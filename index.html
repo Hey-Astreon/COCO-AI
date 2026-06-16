@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CocoAI — Invisible Interview Copilot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!--  TOP TOOLBAR                                               -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="toolbar" id="toolbar">
+    <div class="toolbar-left">
+      <div class="logo-pill">
+        <span class="logo-icon">🥥</span>
+        <span class="logo-text">CocoAI</span>
+      </div>
+
+      <div class="toolbar-divider"></div>
+
+      <!-- Opacity Slider -->
+      <div class="control-group" title="Overlay Opacity">
+        <span class="control-icon">☀</span>
+        <input type="range" min="20" max="100" value="85" class="slider" id="opacitySlider" />
+        <span class="control-value" id="opacityValue">85%</span>
+      </div>
+    </div>
+
+    <div class="toolbar-center">
+      <div class="hotkey-hint">
+        <span class="hotkey-label">Show/Hide</span>
+        <kbd>Ctrl</kbd><span>+</span><kbd>Shift</kbd><span>+</span><kbd>H</kbd>
+      </div>
+      <div class="toolbar-divider"></div>
+      <div class="hotkey-hint">
+        <span class="hotkey-label">Move</span>
+        <kbd>Alt</kbd><span>+</span><kbd>← →</kbd>
+      </div>
+      <div class="toolbar-divider"></div>
+      <div class="hotkey-hint">
+        <span class="hotkey-label">Analyze</span>
+        <kbd>Ctrl</kbd><span>+</span><kbd>Shift</kbd><span>+</span><kbd>A</kbd>
+      </div>
+    </div>
+
+    <div class="toolbar-right">
+      <!-- Status Indicator -->
+      <div class="status-badge" id="statusBadge">
+        <span class="status-dot listening"></span>
+        <span class="status-text" id="statusText">Listening</span>
+      </div>
+
+      <!-- Model Selector -->
+      <select class="model-select" id="modelSelect">
+        <option value="gemini">✦ Gemini Flash</option>
+        <option value="gpt4">◈ GPT-4o</option>
+        <option value="claude">◆ Claude Sonnet</option>
+        <option value="local">⬡ Local (Ollama)</option>
+      </select>
+
+      <!-- Analyze Button -->
+      <button class="btn btn-analyze" id="analyzeBtn" onclick="analyzeScreen()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <path d="M9 9l6 6M15 9l-6 6"/>
+        </svg>
+        Analyze Screen
+      </button>
+
+      <!-- Mic Toggle -->
+      <button class="btn btn-mic active" id="micBtn" onclick="toggleMic()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" id="micIcon">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+      </button>
+
+      <!-- End Session Button -->
+      <button class="btn btn-end" onclick="endSession()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+        </svg>
+        End
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!--  MAIN CONTENT AREA                                         -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="main-container" id="mainContainer">
+
+    <!-- LEFT: ASK + ANSWERS PANEL -->
+    <div class="panel panel-answers" id="answersPanel">
+
+      <!-- Ask Input -->
+      <div class="ask-bar">
+        <div class="ask-input-wrapper">
+          <svg class="ask-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input
+            type="text"
+            class="ask-input"
+            id="askInput"
+            placeholder="Type your question or ask CocoAI anything..."
+            onkeydown="handleAskKey(event)"
+          />
+        </div>
+        <button class="btn btn-ask" onclick="submitQuestion()">Ask</button>
+      </div>
+
+      <!-- Panel Header -->
+      <div class="panel-header">
+        <div class="panel-title">
+          <span class="panel-icon">⚡</span>
+          AI Answers
+        </div>
+        <div class="panel-actions">
+          <button class="icon-btn" onclick="clearAnswers()" title="Clear all answers">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+            </svg>
+          </button>
+          <button class="icon-btn" onclick="copyLastAnswer()" title="Copy last answer">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Answers Feed -->
+      <div class="answers-feed" id="answersFeed">
+        <!-- Welcome card -->
+        <div class="welcome-card">
+          <div class="welcome-icon">🥥</div>
+          <div class="welcome-text">
+            <strong>CocoAI is active & listening</strong>
+            <p>I'll detect interview questions automatically and generate answers. You can also type questions above.</p>
+          </div>
+          <div class="hotkey-chips">
+            <span class="chip">Ctrl+Shift+H — Hide</span>
+            <span class="chip">Ctrl+Shift+A — Analyze Screen</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: TRANSCRIPT PANEL -->
+    <div class="panel panel-transcript" id="transcriptPanel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span class="panel-icon">🎙</span>
+          Live Transcript
+        </div>
+        <div class="panel-actions">
+          <label class="auto-scroll-toggle">
+            <input type="checkbox" checked id="autoScrollCheck" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">Auto Scroll</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Audio Waveform Visualizer -->
+      <div class="waveform-bar" id="waveformBar">
+        <div class="waveform-container">
+          <div class="wave-bar" style="--h:30%"></div>
+          <div class="wave-bar" style="--h:60%"></div>
+          <div class="wave-bar" style="--h:45%"></div>
+          <div class="wave-bar" style="--h:80%"></div>
+          <div class="wave-bar" style="--h:55%"></div>
+          <div class="wave-bar" style="--h:70%"></div>
+          <div class="wave-bar" style="--h:40%"></div>
+          <div class="wave-bar" style="--h:65%"></div>
+          <div class="wave-bar" style="--h:50%"></div>
+          <div class="wave-bar" style="--h:75%"></div>
+          <div class="wave-bar" style="--h:35%"></div>
+          <div class="wave-bar" style="--h:85%"></div>
+          <div class="wave-bar" style="--h:60%"></div>
+          <div class="wave-bar" style="--h:45%"></div>
+          <div class="wave-bar" style="--h:70%"></div>
+          <div class="wave-bar" style="--h:55%"></div>
+          <div class="wave-bar" style="--h:80%"></div>
+          <div class="wave-bar" style="--h:40%"></div>
+          <div class="wave-bar" style="--h:65%"></div>
+          <div class="wave-bar" style="--h:50%"></div>
+        </div>
+        <span class="waveform-label">Capturing audio...</span>
+      </div>
+
+      <!-- Transcript Feed -->
+      <div class="transcript-feed" id="transcriptFeed">
+        <!-- Demo Entry -->
+        <div class="transcript-entry interviewer" data-time="00:00">
+          <div class="transcript-avatar interviewer-avatar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="transcript-bubble">
+            <div class="transcript-badges">
+              <span class="badge badge-interviewer">Interviewer</span>
+              <span class="badge badge-answer" onclick="generateForTranscript(this)">Answer</span>
+            </div>
+            <div class="transcript-text">Hi, I'm Sarah. I'll be your interviewer today. Can you start by telling me about yourself?</div>
+            <div class="transcript-time">00:00</div>
+          </div>
+        </div>
+
+        <div class="transcript-entry user" data-time="00:23">
+          <div class="transcript-avatar user-avatar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="transcript-bubble">
+            <div class="transcript-badges">
+              <span class="badge badge-you">You</span>
+            </div>
+            <div class="transcript-text">Sure! I'm a full-stack developer with 3 years of experience...</div>
+            <div class="transcript-time">00:23</div>
+          </div>
+        </div>
+
+        <div class="transcript-entry interviewer" data-time="01:05">
+          <div class="transcript-avatar interviewer-avatar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="transcript-bubble">
+            <div class="transcript-badges">
+              <span class="badge badge-interviewer">Interviewer</span>
+              <span class="badge badge-answer" onclick="generateForTranscript(this)">Answer</span>
+            </div>
+            <div class="transcript-text">Great! Can you explain the difference between a list and a tuple in Python?</div>
+            <div class="transcript-time">01:05</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Typing Indicator -->
+      <div class="typing-indicator" id="typingIndicator" style="display:none">
+        <div class="typing-dots">
+          <span></span><span></span><span></span>
+        </div>
+        <span class="typing-text">Interviewer is speaking...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!--  TOAST NOTIFICATION                                        -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
