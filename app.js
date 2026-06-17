@@ -20,19 +20,19 @@ const $ = id => document.getElementById(id);
 
 const els = {
   opacitySlider: $('opacitySlider'),
-  opacityValue:  $('opacityValue'),
+  opacityValue: $('opacityValue'),
   mainContainer: $('mainContainer'),
-  answersFeed:   $('answersFeed'),
-  transcriptFeed:$('transcriptFeed'),
-  askInput:      $('askInput'),
-  micBtn:        $('micBtn'),
-  micIcon:       $('micIcon'),
-  statusBadge:   $('statusBadge'),
-  statusDot:     document.querySelector('.status-dot'),
-  statusText:    $('statusText'),
+  answersFeed: $('answersFeed'),
+  transcriptFeed: $('transcriptFeed'),
+  askInput: $('askInput'),
+  micBtn: $('micBtn'),
+  micIcon: $('micIcon'),
+  statusBadge: $('statusBadge'),
+  statusDot: document.querySelector('.status-dot'),
+  statusText: $('statusText'),
   autoScrollCheck: $('autoScrollCheck'),
   typingIndicator: $('typingIndicator'),
-  toast:         $('toast'),
+  toast: $('toast'),
 };
 
 // ─── Demo Data ────────────────────────────────────────────────
@@ -460,7 +460,28 @@ function clearAnswers() {
 function endSession() {
   if (confirm('End this interview session? All data will be cleared.')) {
     showToast('Session ended. Good luck! 🍀', 'success');
-    setTimeout(() => clearAnswers(), 1500);
+    setTimeout(() => {
+      clearAnswers();
+      if (window.electronAPI) {
+        window.electronAPI.closeApp();
+      }
+    }, 1500);
+  }
+}
+
+function minimizeWindow() {
+  if (window.electronAPI) {
+    window.electronAPI.minimizeApp();
+  } else {
+    showToast('Minimize not supported in web mode');
+  }
+}
+
+function closeWindow() {
+  if (window.electronAPI) {
+    window.electronAPI.closeApp();
+  } else {
+    showToast('Close not supported in web mode');
   }
 }
 

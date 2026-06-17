@@ -347,6 +347,36 @@ kbd {
 }
 .btn-end:active { transform: translateY(0); }
 
+/* Window Controls */
+.window-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.win-btn {
+  width: 22px;
+  height: 22px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border-normal);
+  color: var(--text-secondary);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all var(--t-fast);
+}
+.win-btn:hover {
+  background: rgba(255,255,255,0.15);
+  color: white;
+}
+.win-close:hover {
+  background: var(--accent-danger);
+  border-color: var(--accent-danger);
+  color: white;
+}
+
 .btn-ask {
   background: var(--gradient-primary);
   border: none;

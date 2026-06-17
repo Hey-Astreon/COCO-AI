@@ -1,0 +1,22 @@
+{
+  "name": "coco-ai",
+  "version": "1.0.0",
+  "description": "Your invisible co-pilot. Undetectable. Unstoppable.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron ."
+  },
+  "keywords": [
+    "ai",
+    "interview-assistant",
+    "electron",
+    "stealth",
+    "copilot"
+  ],
+  "author": "Ayushi Raj",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^31.0.0"
+  }
+}
