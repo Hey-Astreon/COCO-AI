@@ -227,6 +227,15 @@ kbd {
   color: var(--text-muted);
 }
 
+/* Panic Hotkey */
+.panic-hint .hotkey-label {
+  color: var(--accent-danger);
+}
+.panic-hint kbd {
+  border-color: rgba(255,71,87,0.3);
+  color: #FF6B6B;
+}
+
 /* Status Badge */
 .status-badge {
   display: flex;

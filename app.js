@@ -111,7 +111,21 @@ document.addEventListener('DOMContentLoaded', () => {
   initAutoScroll();
   startSessionTimer();
   scheduleDemoContent();
+  initElectronBridge();
 });
+
+// ─── Electron Bridge ──────────────────────────────────────────
+function initElectronBridge() {
+  if (window.electronAPI) {
+    // Listen for Ctrl+Shift+A from main process
+    window.electronAPI.onAnalyzeScreen(() => {
+      analyzeScreen();
+    });
+    console.log('🥥 CocoAI running in Electron (stealth mode active)');
+  } else {
+    console.log('🥥 CocoAI running in browser (demo mode)');
+  }
+}
 
 // ─── Opacity Slider ────────────────────────────────────────────
 function initOpacitySlider() {
@@ -129,8 +143,16 @@ function initOpacitySlider() {
       rgba(255,255,255,0.15) ${val}%
     )`;
 
-    // Apply to main container
-    document.body.style.opacity = (val / 100).toFixed(2);
+    // Apply opacity — use native Electron window opacity for stealth
+    // CSS opacity does NOT affect Windows display affinity, so screen
+    // capture tools still see the full window. Native opacity works at
+    // the OS compositor level and is respected by capture exclusion.
+    if (window.electronAPI) {
+      window.electronAPI.setOpacity(val / 100);
+    } else {
+      // Fallback for browser preview mode
+      document.body.style.opacity = (val / 100).toFixed(2);
+    }
   };
 
   slider.addEventListener('input', updateSlider);
