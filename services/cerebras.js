@@ -1,0 +1,171 @@
+/* ═══════════════════════════════════════════════════════════════════
+   CocoAI — Cerebras AI Service
+   Streaming chat completions via Cerebras (OpenAI-compatible API)
+   ═══════════════════════════════════════════════════════════════════ */
+
+const https = require('https');
+
+const CEREBRAS_BASE = 'api.cerebras.ai';
+
+// Available models on Cerebras
+const MODELS = {
+  'llama-8b': 'llama-3.1-8b',
+  'llama-70b': 'llama-3.3-70b',
+  'qwen-32b': 'qwen-3-32b',
+};
+
+const DEFAULT_MODEL = 'llama-3.3-70b';
+
+/**
+ * Build the system prompt for interview context
+ */
+function buildSystemPrompt(context = {}) {
+  let prompt = `You are CocoAI, an expert AI interview copilot. You help candidates ace their interviews by providing clear, concise, and impressive answers.
+
+RULES:
+- Give direct, structured answers that the candidate can speak aloud
+- Use bullet points for complex topics
+- Include relevant code examples for technical questions (keep them short)
+- For behavioral questions, use the STAR method (Situation, Task, Action, Result)
+- Keep answers under 200 words unless the question requires more detail
+- Be confident and authoritative in tone
+- If it's a coding question, provide the solution with time/space complexity`;
+
+  if (context.resume) {
+    prompt += `\n\nCANDIDATE'S RESUME:\n${context.resume}`;
+  }
+  if (context.jobDescription) {
+    prompt += `\n\nJOB DESCRIPTION:\n${context.jobDescription}`;
+  }
+  if (context.transcript && context.transcript.length > 0) {
+    const recentTranscript = context.transcript.slice(-10).map(t =>
+      `${t.role}: ${t.text}`
+    ).join('\n');
+    prompt += `\n\nRECENT INTERVIEW TRANSCRIPT:\n${recentTranscript}`;
+  }
+
+  return prompt;
+}
+
+/**
+ * Stream a chat completion from Cerebras API
+ * @param {string} apiKey - Cerebras API key
+ * @param {string} question - The interview question
+ * @param {object} options - { model, context, onChunk, onDone, onError }
+ * @returns {object} - { abort() } to cancel the request
+ */
+function streamCompletion(apiKey, question, options = {}) {
+  const {
+    model = DEFAULT_MODEL,
+    context = {},
+    onChunk = () => {},
+    onDone = () => {},
+    onError = () => {},
+  } = options;
+
+  const systemPrompt = buildSystemPrompt(context);
+
+  const payload = JSON.stringify({
+    model: model,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: question }
+    ],
+    stream: true,
+    max_tokens: 1024,
+    temperature: 0.7,
+    top_p: 0.9,
+  });
+
+  const req = https.request({
+    hostname: CEREBRAS_BASE,
+    path: '/v1/chat/completions',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+      'Accept': 'text/event-stream',
+    },
+  }, (res) => {
+    if (res.statusCode !== 200) {
+      let errorBody = '';
+      res.on('data', (chunk) => { errorBody += chunk.toString(); });
+      res.on('end', () => {
+        onError(new Error(`Cerebras API error ${res.statusCode}: ${errorBody}`));
+      });
+      return;
+    }
+
+    let buffer = '';
+    let fullText = '';
+
+    res.on('data', (chunk) => {
+      buffer += chunk.toString();
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || ''; // Keep incomplete line in buffer
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || !trimmed.startsWith('data: ')) continue;
+
+        const data = trimmed.slice(6);
+        if (data === '[DONE]') {
+          onDone(fullText);
+          return;
+        }
+
+        try {
+          const parsed = JSON.parse(data);
+          const delta = parsed.choices?.[0]?.delta?.content;
+          if (delta) {
+            fullText += delta;
+            onChunk(delta, fullText);
+          }
+        } catch (e) {
+          // Skip malformed JSON chunks
+        }
+      }
+    });
+
+    res.on('end', () => {
+      if (fullText) {
+        onDone(fullText);
+      }
+    });
+
+    res.on('error', onError);
+  });
+
+  req.on('error', onError);
+  req.write(payload);
+  req.end();
+
+  return {
+    abort: () => {
+      try { req.destroy(); } catch (e) {}
+    }
+  };
+}
+
+/**
+ * Non-streaming completion (for quick one-shot queries)
+ */
+function getCompletion(apiKey, question, model = DEFAULT_MODEL) {
+  return new Promise((resolve, reject) => {
+    let result = '';
+    streamCompletion(apiKey, question, {
+      model,
+      onChunk: (chunk) => { result += chunk; },
+      onDone: (text) => resolve(text),
+      onError: reject,
+    });
+  });
+}
+
+module.exports = {
+  MODELS,
+  DEFAULT_MODEL,
+  streamCompletion,
+  getCompletion,
+  buildSystemPrompt,
+};

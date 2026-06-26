@@ -1049,3 +1049,94 @@ kbd {
   .panel-transcript { display: none; }
   .toolbar-center { display: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   LIVE AUDIO & AI STYLES
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Interim (live) transcript badge */
+.badge-interim {
+  background: rgba(255, 165, 2, 0.15);
+  border: 1px solid rgba(255, 165, 2, 0.4);
+  color: var(--accent-warning);
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: var(--radius-pill);
+  animation: pulse-glow 1.5s infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.transcript-entry.interim {
+  opacity: 0.7;
+}
+.transcript-entry.interim .transcript-text {
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+/* Connecting status */
+.status-dot.connecting {
+  background: var(--accent-warning);
+  animation: pulse-dot 1s infinite;
+}
+
+.status-dot.error {
+  background: var(--accent-danger);
+}
+
+.status-dot.idle {
+  background: var(--text-muted);
+}
+
+/* Error message in Q&A cards */
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent-danger);
+  font-size: 12px;
+  padding: 8px;
+  background: rgba(255, 71, 87, 0.08);
+  border: 1px solid rgba(255, 71, 87, 0.2);
+  border-radius: var(--radius-sm);
+}
+.error-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* Code blocks in AI answers */
+.code-block {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-normal);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin: 8px 0;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #A8EDEA;
+}
+.code-block code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* AI answer paragraph spacing */
+.qa-a-text p {
+  margin: 4px 0;
+}
+.qa-a-text p:first-child {
+  margin-top: 0;
+}
+.qa-a-text p:last-child {
+  margin-bottom: 0;
+}

@@ -1,18 +1,22 @@
 /* ═════════════════════════════════════════════════════════════
-   CocoAI — JavaScript Logic
-   Features: AI Q&A simulation, transcript, streaming text,
-             hotkeys, opacity control, mic toggle, toast
+   CocoAI — Application Logic
+   Real AI answers via Cerebras + Live audio via Deepgram
    ═════════════════════════════════════════════════════════════ */
 
 'use strict';
 
 // ─── State ────────────────────────────────────────────────────
 const state = {
-  micActive: true,
+  micActive: false,
   sessionTime: 0,
   messageCount: 0,
   autoScroll: true,
   lastAnswer: '',
+  currentModel: 'llama-3.3-70b',
+  apiKeys: { cerebras: '', deepgram: '' },
+  transcriptHistory: [],  // { role, text } for AI context
+  deepgramService: null,
+  interimTranscriptEl: null, // For updating interim results
 };
 
 // ─── DOM Refs ─────────────────────────────────────────────────
@@ -33,97 +37,182 @@ const els = {
   autoScrollCheck: $('autoScrollCheck'),
   typingIndicator: $('typingIndicator'),
   toast: $('toast'),
+  modelSelect: $('modelSelect'),
 };
 
-// ─── Demo Data ────────────────────────────────────────────────
-const DEMO_QA = [
-  {
-    q: "Can you explain the difference between a list and a tuple in Python?",
-    a: `Both lists and tuples are sequence data types in Python, but they have key differences:
-
-<ul>
-  <li><strong>Lists are mutable</strong> — You can add, remove, or change elements after creation.</li>
-  <li><strong>Tuples are immutable</strong> — Once created, their elements cannot be changed.</li>
-  <li>Lists use <code>square brackets</code>: <code>[1, 2, 3]</code></li>
-  <li>Tuples use <code>parentheses</code>: <code>(1, 2, 3)</code></li>
-  <li><strong>Lists are generally slower</strong> for iteration due to their mutability.</li>
-  <li><strong>Tuples can be used as dictionary keys</strong> or set elements; lists cannot.</li>
-</ul>
-
-Use <strong>lists</strong> when you need to modify the sequence; use <strong>tuples</strong> for fixed collections or as keys.`
-  },
-  {
-    q: "What is the time complexity of binary search?",
-    a: `Binary search operates on <strong>sorted arrays</strong> and has the following complexity:
-
-<ul>
-  <li><strong>Time Complexity:</strong> <code>O(log n)</code> — halves the search space each iteration</li>
-  <li><strong>Space Complexity:</strong> <code>O(1)</code> for iterative, <code>O(log n)</code> for recursive (call stack)</li>
-  <li><strong>Best Case:</strong> <code>O(1)</code> — target is the middle element</li>
-  <li><strong>Worst Case:</strong> <code>O(log n)</code> — element is at end or not present</li>
-</ul>
-
-Key insight: each comparison eliminates <strong>half</strong> the remaining candidates, hence logarithmic time.`
-  },
-  {
-    q: "Tell me about yourself and your experience.",
-    a: `Here's a strong STAR-structured response:
-
-<strong>Situation:</strong> I'm a passionate full-stack developer with X years of experience building scalable web applications.
-
-<strong>Task & Action:</strong>
-<ul>
-  <li>Built production systems using <strong>React, Node.js, and Python</strong></li>
-  <li>Led a team of 3 engineers to deliver a high-traffic feature handling 50k+ daily users</li>
-  <li>Reduced API response time by <strong>40%</strong> through query optimization and caching</li>
-</ul>
-
-<strong>Result:</strong> Consistently delivered projects on time, received a "Top Performer" rating, and contributed to a 2x growth in product users.
-
-Tailor this with YOUR specific projects and metrics for maximum impact.`
-  },
-  {
-    q: "Design a URL shortening service like bit.ly",
-    a: `Here's a high-level system design for a URL shortener:
-
-<strong>Core Components:</strong>
-<ul>
-  <li><strong>API Layer:</strong> POST /shorten → returns short code; GET /{code} → 301 redirect</li>
-  <li><strong>Encoding:</strong> Base62 encoding (a-z, A-Z, 0-9) — 6 chars = 62⁶ ≈ 56 billion URLs</li>
-  <li><strong>Database:</strong> NoSQL (DynamoDB/Cassandra) for key→URL mapping; Redis for hot URL caching</li>
-  <li><strong>Scale:</strong> 100:1 read/write ratio — optimize for reads with CDN + cache</li>
-</ul>
-
-<strong>Scale estimates:</strong> 500M new URLs/day → ~100M redirects/day → need horizontal scaling + sharding.`
-  },
-];
-
-const DEMO_TRANSCRIPTS = [
-  { role: 'interviewer', text: "Can you walk me through a challenging project you've worked on?", delay: 5000 },
-  { role: 'interviewer', text: "What's your approach to debugging a complex issue in production?", delay: 12000 },
-  { role: 'you', text: "My approach starts with isolating the issue using logs and metrics...", delay: 18000 },
-];
-
 // ─── Initialization ────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initOpacitySlider();
   initHotkeys();
   initAutoScroll();
+  initModelSelector();
   startSessionTimer();
-  scheduleDemoContent();
-  initElectronBridge();
+  await initElectronBridge();
+  initDeepgram();
 });
 
 // ─── Electron Bridge ──────────────────────────────────────────
-function initElectronBridge() {
+async function initElectronBridge() {
   if (window.electronAPI) {
-    // Listen for Ctrl+Shift+A from main process
+    // Get API keys from main process
+    try {
+      state.apiKeys = await window.electronAPI.getApiKeys();
+      console.log('🥥 API keys loaded:', {
+        cerebras: state.apiKeys.cerebras ? '✅ Set' : '❌ Missing',
+        deepgram: state.apiKeys.deepgram ? '✅ Set' : '❌ Missing',
+      });
+    } catch (e) {
+      console.error('Failed to get API keys:', e);
+    }
+
+    // Listen for AI streaming events
+    window.electronAPI.onAIChunk((data) => {
+      handleAIChunk(data);
+    });
+    window.electronAPI.onAIDone((data) => {
+      handleAIDone(data);
+    });
+    window.electronAPI.onAIError((data) => {
+      handleAIError(data);
+    });
+
+    // Listen for analyze-screen from main process
     window.electronAPI.onAnalyzeScreen(() => {
       analyzeScreen();
     });
+
     console.log('🥥 CocoAI running in Electron (stealth mode active)');
   } else {
     console.log('🥥 CocoAI running in browser (demo mode)');
+  }
+}
+
+// ─── Deepgram Audio Service ────────────────────────────────────
+function initDeepgram() {
+  if (!state.apiKeys.deepgram) {
+    console.warn('[Deepgram] No API key — audio disabled');
+    updateStatus('idle', 'No API Key');
+    return;
+  }
+
+  // Load DeepgramService (it runs in the renderer since it uses MediaRecorder)
+  // The service file is loaded via script tag in index.html
+  if (typeof DeepgramService === 'undefined') {
+    console.warn('[Deepgram] DeepgramService not loaded');
+    return;
+  }
+
+  state.deepgramService = new DeepgramService(state.apiKeys.deepgram);
+
+  // Handle transcription results
+  state.deepgramService.onTranscript = (text, isFinal, speaker, speechFinal) => {
+    if (isFinal) {
+      // Final result — add to transcript feed
+      addTranscriptEntry(speaker, text);
+
+      // Store in history for AI context
+      state.transcriptHistory.push({ role: speaker, text });
+
+      // Auto-detect questions and generate answers
+      if (DeepgramService.isQuestion(text)) {
+        setTimeout(() => {
+          addQACard(text);
+          showToast('❓ Question detected — generating answer...', 'success');
+        }, 500);
+      }
+
+      // Clear interim element
+      if (state.interimTranscriptEl) {
+        state.interimTranscriptEl.remove();
+        state.interimTranscriptEl = null;
+      }
+    } else {
+      // Interim result — show live updating text
+      showInterimTranscript(text);
+    }
+  };
+
+  // Handle status changes
+  state.deepgramService.onStatusChange = (status) => {
+    switch (status) {
+      case 'connecting':
+        updateStatus('connecting', 'Connecting...');
+        break;
+      case 'listening':
+        updateStatus('listening', 'Listening');
+        els.micBtn.classList.add('active');
+        state.micActive = true;
+        // Resume wave animation
+        document.querySelectorAll('.wave-bar').forEach(b => b.style.animationPlayState = 'running');
+        break;
+      case 'paused':
+        updateStatus('paused', 'Paused');
+        els.micBtn.classList.remove('active');
+        state.micActive = false;
+        document.querySelectorAll('.wave-bar').forEach(b => b.style.animationPlayState = 'paused');
+        break;
+      case 'error':
+        updateStatus('error', 'Error');
+        break;
+    }
+  };
+
+  // Handle errors
+  state.deepgramService.onError = (err) => {
+    console.error('[Deepgram] Error:', err);
+    showToast('🎙 Audio error: ' + (err.message || 'Connection failed'), 'error');
+  };
+
+  updateStatus('idle', 'Ready');
+}
+
+function showInterimTranscript(text) {
+  if (!state.interimTranscriptEl) {
+    state.interimTranscriptEl = document.createElement('div');
+    state.interimTranscriptEl.className = 'transcript-entry interviewer interim';
+    state.interimTranscriptEl.innerHTML = `
+      <div class="transcript-avatar interviewer-avatar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div class="transcript-bubble">
+        <div class="transcript-badges">
+          <span class="badge badge-interviewer">Interviewer</span>
+          <span class="badge badge-interim">Live</span>
+        </div>
+        <div class="transcript-text interim-text"></div>
+      </div>
+    `;
+    els.transcriptFeed.appendChild(state.interimTranscriptEl);
+  }
+
+  const textEl = state.interimTranscriptEl.querySelector('.interim-text');
+  if (textEl) textEl.textContent = text;
+  scrollToBottom(els.transcriptFeed);
+}
+
+function updateStatus(type, text) {
+  const dot = els.statusDot;
+  const label = els.statusText;
+
+  dot.className = 'status-dot ' + type;
+  label.textContent = text;
+
+  if (type === 'listening') {
+    label.style.color = 'var(--accent-secondary)';
+  } else if (type === 'error') {
+    label.style.color = 'var(--accent-danger)';
+  } else {
+    label.style.color = 'var(--text-muted)';
+  }
+}
+
+// ─── Model Selector ────────────────────────────────────────────
+function initModelSelector() {
+  if (els.modelSelect) {
+    els.modelSelect.addEventListener('change', () => {
+      state.currentModel = els.modelSelect.value;
+      showToast(`🧠 Model: ${els.modelSelect.options[els.modelSelect.selectedIndex].text}`, 'success');
+    });
   }
 }
 
@@ -135,7 +224,6 @@ function initOpacitySlider() {
     const val = slider.value;
     els.opacityValue.textContent = val + '%';
 
-    // Update gradient fill
     slider.style.setProperty('--value', val + '%');
     slider.style.background = `linear-gradient(to right,
       var(--accent-primary) 0%,
@@ -143,20 +231,15 @@ function initOpacitySlider() {
       rgba(255,255,255,0.15) ${val}%
     )`;
 
-    // Apply opacity — use native Electron window opacity for stealth
-    // CSS opacity does NOT affect Windows display affinity, so screen
-    // capture tools still see the full window. Native opacity works at
-    // the OS compositor level and is respected by capture exclusion.
     if (window.electronAPI) {
       window.electronAPI.setOpacity(val / 100);
     } else {
-      // Fallback for browser preview mode
       document.body.style.opacity = (val / 100).toFixed(2);
     }
   };
 
   slider.addEventListener('input', updateSlider);
-  updateSlider(); // init
+  updateSlider();
 }
 
 // ─── Auto-scroll ────────────────────────────────────────────────
@@ -174,9 +257,7 @@ function scrollToBottom(el) {
 
 // ─── Session Timer ─────────────────────────────────────────────
 function startSessionTimer() {
-  setInterval(() => {
-    state.sessionTime++;
-  }, 1000);
+  setInterval(() => { state.sessionTime++; }, 1000);
 }
 
 function getTimestamp() {
@@ -192,24 +273,17 @@ function initHotkeys() {
     const shift = e.shiftKey;
     const key = e.key.toLowerCase();
 
-    // Ctrl+Shift+H — Hide/Show
     if (ctrl && shift && key === 'h') {
       e.preventDefault();
       toggleVisibility();
     }
-
-    // Ctrl+Shift+A — Analyze
     if (ctrl && shift && key === 'a') {
       e.preventDefault();
       analyzeScreen();
     }
-
-    // Enter in ask input
     if (key === 'enter' && document.activeElement === els.askInput) {
       submitQuestion();
     }
-
-    // Escape — focus ask input
     if (key === 'escape') {
       els.askInput.focus();
     }
@@ -227,21 +301,21 @@ function toggleVisibility() {
 
 // ─── Mic Toggle ────────────────────────────────────────────────
 function toggleMic() {
-  state.micActive = !state.micActive;
-  els.micBtn.classList.toggle('active', state.micActive);
+  if (!state.deepgramService) {
+    showToast('🎙 Audio service not initialized. Check API key.', 'error');
+    return;
+  }
 
   if (state.micActive) {
-    els.statusDot.className = 'status-dot listening';
-    els.statusText.textContent = 'Listening';
-    showToast('🎙 Microphone active', 'success');
-    // Resume wave animation
-    document.querySelectorAll('.wave-bar').forEach(b => b.style.animationPlayState = 'running');
-  } else {
-    els.statusDot.className = 'status-dot paused';
-    els.statusText.textContent = 'Paused';
+    state.deepgramService.pause();
     showToast('🔇 Microphone paused');
-    // Pause wave animation
-    document.querySelectorAll('.wave-bar').forEach(b => b.style.animationPlayState = 'paused');
+  } else {
+    if (state.deepgramService.isListening) {
+      state.deepgramService.resume();
+    } else {
+      state.deepgramService.startMicrophone();
+    }
+    showToast('🎙 Microphone active', 'success');
   }
 }
 
@@ -257,7 +331,6 @@ function handleAskKey(e) {
 function submitQuestion() {
   const question = els.askInput.value.trim();
   if (!question) return;
-
   els.askInput.value = '';
   addQACard(question);
 }
@@ -267,50 +340,31 @@ function generateForTranscript(badgeEl) {
   const bubble = badgeEl.closest('.transcript-bubble');
   const textEl = bubble.querySelector('.transcript-text');
   if (!textEl) return;
-
   const question = textEl.textContent;
   addQACard(question);
   showToast('⚡ Generating answer...', 'success');
 }
 
-// ─── Add Q&A Card ──────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════
+//  AI Q&A Card — Real Cerebras Streaming
+// ═══════════════════════════════════════════════════════════════════
+
+// Map to track active streaming cards by requestId
+const activeCards = new Map();
+
 async function addQACard(question) {
   state.messageCount++;
+  const requestId = `req-${state.messageCount}-${Date.now()}`;
   const timestamp = getTimestamp();
 
   // Remove welcome card if present
   const welcome = els.answersFeed.querySelector('.welcome-card');
   if (welcome) welcome.remove();
 
-  // Add thinking indicator
-  const thinkingEl = document.createElement('div');
-  thinkingEl.className = 'streaming-card';
-  thinkingEl.id = `thinking-${state.messageCount}`;
-  thinkingEl.innerHTML = `
-    <div class="thinking-dots">
-      <span></span><span></span><span></span>
-    </div>
-    <span class="thinking-text">CocoAI is generating your answer...</span>
-  `;
-  els.answersFeed.appendChild(thinkingEl);
-  scrollToBottom(els.answersFeed);
-
-  // Pick a demo answer or generate a generic one
-  const demoItem = DEMO_QA.find(d =>
-    question.toLowerCase().split(' ').some(w => d.q.toLowerCase().includes(w) && w.length > 4)
-  );
-  const answerHTML = demoItem ? demoItem.a : generateGenericAnswer(question);
-  state.lastAnswer = answerHTML;
-
-  // Simulate API delay (300–800ms)
-  await sleep(300 + Math.random() * 500);
-
-  // Remove thinking indicator
-  thinkingEl.remove();
-
-  // Create Q&A card
+  // Create Q&A card immediately
   const card = document.createElement('div');
   card.className = 'qa-card';
+  card.id = `card-${requestId}`;
   card.innerHTML = `
     <div class="qa-question">
       <span class="qa-q-label">Q</span>
@@ -318,7 +372,12 @@ async function addQACard(question) {
     </div>
     <div class="qa-answer">
       <div class="qa-a-label">⚡ CocoAI Answer</div>
-      <div class="qa-a-text" id="answer-text-${state.messageCount}"></div>
+      <div class="qa-a-text" id="answer-${requestId}">
+        <div class="thinking-dots">
+          <span></span><span></span><span></span>
+        </div>
+        <span class="thinking-text">Connecting to Cerebras AI...</span>
+      </div>
     </div>
     <div class="qa-footer">
       <span class="qa-time">${timestamp}</span>
@@ -332,45 +391,129 @@ async function addQACard(question) {
   els.answersFeed.appendChild(card);
   scrollToBottom(els.answersFeed);
 
-  // Stream the answer text
-  const answerEl = $(`answer-text-${state.messageCount}`);
-  await streamHTML(answerEl, answerHTML);
+  // Store the answer element reference
+  activeCards.set(requestId, {
+    answerEl: $(`answer-${requestId}`),
+    fullText: '',
+  });
+
+  // Send to Cerebras via main process IPC
+  if (window.electronAPI && state.apiKeys.cerebras) {
+    window.electronAPI.streamAI(
+      question,
+      state.currentModel,
+      { transcript: state.transcriptHistory.slice(-10) },
+      requestId
+    );
+  } else {
+    // Fallback: demo mode (no API key or not in Electron)
+    const answerEl = $(`answer-${requestId}`);
+    answerEl.innerHTML = '<span class="cursor-blink"></span>';
+    const demoAnswer = generateDemoAnswer(question);
+    await streamText(answerEl, demoAnswer);
+    state.lastAnswer = demoAnswer;
+  }
 }
 
-// ─── Stream HTML content ───────────────────────────────────────
-async function streamHTML(el, html) {
-  // Add blinking cursor placeholder
-  el.innerHTML = '<span class="cursor-blink"></span>';
+// ─── AI Stream Handlers ────────────────────────────────────────
 
-  // Split into characters but preserve HTML tags
-  const parts = chunkHTML(html);
+function handleAIChunk({ requestId, chunk, fullText }) {
+  const cardData = activeCards.get(requestId);
+  if (!cardData) return;
+
+  const { answerEl } = cardData;
+
+  // On first chunk, clear the thinking indicator
+  if (!cardData.streaming) {
+    answerEl.innerHTML = '';
+    cardData.streaming = true;
+  }
+
+  // Append the new chunk directly as text
+  cardData.fullText = fullText;
+
+  // Render the full text with markdown-like formatting
+  answerEl.innerHTML = formatAnswer(fullText) + '<span class="cursor-blink"></span>';
+  scrollToBottom(els.answersFeed);
+}
+
+function handleAIDone({ requestId, fullText }) {
+  const cardData = activeCards.get(requestId);
+  if (!cardData) return;
+
+  const { answerEl } = cardData;
+  answerEl.innerHTML = formatAnswer(fullText);
+  state.lastAnswer = fullText;
+  activeCards.delete(requestId);
+  scrollToBottom(els.answersFeed);
+}
+
+function handleAIError({ requestId, error }) {
+  const cardData = activeCards.get(requestId);
+  if (!cardData) return;
+
+  const { answerEl } = cardData;
+  answerEl.innerHTML = `
+    <div class="error-message">
+      <span class="error-icon">⚠️</span>
+      <span>${escHtml(error)}</span>
+    </div>
+  `;
+  activeCards.delete(requestId);
+  showToast('❌ AI Error: ' + error);
+}
+
+// ─── Format AI Answer (simple markdown) ────────────────────────
+function formatAnswer(text) {
+  let html = escHtml(text);
+
+  // Bold: **text**
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+  // Code inline: `text`
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+  // Code blocks: ```...```
+  html = html.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => {
+    return `<pre class="code-block"><code>${code.trim()}</code></pre>`;
+  });
+
+  // Bullet points: - or *
+  html = html.replace(/^[\-\*] (.+)$/gm, '<li>$1</li>');
+  html = html.replace(/(<li>.*<\/li>\n?)+/gs, (match) => `<ul>${match}</ul>`);
+
+  // Numbered lists: 1. 2. etc
+  html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+
+  // Line breaks
+  html = html.replace(/\n\n/g, '</p><p>');
+  html = html.replace(/\n/g, '<br>');
+
+  return `<p>${html}</p>`;
+}
+
+// ─── Stream text character by character (demo mode) ────────────
+async function streamText(el, text) {
+  el.innerHTML = '<span class="cursor-blink"></span>';
+  const formatted = formatAnswer(text);
+  const parts = chunkHTML(formatted);
   let displayed = '';
 
   for (let i = 0; i < parts.length; i++) {
     displayed += parts[i];
     el.innerHTML = displayed + '<span class="cursor-blink"></span>';
-
-    if (state.autoScroll) {
-      els.answersFeed.scrollTop = els.answersFeed.scrollHeight;
-    }
-
-    // Variable delay: faster for tags, slower for text
-    const delay = parts[i].startsWith('<') ? 1 : (8 + Math.random() * 10);
+    if (state.autoScroll) els.answersFeed.scrollTop = els.answersFeed.scrollHeight;
+    const delay = parts[i].startsWith('<') ? 1 : (6 + Math.random() * 8);
     await sleep(delay);
   }
-
-  // Remove cursor at end
   el.innerHTML = displayed;
 }
 
-// ─── Chunk HTML for streaming ──────────────────────────────────
 function chunkHTML(html) {
   const chunks = [];
   let i = 0;
-
   while (i < html.length) {
     if (html[i] === '<') {
-      // Find end of tag
       const end = html.indexOf('>', i);
       if (end !== -1) {
         chunks.push(html.slice(i, end + 1));
@@ -382,54 +525,27 @@ function chunkHTML(html) {
       chunks.push(html[i++]);
     }
   }
-
   return chunks;
 }
 
-// ─── Generic Answer Generator ──────────────────────────────────
-function generateGenericAnswer(question) {
+// ─── Demo Answer Generator (fallback when no API key) ──────────
+function generateDemoAnswer(question) {
   const lcq = question.toLowerCase();
 
   if (lcq.includes('tell me about yourself') || lcq.includes('introduce yourself')) {
-    return `<strong>Here's a strong "Tell me about yourself" structure:</strong>
-
-<ul>
-  <li><strong>Present:</strong> Start with your current role and key expertise</li>
-  <li><strong>Past:</strong> Mention 1-2 relevant achievements with metrics</li>
-  <li><strong>Future:</strong> Connect why this role excites you specifically</li>
-</ul>
-
-Keep it under <strong>90 seconds</strong>. Practice until it sounds natural, not memorized.`;
+    return `**Here's a strong "Tell me about yourself" structure:**\n\n- **Present:** Start with your current role and key expertise\n- **Past:** Mention 1-2 relevant achievements with metrics\n- **Future:** Connect why this role excites you specifically\n\nKeep it under **90 seconds**. Practice until it sounds natural.`;
   }
 
-  if (lcq.includes('weakness') || lcq.includes('challenge')) {
-    return `<strong>Answer Formula for "What's your weakness?":</strong>
-
-<ul>
-  <li>Name a <strong>real weakness</strong> (not a humble-brag like "I work too hard")</li>
-  <li>Show <strong>self-awareness</strong> about how it has impacted you</li>
-  <li>Describe the <strong>concrete steps</strong> you're taking to improve it</li>
-  <li>Give a <strong>recent example</strong> of improvement</li>
-</ul>
-
-Example: <em>"I used to struggle with public speaking. I joined Toastmasters 6 months ago and have since delivered 3 presentations to groups of 30+ people."</em>`;
+  if (lcq.includes('binary search') || lcq.includes('time complexity')) {
+    return `**Binary Search** operates on **sorted arrays**:\n\n- **Time Complexity:** \`O(log n)\` — halves the search space each iteration\n- **Space Complexity:** \`O(1)\` iterative, \`O(log n)\` recursive\n- **Best Case:** \`O(1)\` — target is the middle element\n- **Worst Case:** \`O(log n)\` — element at end or not present\n\nKey insight: each comparison eliminates **half** the remaining candidates.`;
   }
 
-  return `<strong>Here's a structured approach to answer this question:</strong>
-
-<ul>
-  <li>Start with the <strong>core concept</strong> in one clear sentence</li>
-  <li>Use a <strong>concrete example</strong> from your experience</li>
-  <li>Quantify your impact with <strong>specific metrics</strong> where possible</li>
-  <li>Connect it to the <strong>role's requirements</strong> you're interviewing for</li>
-</ul>
-
-Take a <strong>2-3 second pause</strong> before answering to organize your thoughts — interviewers appreciate thoughtfulness.`;
+  return `**Here's a structured approach to answer this:**\n\n- Start with the **core concept** in one clear sentence\n- Use a **concrete example** from your experience\n- Quantify your impact with **specific metrics** where possible\n- Connect it to the **role's requirements** you're interviewing for\n\nTake a **2-3 second pause** before answering — interviewers appreciate thoughtfulness.`;
 }
 
 // ─── Analyze Screen ────────────────────────────────────────────
 function analyzeScreen() {
-  addQACard('[Image captured from screen] Please analyze this coding problem and provide a step-by-step solution.');
+  addQACard('[Screenshot captured] Please analyze this coding problem and provide a step-by-step solution with code.');
   showToast('📸 Screen captured — analyzing...', 'success');
 }
 
@@ -449,9 +565,7 @@ function copyLastAnswer() {
     showToast('No answers yet');
     return;
   }
-  const div = document.createElement('div');
-  div.innerHTML = state.lastAnswer;
-  navigator.clipboard.writeText(div.innerText).then(() => showToast('📋 Last answer copied!', 'success'));
+  navigator.clipboard.writeText(state.lastAnswer).then(() => showToast('📋 Last answer copied!', 'success'));
 }
 
 function regenerate(btn, question) {
@@ -481,6 +595,11 @@ function clearAnswers() {
 
 function endSession() {
   if (confirm('End this interview session? All data will be cleared.')) {
+    // Stop audio
+    if (state.deepgramService) {
+      state.deepgramService.stop();
+    }
+    state.transcriptHistory = [];
     showToast('Session ended. Good luck! 🍀', 'success');
     setTimeout(() => {
       clearAnswers();
@@ -494,16 +613,12 @@ function endSession() {
 function minimizeWindow() {
   if (window.electronAPI) {
     window.electronAPI.minimizeApp();
-  } else {
-    showToast('Minimize not supported in web mode');
   }
 }
 
 function closeWindow() {
   if (window.electronAPI) {
     window.electronAPI.closeApp();
-  } else {
-    showToast('Close not supported in web mode');
   }
 }
 
@@ -535,39 +650,6 @@ function addTranscriptEntry(role, text) {
 
   els.transcriptFeed.appendChild(entry);
   scrollToBottom(els.transcriptFeed);
-
-  // Auto-generate answer if interviewer and a question
-  if (isInterviewer && text.endsWith('?')) {
-    setTimeout(() => {
-      addQACard(text);
-    }, 1200);
-  }
-}
-
-// ─── Schedule Demo Content ─────────────────────────────────────
-function scheduleDemoContent() {
-  // Simulate first question being asked
-  setTimeout(() => {
-    showTypingIndicator(1800);
-    setTimeout(() => {
-      addTranscriptEntry('interviewer', 'Can you explain the difference between a list and a tuple in Python?');
-    }, 2000);
-  }, 3000);
-
-  // Second question
-  setTimeout(() => {
-    showTypingIndicator(1500);
-    setTimeout(() => {
-      addTranscriptEntry('interviewer', "What is the time complexity of binary search?");
-    }, 12000);
-  }, 10000);
-}
-
-function showTypingIndicator(duration) {
-  els.typingIndicator.style.display = 'flex';
-  setTimeout(() => {
-    els.typingIndicator.style.display = 'none';
-  }, duration);
 }
 
 // ─── Toast ─────────────────────────────────────────────────────
@@ -576,7 +658,6 @@ function showToast(message, type = '') {
   const t = els.toast;
   t.textContent = message;
   t.className = `toast ${type}`;
-
   clearTimeout(toastTimer);
   requestAnimationFrame(() => {
     t.classList.add('show');
