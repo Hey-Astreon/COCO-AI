@@ -162,10 +162,50 @@ function getCompletion(apiKey, question, model = DEFAULT_MODEL) {
   });
 }
 
+/**
+ * Fetch available models from Cerebras
+ */
+function getModels(apiKey) {
+  return new Promise((resolve) => {
+    const req = https.get({
+      hostname: CEREBRAS_BASE,
+      path: '/v1/models',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      timeout: 3000,
+    }, (res) => {
+      if (res.statusCode !== 200) {
+        resolve([]);
+        return;
+      }
+      let body = '';
+      res.on('data', chunk => body += chunk);
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(body);
+          const models = (parsed.data || []).map(m => m.id);
+          resolve(models);
+        } catch (e) {
+          resolve([]);
+        }
+      });
+    });
+
+    req.on('error', () => resolve([]));
+    req.on('timeout', () => {
+      try { req.destroy(); } catch(e) {}
+      resolve([]);
+    });
+  });
+}
+
 module.exports = {
   MODELS,
   DEFAULT_MODEL,
   streamCompletion,
   getCompletion,
+  getModels,
   buildSystemPrompt,
 };
+

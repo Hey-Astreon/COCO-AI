@@ -207,14 +207,46 @@ function updateStatus(type, text) {
 }
 
 // ─── Model Selector ────────────────────────────────────────────
-function initModelSelector() {
-  if (els.modelSelect) {
-    els.modelSelect.addEventListener('change', () => {
-      state.currentModel = els.modelSelect.value;
-      showToast(`🧠 Model: ${els.modelSelect.options[els.modelSelect.selectedIndex].text}`, 'success');
-    });
+async function initModelSelector() {
+  if (!els.modelSelect) return;
+
+  els.modelSelect.addEventListener('change', () => {
+    state.currentModel = els.modelSelect.value;
+    showToast(`🧠 Model: ${els.modelSelect.options[els.modelSelect.selectedIndex].text}`, 'success');
+  });
+
+  if (window.electronAPI) {
+    try {
+      const models = await window.electronAPI.getCerebrasModels();
+      if (models && models.length > 0) {
+        // Clear default hardcoded options
+        els.modelSelect.innerHTML = '';
+
+        // Add dynamically retrieved models
+        models.forEach(modelId => {
+          const opt = document.createElement('option');
+          opt.value = modelId;
+          
+          let emoji = '👾';
+          if (modelId.includes('llama')) emoji = '⚡';
+          else if (modelId.includes('qwen')) emoji = '🧠';
+          else if (modelId.includes('gpt')) emoji = '🚀';
+          else if (modelId.includes('glm')) emoji = '🌟';
+
+          opt.textContent = `${emoji} ${modelId}`;
+          els.modelSelect.appendChild(opt);
+        });
+
+        // Set active model to first retrieved model
+        state.currentModel = models[0];
+        console.log(`🥥 Dynamic models loaded:`, models, `Active: ${state.currentModel}`);
+      }
+    } catch (e) {
+      console.warn('Failed to load Cerebras models dynamically, using defaults:', e);
+    }
   }
 }
+
 
 // ─── Opacity Slider ────────────────────────────────────────────
 function initOpacitySlider() {

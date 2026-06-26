@@ -124,6 +124,13 @@ ipcMain.handle('get-api-keys', () => {
   };
 });
 
+ipcMain.handle('get-cerebras-models', async () => {
+  const apiKey = process.env.CEREBRAS_API_KEY;
+  if (!apiKey) return [];
+  return await cerebras.getModels(apiKey);
+});
+
+
 // ═══════════════════════════════════════════════════════════════════
 //  IPC HANDLERS — Cerebras AI (Streaming)
 // ═══════════════════════════════════════════════════════════════════

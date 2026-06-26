@@ -18,6 +18,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // ─── API Keys ─────────────────────────────────────────────────
   getApiKeys: () => ipcRenderer.invoke('get-api-keys'),
+  getCerebrasModels: () => ipcRenderer.invoke('get-cerebras-models'),
+
 
   // ─── Cerebras AI (Streaming) ──────────────────────────────────
   streamAI: (question, model, context, requestId) => {
