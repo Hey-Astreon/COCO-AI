@@ -651,10 +651,20 @@ async function analyzeScreen() {
     
     // Call the real Gemini Vision API with live status updates!
     const prompt = "Please analyze the code, question, error, or diagram in this screenshot. Provide a clear, structured step-by-step solution, complete corrected code blocks, and time/space complexity analysis where applicable.";
+    let fullText = '';
     const analysis = await window.GeminiService.analyzeImage(
       state.apiKeys.gemini,
       imgDataUrl,
       prompt,
+      (chunk) => {
+        // Clear the thinking dots indicator on the first chunk
+        if (!fullText) {
+          answerEl.innerHTML = '';
+        }
+        fullText += chunk;
+        answerEl.innerHTML = formatAnswer(fullText) + '<span class="cursor-blink"></span>';
+        if (state.autoScroll) els.answersFeed.scrollTop = els.answersFeed.scrollHeight;
+      },
       (statusMsg) => {
         // Live update the thinking text when retrying/falling back
         const thinkingText = answerEl.querySelector('.thinking-text');
@@ -663,8 +673,8 @@ async function analyzeScreen() {
       }
     );
     
-    answerEl.innerHTML = formatAnswer(analysis);
-    state.lastAnswer = analysis;
+    answerEl.innerHTML = formatAnswer(analysis || fullText);
+    state.lastAnswer = analysis || fullText;
     showToast('✅ Problem analyzed successfully!', 'success');
   } catch (err) {
     console.error('Screen analysis failed:', err);

@@ -24,10 +24,11 @@ const GeminiService = {
    * @param {string} apiKey - Gemini API Key
    * @param {string} base64Image - Base64 image data (with or without prefix)
    * @param {string} prompt - Vision prompt
+   * @param {function} [onChunk] - Optional callback for streaming text chunks
    * @param {function} [onStatus] - Optional callback for status updates (e.g. "Retrying...")
-   * @returns {Promise<string>} - The analyzed text response
+   * @returns {Promise<string>} - The full compiled response text
    */
-  async analyzeImage(apiKey, base64Image, prompt, onStatus) {
+  async analyzeImage(apiKey, base64Image, prompt, onChunk, onStatus) {
     if (!prompt) {
       prompt = 'Identify the coding problem, question, or diagram in this screenshot and provide a clear, concise step-by-step solution with code.';
     }
@@ -67,7 +68,7 @@ const GeminiService = {
       // Retry loop with exponential backoff for each model
       for (let attempt = 0; attempt < this.MAX_RETRIES; attempt++) {
         try {
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`;
 
           if (onStatus && (attempt > 0 || modelIdx > 0)) {
             const msg = attempt > 0
@@ -81,17 +82,6 @@ const GeminiService = {
             headers: { 'Content-Type': 'application/json' },
             body: requestBody
           });
-
-          // ── Success ──
-          if (response.ok) {
-            const result = await response.json();
-            const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (!text) {
-              throw new Error('Gemini returned an empty response — the image may not contain recognizable content.');
-            }
-            console.log(`🥥 Gemini analysis succeeded on model: ${model} (attempt ${attempt + 1})`);
-            return text;
-          }
 
           // ── Rate Limit (429) — Retry with backoff ──
           if (response.status === 429) {
@@ -107,17 +97,81 @@ const GeminiService = {
           }
 
           // ── Other API error — don't retry, throw immediately ──
-          const errText = await response.text();
-          let errMsg = `Gemini API error ${response.status}`;
-          try {
-            const errJson = JSON.parse(errText);
-            if (errJson.error?.message) {
-              errMsg += `: ${errJson.error.message}`;
+          if (!response.ok) {
+            const errText = await response.text();
+            let errMsg = `Gemini API error ${response.status}`;
+            try {
+              const errJson = JSON.parse(errText);
+              if (errJson.error?.message) {
+                errMsg += `: ${errJson.error.message}`;
+              }
+            } catch (_) {
+              errMsg += `: ${errText.slice(0, 200)}`;
             }
-          } catch (_) {
-            errMsg += `: ${errText.slice(0, 200)}`;
+            throw new Error(errMsg);
           }
-          throw new Error(errMsg);
+
+          // ── Success: Stream Chunks ──
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+          let fullText = '';
+          let streamStarted = false;
+
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              buffer += decoder.decode(value, { stream: true });
+
+              const lines = buffer.split('\n');
+              buffer = lines.pop(); // Keep partial line in buffer
+
+              for (const line of lines) {
+                const cleanLine = line.trim();
+                if (!cleanLine) continue;
+
+                if (cleanLine.startsWith('data: ')) {
+                  const dataStr = cleanLine.substring(6);
+                  try {
+                    const json = JSON.parse(dataStr);
+                    const chunkText = json.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (chunkText) {
+                      streamStarted = true;
+                      fullText += chunkText;
+                      if (onChunk) {
+                        onChunk(chunkText);
+                      }
+                    }
+                  } catch (e) {
+                    console.warn('[Gemini] Failed to parse SSE JSON chunk:', e);
+                  }
+                }
+              }
+            }
+
+            // Flush remaining buffer
+            if (buffer.trim().startsWith('data: ')) {
+              try {
+                const json = JSON.parse(buffer.trim().substring(6));
+                const chunkText = json.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (chunkText) {
+                  fullText += chunkText;
+                  if (onChunk) onChunk(chunkText);
+                }
+              } catch (_) {}
+            }
+
+            console.log(`🥥 Gemini analysis streaming succeeded on model: ${model}`);
+            return fullText;
+
+          } catch (streamErr) {
+            if (streamStarted) {
+              console.warn('[Gemini] Stream interrupted mid-generation. Returning partial response.', streamErr);
+              return fullText;
+            }
+            throw streamErr;
+          }
 
         } catch (err) {
           lastError = err;
