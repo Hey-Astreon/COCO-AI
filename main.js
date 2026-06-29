@@ -6,7 +6,7 @@
 // Load environment variables FIRST
 require('dotenv').config();
 
-const { app, BrowserWindow, globalShortcut, ipcMain, screen } = require('electron');
+const { app, BrowserWindow, globalShortcut, ipcMain, screen, desktopCapturer } = require('electron');
 const path = require('path');
 const cerebras = require('./services/cerebras');
 
@@ -121,7 +121,20 @@ ipcMain.handle('get-api-keys', () => {
   return {
     cerebras: process.env.CEREBRAS_API_KEY || '',
     deepgram: process.env.DEEPGRAM_API_KEY || '',
+    gemini: process.env.GEMINI_API_KEY || '',
   };
+});
+
+ipcMain.handle('capture-screen', async () => {
+  const sources = await desktopCapturer.getSources({
+    types: ['screen'],
+    thumbnailSize: { width: 1920, height: 1080 }
+  });
+  
+  if (sources.length > 0) {
+    return sources[0].thumbnail.toDataURL();
+  }
+  throw new Error('No screen sources found');
 });
 
 ipcMain.handle('get-cerebras-models', async () => {

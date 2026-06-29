@@ -42,6 +42,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onAnalyzeScreen: (callback) => {
     ipcRenderer.on('analyze-screen', () => callback());
   },
+  captureScreen: () => ipcRenderer.invoke('capture-screen'),
 
   // ─── Identify ─────────────────────────────────────────────────
   isElectron: true,

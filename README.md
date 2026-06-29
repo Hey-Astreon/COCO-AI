@@ -12,7 +12,7 @@
 
 **A next-generation AI interview assistant overlay — inspired by CoPrep AI, designed to be better.**
 
-[🚀 Live Demo](#) · [📖 Documentation](#features) · [🐛 Report Bug](https://github.com/Silenttears-cloud/COCO-AI/issues) · [💡 Request Feature](https://github.com/Silenttears-cloud/COCO-AI/issues)
+[🚀 Live Demo](#) · [📖 Documentation](#features) · [🐛 Report Bug](https://github.com/Hey-Astreon/COCO-AI/issues) · [💡 Request Feature](https://github.com/Hey-Astreon/COCO-AI/issues)
 
 </div>
 
@@ -65,7 +65,7 @@
 ### Option 1 — Direct Browser (Preview)
 ```bash
 # Clone the repo
-git clone https://github.com/Silenttears-cloud/COCO-AI.git
+git clone https://github.com/Hey-Astreon/COCO-AI.git
 cd COCO-AI
 
 # Open directly in browser
@@ -192,11 +192,12 @@ Contributions are welcome! Please:
 
 ---
 
-## 👩‍💻 Author
+## 👩‍💻 Authors
 
-**Ayushi Raj** — [@Silenttears-cloud](https://github.com/Silenttears-cloud)
+* **Roushan (Astreon)** — [@Hey-Astreon](https://github.com/Hey-Astreon)
+* **Ayushi Raj** — [@Silenttears-cloud](https://github.com/Silenttears-cloud)
 
-*1st Year BCA Student at Amity University · Full-Stack Developer · AI Enthusiast*
+*1st Year BCA Students at Amity University · Full-Stack Developers · AI Orchestrators & Prompt Engineers*
 
 > *"Nothing is immortal. Every system has a vulnerability. We build better."*
 
@@ -210,7 +211,7 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 <div align="center">
 
-**Built with 💜 by Ayushi Raj**
+**Built with 💜 by Roushan & Ayushi**
 
 *If CocoAI helped you, give it a ⭐ on GitHub!*
 

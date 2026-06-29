@@ -25,7 +25,7 @@
       <!-- Opacity Slider -->
       <div class="control-group" title="Overlay Opacity">
         <span class="control-icon">☀</span>
-        <input type="range" min="20" max="100" value="85" class="slider" id="opacitySlider" />
+        <input type="range" min="35" max="100" value="85" class="slider" id="opacitySlider" />
         <span class="control-value" id="opacityValue">85%</span>
       </div>
     </div>
@@ -55,8 +55,8 @@
     <div class="toolbar-right">
       <!-- Status Indicator -->
       <div class="status-badge" id="statusBadge">
-        <span class="status-dot listening"></span>
-        <span class="status-text" id="statusText">Listening</span>
+        <span class="status-dot idle"></span>
+        <span class="status-text" id="statusText">Initializing...</span>
       </div>
 
       <!-- Model Selector -->
@@ -76,7 +76,7 @@
       </button>
 
       <!-- Mic Toggle -->
-      <button class="btn btn-mic active" id="micBtn" onclick="toggleMic()">
+      <button class="btn btn-mic" id="micBtn" onclick="toggleMic()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" id="micIcon">
           <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
           <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
@@ -91,6 +91,14 @@
           <rect x="3" y="3" width="18" height="18" rx="2"/>
         </svg>
         End
+      </button>
+
+      <!-- Settings Button -->
+      <button class="btn btn-settings" id="settingsBtn" onclick="toggleSettings()" title="Settings">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
       </button>
 
       <div class="toolbar-divider"></div>
@@ -266,9 +274,68 @@
   <!-- ═══════════════════════════════════════════════════════════ -->
   <!--  TOAST NOTIFICATION                                        -->
   <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!--  SETTINGS DRAWER                                           -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="settings-drawer" id="settingsDrawer">
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <span>⚙</span> Settings
+      </div>
+      <button class="drawer-close" onclick="toggleSettings()">&times;</button>
+    </div>
+    
+    <div class="drawer-body">
+      <!-- API Keys Section -->
+      <div class="settings-section">
+        <h3 class="section-title">API Key Configuration</h3>
+        
+        <div class="form-group">
+          <label for="settingCerebrasKey">Cerebras API Key</label>
+          <input type="password" id="settingCerebrasKey" placeholder="csk-..." class="form-input" />
+          <span class="input-tip">Used for ultra-fast Llama-3.3 answer streaming. Get one at cloud.cerebras.ai.</span>
+        </div>
+        
+        <div class="form-group">
+          <label for="settingDeepgramKey">Deepgram API Key</label>
+          <input type="password" id="settingDeepgramKey" placeholder="Insert your Deepgram key" class="form-input" />
+          <span class="input-tip">Used for real-time transcriptions. Get one at console.deepgram.com.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="settingGeminiKey">Gemini API Key</label>
+          <input type="password" id="settingGeminiKey" placeholder="Insert Gemini API Key" class="form-input" />
+          <span class="input-tip">Required for capturing and analyzing screens/code blocks using Gemini 2.0 Flash.</span>
+        </div>
+      </div>
+      
+      <!-- Resume / Job Context Section -->
+      <div class="settings-section">
+        <h3 class="section-title">Interview Context Injection</h3>
+        
+        <div class="form-group">
+          <label for="settingResume">Your Resume (Plain Text)</label>
+          <textarea id="settingResume" placeholder="Paste your resume contents here. CocoAI will use this to personalize answers..." class="form-textarea"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="settingJd">Job Description (JD)</label>
+          <textarea id="settingJd" placeholder="Paste the job description or role requirements here to align your answers..." class="form-textarea"></textarea>
+        </div>
+      </div>
+    </div>
+    
+    <div class="drawer-footer">
+      <button class="btn btn-save" onclick="saveSettings()">Save Configuration</button>
+      <button class="btn btn-cancel" onclick="toggleSettings()">Cancel</button>
+    </div>
+  </div>
+  <div class="drawer-overlay" id="drawerOverlay" onclick="toggleSettings()"></div>
+
   <div class="toast" id="toast"></div>
 
   <script src="services/deepgram.js"></script>
+  <script src="services/gemini.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -13,7 +13,9 @@ const state = {
   autoScroll: true,
   lastAnswer: '',
   currentModel: 'llama-3.3-70b',
-  apiKeys: { cerebras: '', deepgram: '' },
+  apiKeys: { cerebras: '', deepgram: '', gemini: '' },
+  resume: '',
+  jobDescription: '',
   transcriptHistory: [],  // { role, text } for AI context
   deepgramService: null,
   interimTranscriptEl: null, // For updating interim results
@@ -48,6 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initModelSelector();
   startSessionTimer();
   await initElectronBridge();
+  loadSettings();
   initDeepgram();
 });
 
@@ -434,7 +437,11 @@ async function addQACard(question) {
     window.electronAPI.streamAI(
       question,
       state.currentModel,
-      { transcript: state.transcriptHistory.slice(-10) },
+      { 
+        transcript: state.transcriptHistory.slice(-10),
+        resume: state.resume,
+        jobDescription: state.jobDescription
+      },
       requestId
     );
   } else {
@@ -576,9 +583,99 @@ function generateDemoAnswer(question) {
 }
 
 // ─── Analyze Screen ────────────────────────────────────────────
-function analyzeScreen() {
-  addQACard('[Screenshot captured] Please analyze this coding problem and provide a step-by-step solution with code.');
-  showToast('📸 Screen captured — analyzing...', 'success');
+async function analyzeScreen() {
+  state.messageCount++;
+  const requestId = `req-${state.messageCount}-${Date.now()}`;
+  const timestamp = getTimestamp();
+
+  // Remove welcome card if present
+  const welcome = els.answersFeed.querySelector('.welcome-card');
+  if (welcome) welcome.remove();
+
+  // Create card with thinking state
+  const card = document.createElement('div');
+  card.className = 'qa-card';
+  card.id = `card-${requestId}`;
+  card.innerHTML = `
+    <div class="qa-question">
+      <span class="qa-q-label">📸</span>
+      <span class="qa-q-text">Screenshot Capture Analysis</span>
+    </div>
+    <div class="qa-answer">
+      <div class="qa-a-label">⚡ CocoAI Code Solver</div>
+      <div class="qa-a-text" id="answer-${requestId}">
+        <div class="thinking-dots">
+          <span></span><span></span><span></span>
+        </div>
+        <span class="thinking-text">Capturing screen and analyzing with Gemini...</span>
+      </div>
+    </div>
+    <div class="qa-footer">
+      <span class="qa-time">${timestamp}</span>
+      <div class="qa-actions">
+        <button class="qa-action-btn" onclick="copyAnswer(this)">Copy</button>
+        <button class="qa-action-btn" onclick="thumbsUp(this)">👍</button>
+      </div>
+    </div>
+  `;
+  els.answersFeed.appendChild(card);
+  scrollToBottom(els.answersFeed);
+
+  showToast('📸 Capturing screen...', 'success');
+
+  const answerEl = $(`answer-${requestId}`);
+
+  try {
+    let imgDataUrl = '';
+    
+    if (window.electronAPI && window.electronAPI.captureScreen) {
+      // Capture the real screen!
+      imgDataUrl = await window.electronAPI.captureScreen();
+    } else {
+      // Browser demo mode fallback — mock a captured screen
+      console.log('🥥 Browser mode: mocking screenshot');
+      await sleep(1000);
+      imgDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='; // 1x1 transparent pixel
+    }
+
+    if (!state.apiKeys.gemini) {
+      throw new Error('Gemini API key is not configured. Add it in the settings panel.');
+    }
+
+    answerEl.innerHTML = `
+      <div class="thinking-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <span class="thinking-text">Gemini is solving the problem...</span>
+    `;
+    
+    // Call the real Gemini Vision API with live status updates!
+    const prompt = "Please analyze the code, question, error, or diagram in this screenshot. Provide a clear, structured step-by-step solution, complete corrected code blocks, and time/space complexity analysis where applicable.";
+    const analysis = await window.GeminiService.analyzeImage(
+      state.apiKeys.gemini,
+      imgDataUrl,
+      prompt,
+      (statusMsg) => {
+        // Live update the thinking text when retrying/falling back
+        const thinkingText = answerEl.querySelector('.thinking-text');
+        if (thinkingText) thinkingText.textContent = statusMsg;
+        showToast(statusMsg, 'warning');
+      }
+    );
+    
+    answerEl.innerHTML = formatAnswer(analysis);
+    state.lastAnswer = analysis;
+    showToast('✅ Problem analyzed successfully!', 'success');
+  } catch (err) {
+    console.error('Screen analysis failed:', err);
+    answerEl.innerHTML = `
+      <div class="error-message">
+        <span class="error-icon">⚠️</span>
+        <span>Screen Analysis Failed: ${escHtml(err.message || err)}</span>
+      </div>
+    `;
+    showToast('❌ Analysis failed', 'error');
+  }
 }
 
 // ─── Button Actions ────────────────────────────────────────────
@@ -710,4 +807,89 @@ function escHtml(str) {
 
 function escAttr(str) {
   return str.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// ─── Settings Panel Logic ──────────────────────────────────────
+function loadSettings() {
+  try {
+    // Load keys
+    const storedKeys = localStorage.getItem('cocoai_api_keys');
+    if (storedKeys) {
+      const parsedKeys = JSON.parse(storedKeys);
+      // Only overwrite keys if they are not already set by Electron / .env
+      state.apiKeys.cerebras = state.apiKeys.cerebras || parsedKeys.cerebras || '';
+      state.apiKeys.deepgram = state.apiKeys.deepgram || parsedKeys.deepgram || '';
+      state.apiKeys.gemini = state.apiKeys.gemini || parsedKeys.gemini || '';
+    }
+    
+    // Load resume & JD
+    state.resume = localStorage.getItem('cocoai_resume') || '';
+    state.jobDescription = localStorage.getItem('cocoai_jd') || '';
+    
+    // Set UI input values
+    $('settingCerebrasKey').value = state.apiKeys.cerebras;
+    $('settingDeepgramKey').value = state.apiKeys.deepgram;
+    $('settingGeminiKey').value = state.apiKeys.gemini || '';
+    $('settingResume').value = state.resume;
+    $('settingJd').value = state.jobDescription;
+    
+    console.log('🥥 Local settings loaded');
+  } catch (e) {
+    console.error('Failed to load settings from localStorage:', e);
+  }
+}
+
+function saveSettings() {
+  try {
+    const keys = {
+      cerebras: $('settingCerebrasKey').value.trim(),
+      deepgram: $('settingDeepgramKey').value.trim(),
+      gemini: $('settingGeminiKey').value.trim(),
+    };
+    
+    const resume = $('settingResume').value.trim();
+    const jd = $('settingJd').value.trim();
+    
+    localStorage.setItem('cocoai_api_keys', JSON.stringify(keys));
+    localStorage.setItem('cocoai_resume', resume);
+    localStorage.setItem('cocoai_jd', jd);
+    
+    // Update active state
+    state.apiKeys = keys;
+    state.resume = resume;
+    state.jobDescription = jd;
+    
+    showToast('⚙ Configuration saved successfully!', 'success');
+    toggleSettings();
+    
+    // Re-initialize Deepgram if key changed and not already running
+    if (keys.deepgram && !state.deepgramService) {
+      initDeepgram();
+    }
+  } catch (e) {
+    showToast('❌ Failed to save configuration', 'error');
+  }
+}
+
+function toggleSettings() {
+  const drawer = $('settingsDrawer');
+  const overlay = $('drawerOverlay');
+  
+  if (drawer.classList.contains('open')) {
+    drawer.classList.remove('open');
+    overlay.classList.remove('open');
+    overlay.style.display = 'none';
+  } else {
+    // Populate latest values before opening
+    $('settingCerebrasKey').value = state.apiKeys.cerebras || '';
+    $('settingDeepgramKey').value = state.apiKeys.deepgram || '';
+    $('settingGeminiKey').value = state.apiKeys.gemini || '';
+    $('settingResume').value = state.resume || '';
+    $('settingJd').value = state.jobDescription || '';
+    
+    drawer.classList.add('open');
+    overlay.style.display = 'block';
+    // Small delay to trigger opacity transition
+    setTimeout(() => overlay.classList.add('open'), 10);
+  }
 }
