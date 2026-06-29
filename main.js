@@ -128,13 +128,24 @@ ipcMain.handle('get-api-keys', () => {
 ipcMain.handle('capture-screen', async () => {
   const sources = await desktopCapturer.getSources({
     types: ['screen'],
-    thumbnailSize: { width: 1920, height: 1080 }
+    thumbnailSize: { width: 1280, height: 720 } // Speed up screenshot capture with 720p resolution
   });
   
   if (sources.length > 0) {
     return sources[0].thumbnail.toDataURL();
   }
   throw new Error('No screen sources found');
+});
+
+ipcMain.handle('get-system-audio-source-id', async () => {
+  const sources = await desktopCapturer.getSources({
+    types: ['screen']
+  });
+  
+  if (sources.length > 0) {
+    return sources[0].id;
+  }
+  throw new Error('No audio loopback screen source found');
 });
 
 ipcMain.handle('get-cerebras-models', async () => {

@@ -20,18 +20,20 @@ class DeepgramService {
     this.onStatusChange = null;  // callback(status) — 'connecting'|'listening'|'paused'|'error'
     this.reconnectAttempts = 0;
     this.maxReconnects = 3;
+    this.micStreamTracks = null;
+    this.systemStreamTracks = null;
   }
 
   /**
-   * Start capturing audio from the user's microphone
-   * and streaming to Deepgram for transcription
+   * Start capturing audio from both microphone and system audio loopback (WASAPI),
+   * mixing them together using the Web Audio API, and streaming to Deepgram.
    */
   async startMicrophone() {
     try {
       this._setStatus('connecting');
 
-      // Request microphone access
-      this.mediaStream = await navigator.mediaDevices.getUserMedia({
+      // 1. Request microphone access
+      const micStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           channelCount: 1,
           sampleRate: 16000,
@@ -41,44 +43,65 @@ class DeepgramService {
         }
       });
 
-      // Connect to Deepgram WebSocket
+      let finalStream = micStream;
+      this.micStreamTracks = micStream.getTracks();
+
+      // 2. Query system audio source ID from Electron main process
+      if (window.electronAPI && window.electronAPI.getSystemAudioSourceId) {
+        try {
+          const sourceId = await window.electronAPI.getSystemAudioSourceId();
+          console.log('[Deepgram] Capturing system audio loopback for source ID:', sourceId);
+          
+          const systemStream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              mandatory: {
+                chromeMediaSource: 'desktop',
+                chromeMediaSourceId: sourceId
+              }
+            },
+            video: {
+              mandatory: {
+                chromeMediaSource: 'desktop',
+                chromeMediaSourceId: sourceId,
+                maxHeight: 1,
+                maxWidth: 1
+              }
+            }
+          });
+
+          this.systemStreamTracks = systemStream.getTracks();
+
+          // Mix the streams together using Web Audio API
+          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const micSource = audioCtx.createMediaStreamSource(micStream);
+          const systemSource = audioCtx.createMediaStreamSource(systemStream);
+          const dest = audioCtx.createMediaStreamDestination();
+
+          micSource.connect(dest);
+          systemSource.connect(dest);
+
+          finalStream = dest.stream;
+          console.log('[Audio] Successfully mixed Mic and System Audio (WASAPI Loopback) streams');
+        } catch (sysErr) {
+          console.warn('[Audio] Loopback capture failed or was rejected. Falling back to mic only.', sysErr);
+        }
+      }
+
+      this.mediaStream = finalStream;
       this._connectWebSocket();
 
     } catch (err) {
       this._setStatus('error');
       if (this.onError) this.onError(err);
-      console.error('[Deepgram] Microphone access error:', err);
+      console.error('[Deepgram] Audio capture initialization failed:', err);
     }
   }
 
   /**
-   * Start capturing system audio (speaker loopback) using Electron's
-   * desktopCapturer — this captures interviewer's voice from Zoom/Meet/Teams
+   * Alias for unified audio capture
    */
   async startSystemAudio() {
-    try {
-      this._setStatus('connecting');
-
-      // Use Electron's desktopCapturer to get system audio
-      // This needs to be called from the renderer with proper permissions
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          // In Electron, we can capture system audio via a loopback device
-          // For now, fall back to mic if system audio isn't available
-          channelCount: 1,
-          sampleRate: 16000,
-          echoCancellation: false,
-          noiseSuppression: true,
-        }
-      });
-
-      this.mediaStream = stream;
-      this._connectWebSocket();
-
-    } catch (err) {
-      console.warn('[Deepgram] System audio not available, falling back to mic');
-      await this.startMicrophone();
-    }
+    await this.startMicrophone();
   }
 
   /**
@@ -253,15 +276,22 @@ class DeepgramService {
     }
   }
 
-  /**
-   * Stop transcription and clean up
-   */
   stop() {
     this.isListening = false;
 
     if (this.mediaRecorder) {
       try { this.mediaRecorder.stop(); } catch (e) {}
       this.mediaRecorder = null;
+    }
+
+    if (this.micStreamTracks) {
+      this.micStreamTracks.forEach(track => track.stop());
+      this.micStreamTracks = null;
+    }
+
+    if (this.systemStreamTracks) {
+      this.systemStreamTracks.forEach(track => track.stop());
+      this.systemStreamTracks = null;
     }
 
     if (this.mediaStream) {

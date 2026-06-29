@@ -43,6 +43,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('analyze-screen', () => callback());
   },
   captureScreen: () => ipcRenderer.invoke('capture-screen'),
+  getSystemAudioSourceId: () => ipcRenderer.invoke('get-system-audio-source-id'),
 
   // ─── Identify ─────────────────────────────────────────────────
   isElectron: true,
