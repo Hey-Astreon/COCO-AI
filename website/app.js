@@ -211,19 +211,21 @@ gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
   // ── Stealth Demo ──────────────────────────────────────────────
   revealOnScroll('.stealth-demo', { delay: 0.1 });
 
-  // ── Features Grid — stagger each card ─────────────────────────
-  ScrollTrigger.create({
-    trigger: '.features-grid',
-    start: 'top 80%',
-    onEnter: () => {
-      gsap.from('.feature-card', {
-        opacity: 0,
-        y: 60,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: 'expo.out',
-      });
-    }
+  // ── Features Grid — stagger each card directly (no grid-level opacity) ──────
+  gsap.utils.toArray('.feature-card').forEach((card, i) => {
+    gsap.from(card, {
+      opacity: 0,
+      y: 50,
+      scale: 0.96,
+      duration: 0.7,
+      ease: 'expo.out',
+      delay: i * 0.08,
+      scrollTrigger: {
+        trigger: card,
+        start: 'top 90%',
+        toggleActions: 'play none none none',
+      },
+    });
   });
 
   // ── Steps stagger ─────────────────────────────────────────────
