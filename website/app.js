@@ -211,7 +211,7 @@ gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
   // ── Stealth Demo ──────────────────────────────────────────────
   revealOnScroll('.stealth-demo', { delay: 0.1 });
 
-  // ── Features Grid — stagger each card directly (no grid-level opacity) ──────
+  // ── Features Grid — per-card ScrollTrigger with refresh ────────
   gsap.utils.toArray('.feature-card').forEach((card, i) => {
     gsap.from(card, {
       opacity: 0,
@@ -222,11 +222,15 @@ gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
       delay: i * 0.08,
       scrollTrigger: {
         trigger: card,
-        start: 'top 90%',
+        start: 'top 95%',
         toggleActions: 'play none none none',
+        onLeaveBack: () => {},
       },
     });
   });
+
+  // Refresh all triggers after full page render to fix any missed cards
+  setTimeout(() => ScrollTrigger.refresh(), 600);
 
   // ── Steps stagger ─────────────────────────────────────────────
   gsap.utils.toArray('.step').forEach((el, i) => {
