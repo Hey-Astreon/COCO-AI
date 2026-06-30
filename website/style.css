@@ -7,20 +7,20 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg-void:       #05050f;
-  --bg-deep:       #080815;
-  --accent-violet: #6c63ff;
-  --accent-teal:   #00d4aa;
-  --accent-pink:   #ff6584;
-  --accent-gold:   #ffd700;
-  --text-primary:  #f0f0ff;
-  --text-muted:    #8888aa;
-  --text-dim:      #4a4a6a;
-  --glass-bg:      rgba(12, 12, 30, 0.65);
-  --glass-border:  rgba(108, 99, 255, 0.18);
-  --glass-glow:    rgba(108, 99, 255, 0.08);
-  --teal-glow:     rgba(0, 212, 170, 0.15);
-  --font-main:     'Inter', system-ui, sans-serif;
+  --bg-void:       #020205;
+  --bg-deep:       #05050c;
+  --accent-violet: hsl(263, 100%, 70%);
+  --accent-teal:   hsl(168, 100%, 46%);
+  --accent-pink:   hsl(340, 100%, 70%);
+  --accent-gold:   hsl(48, 100%, 60%);
+  --text-primary:  #f3f3fd;
+  --text-muted:    #8b8ba7;
+  --text-dim:      #4d4d6e;
+  --glass-bg:      rgba(8, 8, 16, 0.75);
+  --glass-border:  rgba(255, 255, 255, 0.08);
+  --glass-glow:    rgba(108, 99, 255, 0.1);
+  --teal-glow:     rgba(0, 212, 170, 0.18);
+  --font-main:     'Plus Jakarta Sans', system-ui, sans-serif;
   --font-mono:     'JetBrains Mono', monospace;
   --radius-sm:     8px;
   --radius-md:     16px;
@@ -29,7 +29,20 @@
   --ease-expo:     cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-html { scroll-behavior: auto; }
+/* ─── Developer Grid Background Overlay ─── */
+.grid-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-size: 50px 50px;
+  background-image: 
+    linear-gradient(to right, rgba(108, 99, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(108, 99, 255, 0.04) 1px, transparent 1px);
+  mask-image: radial-gradient(circle 800px at 50% 50%, black, transparent);
+  -webkit-mask-image: radial-gradient(circle 800px at 50% 50%, black, transparent);
+  opacity: 0.95;
+}
 
 body {
   background: var(--bg-void);
@@ -240,8 +253,6 @@ body {
   letter-spacing: -3px;
   color: var(--text-primary);
   margin-bottom: 24px;
-  opacity: 0;
-  transform: translateY(40px);
 }
 
 .hero-subtitle {
@@ -250,8 +261,6 @@ body {
   margin-bottom: 40px;
   line-height: 1.7;
   max-width: 520px;
-  opacity: 0;
-  transform: translateY(30px);
 }
 
 .hero-subtitle strong { color: var(--text-primary); }
@@ -262,8 +271,6 @@ body {
   align-items: center;
   flex-wrap: wrap;
   margin-bottom: 56px;
-  opacity: 0;
-  transform: translateY(20px);
 }
 
 .btn-primary {
@@ -321,8 +328,6 @@ body {
   display: flex;
   align-items: center;
   gap: 32px;
-  opacity: 0;
-  transform: translateY(20px);
 }
 
 .stat { text-align: center; }
@@ -392,8 +397,6 @@ body {
 .hero-mockup {
   flex: 0 0 480px;
   perspective: 1200px;
-  opacity: 0;
-  transform: translateX(60px);
 }
 
 .mockup-window {
@@ -631,17 +634,22 @@ body {
 }
 
 .feature-card {
-  background: rgba(14, 14, 36, 0.88);
-  border: 1px solid rgba(108, 99, 255, 0.28);
+  background: rgba(8, 8, 16, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-lg);
   padding: 32px;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  transition: all 0.35s var(--ease-expo);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  transition: border-color 0.25s, box-shadow 0.25s;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
-  background-image: linear-gradient(135deg, rgba(108,99,255,0.05) 0%, rgba(0,212,170,0.02) 100%);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  /* The dynamic hover radial light gradient synced with cursor variables */
+  background-image: radial-gradient(
+    circle 240px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(108, 99, 255, 0.1) 0%,
+    rgba(8, 8, 16, 0.75) 100%
+  );
 }
 
 .feature-card::before {
@@ -1180,4 +1188,21 @@ kbd {
   .hero-stats { gap: 20px; }
   .cta-actions { flex-direction: column; align-items: center; }
   #footer { padding: 40px 24px; }
+}
+
+/* ─── Lenis Core CSS ────────────────────────────────────────── */
+html.lenis {
+  height: auto;
+}
+
+.lenis-clean, .lenis-clean [data-lenis-prevent] {
+  scroll-behavior: auto !important;
+}
+
+.lenis-clean {
+  min-height: 100%;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
 }
