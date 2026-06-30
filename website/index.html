@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CocoAI — Your Invisible Interview Copilot</title>
+  <meta name="description" content="CocoAI is an undetectable, AI-powered interview assistant overlay for Windows. Real-time answers, live transcription, and screen analysis — invisible to Zoom, Teams, and Meet." />
+  <meta property="og:title" content="CocoAI — Your Invisible Interview Copilot" />
+  <meta property="og:description" content="Crack interviews. Not your budget. The most affordable, truly private AI interview assistant designed for India's next generation." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ─── Canvas Layer (Three.js) ─── -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- ─── Smooth Scroll Wrapper ─── -->
+  <div id="scroll-container">
+
+    <!-- ─── Navigation ─── -->
+    <nav id="navbar">
+      <div class="nav-brand">
+        <span class="brand-icon">🥥</span>
+        <span class="brand-name">CocoAI</span>
+        <span class="brand-badge">BETA</span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="https://github.com/Hey-Astreon/COCO-AI" target="_blank" class="nav-github">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a></li>
+      </ul>
+      <a href="https://github.com/Hey-Astreon/COCO-AI" target="_blank" class="nav-cta">Download Free →</a>
+    </nav>
+
+    <!-- ─── SECTION 1: Hero ─── -->
+    <section id="hero" class="section">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="badge-dot"></span>
+          Now Live · Windows v1.0
+        </div>
+        <h1 class="hero-title">
+          Your <span class="gradient-text">Invisible</span><br/>Interview Copilot
+        </h1>
+        <p class="hero-subtitle">
+          Real-time AI answers. Live transcription. Screen analysis.<br/>
+          <strong>100% undetectable</strong> to Zoom, Teams & Google Meet.
+        </p>
+        <div class="hero-actions">
+          <a href="https://github.com/Hey-Astreon/COCO-AI" target="_blank" class="btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download for Windows
+          </a>
+          <a href="#how-it-works" class="btn-ghost">See How It Works →</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat">
+            <div class="stat-value">₹299<span>/mo</span></div>
+            <div class="stat-label">vs ₹3000+ competitors</div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <div class="stat-value">&lt;500<span>ms</span></div>
+            <div class="stat-label">answer latency</div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <div class="stat-value">100<span>%</span></div>
+            <div class="stat-label">undetectable</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3D Float Mockup -->
+      <div class="hero-mockup" id="hero-mockup">
+        <div class="mockup-window">
+          <div class="mockup-titlebar">
+            <div class="mockup-dots"><span></span><span></span><span></span></div>
+            <div class="mockup-title">🥥 CocoAI  ·  Interview Active</div>
+          </div>
+          <div class="mockup-body">
+            <div class="mockup-answer-panel">
+              <div class="mockup-label">⚡ CocoAI Answer</div>
+              <div class="mockup-answer-stream">
+                <span class="stream-text" id="stream-text"></span>
+                <span class="stream-cursor">|</span>
+              </div>
+            </div>
+            <div class="mockup-transcript-panel">
+              <div class="mockup-label">🎙 Live Transcript</div>
+              <div class="mockup-waveform">
+                <span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span>
+              </div>
+              <div class="mockup-transcript-line interviewer">Interviewer: Explain Big O…</div>
+              <div class="mockup-transcript-line you">You: Sure, Big O notation…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-scroll-hint">
+        <span>Scroll to explore</span>
+        <div class="scroll-arrow"></div>
+      </div>
+    </section>
+
+    <!-- ─── SECTION 2: Stealth ─── -->
+    <section id="stealth" class="section section-pin">
+      <div class="section-label">01 · STEALTH</div>
+      <h2 class="section-title">They see your screen.<br/><span class="gradient-text">They don't see CocoAI.</span></h2>
+      <p class="section-desc">CocoAI uses Windows Win32 <code>WDA_EXCLUDEFROMCAPTURE</code> — the same technology used by banks and DRM systems — to make the overlay invisible to any screen capture software.</p>
+
+      <div class="stealth-demo">
+        <div class="stealth-view" id="stealth-you">
+          <div class="stealth-label">👁 What YOU see</div>
+          <div class="stealth-screen with-overlay">
+            <div class="stealth-browser-bar"><div></div><div></div><div></div></div>
+            <div class="stealth-content">
+              <div class="code-block-mini">
+<pre>function twoSum(nums, target) {
+  const map = {};
+  for (let i = 0; i &lt; nums.length; i++) {
+    const comp = target - nums[i];
+    if (map[comp] !== undefined)
+      return [map[comp], i];
+    map[nums[i]] = i;
+  }
+}</pre>
+              </div>
+              <div class="overlay-pill">🥥 CocoAI overlay visible</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stealth-arrow">⇄</div>
+
+        <div class="stealth-view" id="stealth-interviewer">
+          <div class="stealth-label">🎙 What INTERVIEWER sees</div>
+          <div class="stealth-screen no-overlay">
+            <div class="stealth-browser-bar"><div></div><div></div><div></div></div>
+            <div class="stealth-content">
+              <div class="code-block-mini">
+<pre>function twoSum(nums, target) {
+  const map = {};
+  for (let i = 0; i &lt; nums.length; i++) {
+    const comp = target - nums[i];
+    if (map[comp] !== undefined)
+      return [map[comp], i];
+    map[nums[i]] = i;
+  }
+}</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── SECTION 3: Features ─── -->
+    <section id="features" class="section">
+      <div class="section-label">02 · FEATURES</div>
+      <h2 class="section-title">Everything you need.<br/><span class="gradient-text">Nothing they can detect.</span></h2>
+
+      <div class="features-grid">
+        <div class="feature-card card-glow" data-tilt>
+          <div class="feature-icon">⚡</div>
+          <h3>Real-Time AI Answers</h3>
+          <p>Powered by Cerebras (sub-200ms) and Gemini Flash, answers stream character-by-character like ChatGPT — before the interviewer finishes speaking.</p>
+          <div class="feature-tag">Cerebras · Gemini 2.0 Flash</div>
+        </div>
+
+        <div class="feature-card card-glow" data-tilt>
+          <div class="feature-icon">🎙</div>
+          <h3>System Audio Capture</h3>
+          <p>Captures both your microphone AND the interviewer's voice directly from your speakers via WASAPI loopback. No virtual mic injection required.</p>
+          <div class="feature-tag">Deepgram Nova-3 · WASAPI</div>
+        </div>
+
+        <div class="feature-card card-glow large" data-tilt>
+          <div class="feature-icon">📸</div>
+          <h3>Screen Problem Solver</h3>
+          <p><code>Ctrl+Shift+A</code> captures your screen and sends it to Gemini Vision which streams a full step-by-step solution with code in real time.</p>
+          <div class="feature-terminal">
+            <div class="terminal-line"><span class="t-prompt">▶</span> <span class="t-cmd">Ctrl+Shift+A</span></div>
+            <div class="terminal-line"><span class="t-dim">📸 Capturing screen...</span></div>
+            <div class="terminal-line"><span class="t-dim">⚡ Gemini streaming...</span></div>
+            <div class="terminal-line"><span class="t-success">✓ Solution ready in 480ms</span></div>
+          </div>
+          <div class="feature-tag">Gemini Vision · SSE Streaming</div>
+        </div>
+
+        <div class="feature-card card-glow" data-tilt>
+          <div class="feature-icon">🛡</div>
+          <h3>Multi-Layer Stealth</h3>
+          <p>Visual exclusion from screen capture, disguised process name, no browser extension injection — undetectable at every layer of inspection.</p>
+          <div class="feature-tag">Win32 WDA_EXCLUDEFROMCAPTURE</div>
+        </div>
+
+        <div class="feature-card card-glow" data-tilt>
+          <div class="feature-icon">🧠</div>
+          <h3>Context-Aware AI</h3>
+          <p>Upload your resume and paste the job description. Every answer is tailored to your specific background and the exact role you're interviewing for.</p>
+          <div class="feature-tag">Personalized Prompting</div>
+        </div>
+
+        <div class="feature-card card-glow" data-tilt>
+          <div class="feature-icon">🔄</div>
+          <h3>BYOK Model Freedom</h3>
+          <p>Bring Your Own Key — use your own free API keys for Cerebras, Gemini, and Deepgram. Zero server cost. Maximum privacy. No subscription lock-in.</p>
+          <div class="feature-tag">Open Source · MIT License</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── SECTION 4: How It Works ─── -->
+    <section id="how-it-works" class="section">
+      <div class="section-label">03 · HOW IT WORKS</div>
+      <h2 class="section-title">Set up in <span class="gradient-text">3 minutes</span>.<br/>Use it forever.</h2>
+
+      <div class="steps-track">
+        <div class="step" data-step="1">
+          <div class="step-number">01</div>
+          <div class="step-content">
+            <h3>Clone & Install</h3>
+            <p>Clone the repository and install dependencies with a single command.</p>
+            <div class="code-copy-block">
+              <code id="code-install">git clone https://github.com/Hey-Astreon/COCO-AI.git &amp;&amp; cd COCO-AI &amp;&amp; npm install</code>
+              <button class="copy-btn" onclick="copyCode('code-install', this)">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="step" data-step="2">
+          <div class="step-number">02</div>
+          <div class="step-content">
+            <h3>Add Your API Keys</h3>
+            <p>Create a <code>.env</code> file and paste your free API keys. All three services have generous free tiers.</p>
+            <div class="code-copy-block">
+              <code id="code-env">CEREBRAS_API_KEY=your_key<br/>DEEPGRAM_API_KEY=your_key<br/>GEMINI_API_KEY=your_key</code>
+              <button class="copy-btn" onclick="copyCode('code-env', this)">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="step" data-step="3">
+          <div class="step-number">03</div>
+          <div class="step-content">
+            <h3>Launch & Win</h3>
+            <p>Start the overlay and jump into your interview. CocoAI runs silently in the background.</p>
+            <div class="code-copy-block">
+              <code id="code-start">npm start</code>
+              <button class="copy-btn" onclick="copyCode('code-start', this)">Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hotkeys-grid">
+        <div class="hotkey"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>H</kbd><span>Hide / Show overlay</span></div>
+        <div class="hotkey"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd><span>Analyze screen</span></div>
+        <div class="hotkey"><kbd>Enter</kbd><span>Submit question</span></div>
+        <div class="hotkey"><kbd>Esc</kbd><span>Focus ask bar</span></div>
+      </div>
+    </section>
+
+    <!-- ─── SECTION 5: Pricing ─── -->
+    <section id="pricing" class="section">
+      <div class="section-label">04 · PRICING</div>
+      <h2 class="section-title">Built for Indian students.<br/><span class="gradient-text">10× cheaper</span> than the rest.</h2>
+      <p class="section-desc">CocoAI is free and open source. Premium features coming soon at a price that doesn't break your budget.</p>
+
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <div class="pricing-tier">Free Forever</div>
+          <div class="pricing-price">₹0<span>/mo</span></div>
+          <ul class="pricing-features">
+            <li>✅ Full overlay app</li>
+            <li>✅ Bring your own API keys</li>
+            <li>✅ Cerebras AI answers</li>
+            <li>✅ Deepgram transcription</li>
+            <li>✅ Screen analysis (Gemini)</li>
+            <li>✅ Open source (MIT)</li>
+          </ul>
+          <a href="https://github.com/Hey-Astreon/COCO-AI" target="_blank" class="pricing-btn-outline">Download Free</a>
+        </div>
+
+        <div class="pricing-card pricing-featured">
+          <div class="pricing-best">COMING SOON</div>
+          <div class="pricing-tier">CocoAI Pro</div>
+          <div class="pricing-price">₹299<span>/mo</span></div>
+          <ul class="pricing-features">
+            <li>✅ Everything in Free</li>
+            <li>✅ Managed API proxy (no keys needed)</li>
+            <li>✅ STAR Behavioral Answer Builder</li>
+            <li>✅ Session Export (PDF/TXT)</li>
+            <li>✅ 10,000+ Question Bank</li>
+            <li>✅ Hindi Language Support</li>
+            <li>✅ Priority Support</li>
+          </ul>
+          <button class="pricing-btn-primary" onclick="notifyMe()">Notify Me →</button>
+          <div class="pricing-compare">vs Coprep AI ₹3000/mo · Cluely $29/mo</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── SECTION 6: CTA ─── -->
+    <section id="cta" class="section section-cta">
+      <div class="cta-content">
+        <div class="cta-glow"></div>
+        <h2 class="cta-title">Ready to <span class="gradient-text">ace your interview</span>?</h2>
+        <p class="cta-subtitle">Join the waitlist or download now — completely free.</p>
+        <div class="cta-actions">
+          <a href="https://github.com/Hey-Astreon/COCO-AI" target="_blank" class="btn-primary btn-large">
+            🚀 Download CocoAI Free
+          </a>
+          <a href="https://github.com/Hey-Astreon/COCO-AI" target="_blank" class="btn-ghost">
+            ⭐ Star on GitHub
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Footer ─── -->
+    <footer id="footer">
+      <div class="footer-brand">
+        <span>🥥 CocoAI</span>
+        <span class="footer-tagline">Your Invisible Interview Copilot</span>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/Hey-Astreon/COCO-AI" target="_blank">GitHub</a>
+        <a href="https://github.com/Hey-Astreon/COCO-AI/issues" target="_blank">Issues</a>
+        <a href="https://github.com/Hey-Astreon/COCO-AI/blob/main/LICENSE" target="_blank">MIT License</a>
+      </div>
+      <div class="footer-credits">
+        Built with 💜 by <a href="https://github.com/Hey-Astreon" target="_blank">Roushan (Astreon)</a> &amp; <a href="https://github.com/Silenttears-cloud" target="_blank">Ayushi Raj</a>
+      </div>
+      <div class="footer-copy">© 2026 CocoAI. Open source under MIT License.</div>
+    </footer>
+
+  </div><!-- end #scroll-container -->
+
+  <!-- Notify Modal -->
+  <div id="notify-modal" class="modal-overlay" onclick="closeModal()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <h3>🚀 Join the Waitlist</h3>
+      <p>Get notified when CocoAI Pro launches at ₹299/mo.</p>
+      <input type="email" id="notify-email" placeholder="your@email.com" class="modal-input" />
+      <button class="btn-primary" onclick="submitNotify()">Notify Me!</button>
+    </div>
+  </div>
+
+  <!-- Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
