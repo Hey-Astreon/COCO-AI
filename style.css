@@ -1358,3 +1358,106 @@ kbd {
   display: block;
   opacity: 1;
 }
+
+/* Session Management Action Layout */
+.settings-action-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+.settings-action-row .btn {
+  flex: 1;
+  font-size: 11px;
+  justify-content: center;
+  padding: 8px 10px;
+}
+.btn-action-secondary {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border-normal);
+  color: var(--text-secondary);
+}
+.btn-action-secondary:hover {
+  background: rgba(255,255,255,0.12);
+  color: white;
+}
+.btn-action-primary {
+  background: var(--gradient-primary);
+  border: none;
+  color: white;
+  width: 100%;
+  justify-content: center;
+  padding: 8px 12px;
+}
+.btn-action-primary:hover {
+  box-shadow: var(--shadow-glow-purple);
+  transform: translateY(-1px);
+}
+
+/* Replay Mode Banner */
+.replay-banner {
+  position: fixed;
+  top: var(--toolbar-h);
+  left: 0;
+  right: 0;
+  height: 38px;
+  background: linear-gradient(to right, rgba(230, 126, 34, 0.18), rgba(230, 126, 34, 0.08));
+  border-bottom: 1px solid rgba(230, 126, 34, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 999;
+  backdrop-filter: blur(10px);
+  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes slideDown {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+.replay-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.replay-icon {
+  font-size: 14px;
+}
+.replay-text {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #FFA502;
+  letter-spacing: 0.02em;
+}
+
+.btn-live-mode {
+  background: linear-gradient(135deg, var(--accent-secondary), #00b09b);
+  border: none;
+  color: white;
+  padding: 4px 12px;
+  font-size: 10.5px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  box-shadow: var(--shadow-glow-teal);
+  transition: all var(--t-fast);
+}
+.btn-live-mode:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 212, 170, 0.4);
+}
+
+/* Push down main container in Replay Mode */
+body.replay-active .main-container {
+  top: calc(var(--toolbar-h) + 38px);
+}
+
+/* Disable controls in Replay Mode */
+body.replay-active .ask-bar,
+body.replay-active #micBtn,
+body.replay-active #analyzeBtn,
+body.replay-active #settingsBtn {
+  opacity: 0.4;
+  pointer-events: none !important;
+  cursor: not-allowed;
+}

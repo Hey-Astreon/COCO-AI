@@ -111,6 +111,15 @@
     </div>
   </div>
 
+  <!-- Replay Mode Banner -->
+  <div class="replay-banner" id="replayBanner" style="display: none">
+    <div class="replay-banner-content">
+      <span class="replay-icon">⚠️</span>
+      <span class="replay-text" id="replayBannerText">Replay Mode: Viewing past session</span>
+    </div>
+    <button class="btn btn-live-mode" onclick="exitReplayMode()">Exit Replay & Go Live</button>
+  </div>
+
   <!-- ═══════════════════════════════════════════════════════════ -->
   <!--  MAIN CONTENT AREA                                         -->
   <!-- ═══════════════════════════════════════════════════════════ -->
@@ -321,6 +330,29 @@
             <option value="candidate">👤 Candidate Only (Microphone Only)</option>
           </select>
           <span class="input-tip">Select "Interviewer Only" to transcribe only the interviewer's voice and keep your mic completely disabled.</span>
+        </div>
+      </div>
+      
+      <!-- Session Management Section -->
+      <div class="settings-section">
+        <h3 class="section-title">Session Management</h3>
+        
+        <div class="form-group">
+          <label>Export Current Session</label>
+          <div class="settings-action-row">
+            <button class="btn btn-action-secondary" onclick="exportSession('txt')">📄 Export as TXT</button>
+            <button class="btn btn-action-secondary" onclick="exportSession('json')">💾 Save Session (JSON)</button>
+          </div>
+          <span class="input-tip">Export the transcript and AI answers of the current interview.</span>
+        </div>
+        
+        <div class="form-group">
+          <label>Load Session Replay</label>
+          <div class="file-upload-wrapper">
+            <input type="file" id="replayFileSelector" accept=".json" class="file-input" style="display: none" onchange="handleSessionReplayUpload(event)" />
+            <button class="btn btn-action-primary" onclick="document.getElementById('replayFileSelector').click()">📂 Load Session Replay</button>
+          </div>
+          <span class="input-tip">Upload a saved CocoAI .json session file to view previous transcripts and answers.</span>
         </div>
       </div>
       

@@ -20,6 +20,8 @@ const state = {
   transcriptHistory: [],  // { role, text } for AI context
   deepgramService: null,
   interimTranscriptEl: null, // For updating interim results
+  replayMode: false,
+  savedStateBeforeReplay: null,
 };
 
 // ─── DOM Refs ─────────────────────────────────────────────────
@@ -918,4 +920,265 @@ function toggleSettings() {
     // Small delay to trigger opacity transition
     setTimeout(() => overlay.classList.add('open'), 10);
   }
+}
+
+// ─── Session Management: Export & Replay (Option C) ─────────────
+
+function getQAHistory() {
+  const cards = [];
+  document.querySelectorAll('#answersFeed .qa-card').forEach(card => {
+    const qEl = card.querySelector('.qa-q-text');
+    const aEl = card.querySelector('.qa-a-text');
+    const timeEl = card.querySelector('.qa-time');
+    
+    if (qEl && aEl) {
+      cards.push({
+        question: qEl.textContent.trim(),
+        answerHtml: aEl.innerHTML,
+        answerText: aEl.innerText.trim(),
+        timestamp: timeEl ? timeEl.textContent.trim() : ''
+      });
+    }
+  });
+  return cards;
+}
+
+function exportSession(format = 'txt') {
+  const qaCards = getQAHistory();
+  const transcript = [];
+  document.querySelectorAll('#transcriptFeed .transcript-entry').forEach(entry => {
+    const isInterviewer = entry.classList.contains('interviewer');
+    const textEl = entry.querySelector('.transcript-text');
+    const timeEl = entry.querySelector('.transcript-time');
+    if (textEl) {
+      transcript.push({
+        role: isInterviewer ? 'Interviewer' : 'You',
+        text: textEl.textContent.trim(),
+        time: timeEl ? timeEl.textContent.trim() : ''
+      });
+    }
+  });
+
+  const now = new Date();
+  const dateStr = now.toISOString().slice(0, 10);
+  const timeStr = now.toTimeString().slice(0, 8);
+  const filename = `cocoai-session-${dateStr}_${now.toTimeString().slice(0,2)}${now.toTimeString().slice(3,5)}.${format}`;
+
+  let content = '';
+  let mimeType = 'text/plain';
+
+  if (format === 'txt') {
+    content = `==================================================
+COCOAI - INTERVIEW SESSION EXPORT
+Date: ${dateStr} ${timeStr}
+Session Timer: ${getTimestamp()}
+==================================================
+
+--------------------------------------------------
+JOB DESCRIPTION CONTEXT
+--------------------------------------------------
+${state.jobDescription || 'None provided'}
+
+--------------------------------------------------
+TRANSCRIPT LOG
+--------------------------------------------------
+`;
+    if (transcript.length === 0) {
+      content += 'No transcript entries recorded.\n';
+    } else {
+      transcript.forEach(t => {
+        content += `[${t.time}] ${t.role}: ${t.text}\n`;
+      });
+    }
+
+    content += `
+--------------------------------------------------
+AI QUESTIONS & ANSWERS
+--------------------------------------------------
+`;
+    if (qaCards.length === 0) {
+      content += 'No AI answers generated.\n';
+    } else {
+      qaCards.forEach((qa, idx) => {
+        content += `\n[${qa.timestamp}] Card #${idx + 1}
+Q: ${qa.question}
+A: ${qa.answerText}
+--------------------------------------------------\n`;
+      });
+    }
+  } else if (format === 'json') {
+    mimeType = 'application/json';
+    const sessionData = {
+      exportedAt: now.toISOString(),
+      sessionTime: state.sessionTime,
+      resume: state.resume,
+      jobDescription: state.jobDescription,
+      transcriptHistory: state.transcriptHistory,
+      transcriptFeed: transcript,
+      qaCards: qaCards
+    };
+    content = JSON.stringify(sessionData, null, 2);
+  }
+
+  // Trigger download
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showToast(`💾 Session exported as ${format.toUpperCase()}`, 'success');
+}
+
+function handleSessionReplayUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      
+      // Basic validation
+      if (!data.exportedAt || !Array.isArray(data.transcriptFeed) || !Array.isArray(data.qaCards)) {
+        throw new Error('Invalid CocoAI session replay format.');
+      }
+
+      // Cache the current live state before entering replay mode (only if not already in replay mode)
+      if (!state.replayMode) {
+        state.savedStateBeforeReplay = {
+          sessionTime: state.sessionTime,
+          transcriptHistory: [...state.transcriptHistory],
+          answersFeedHtml: els.answersFeed.innerHTML,
+          transcriptFeedHtml: els.transcriptFeed.innerHTML,
+          lastAnswer: state.lastAnswer
+        };
+      }
+
+      // Close mic if active
+      if (state.micActive && state.deepgramService) {
+        toggleMic();
+      }
+
+      // Populate UI feeds
+      els.answersFeed.innerHTML = '';
+      els.transcriptFeed.innerHTML = '';
+
+      // Set Replay Mode variables
+      state.sessionTime = data.sessionTime || 0;
+      state.transcriptHistory = data.transcriptHistory || [];
+      state.replayMode = true;
+
+      // Populate answers feed
+      if (data.qaCards.length === 0) {
+        els.answersFeed.innerHTML = `
+          <div class="welcome-card">
+            <div class="welcome-icon">📂</div>
+            <div class="welcome-text">
+              <strong>Empty Q&A history</strong>
+              <p>This replayed session does not contain any AI generated answers.</p>
+            </div>
+          </div>
+        `;
+      } else {
+        data.qaCards.forEach((qa, idx) => {
+          const card = document.createElement('div');
+          card.className = 'qa-card replay';
+          card.innerHTML = `
+            <div class="qa-question">
+              <span class="qa-q-label">Q</span>
+              <span class="qa-q-text">${escHtml(qa.question)}</span>
+            </div>
+            <div class="qa-answer">
+              <div class="qa-a-label">⚡ CocoAI Replay Answer</div>
+              <div class="qa-a-text">${qa.answerHtml}</div>
+            </div>
+            <div class="qa-footer">
+              <span class="qa-time">${qa.timestamp}</span>
+              <div class="qa-actions">
+                <button class="qa-action-btn" onclick="copyAnswer(this)">Copy</button>
+              </div>
+            </div>
+          `;
+          els.answersFeed.appendChild(card);
+        });
+      }
+
+      // Populate transcript feed
+      if (data.transcriptFeed.length === 0) {
+        els.transcriptFeed.innerHTML = `
+          <div class="welcome-card">
+            <div class="welcome-text">
+              <p>No speech transcript recorded in this session.</p>
+            </div>
+          </div>
+        `;
+      } else {
+        data.transcriptFeed.forEach(t => {
+          const isInterviewer = t.role === 'Interviewer';
+          const entry = document.createElement('div');
+          entry.className = `transcript-entry ${isInterviewer ? 'interviewer' : 'user'}`;
+          entry.innerHTML = `
+            <div class="transcript-avatar ${isInterviewer ? 'interviewer-avatar' : 'user-avatar'}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <div class="transcript-bubble">
+              <div class="transcript-badges">
+                <span class="badge ${isInterviewer ? 'badge-interviewer' : 'badge-you'}">
+                  ${isInterviewer ? 'Interviewer' : 'You'}
+                </span>
+              </div>
+              <div class="transcript-text">${escHtml(t.text)}</div>
+              <div class="transcript-time">${t.time}</div>
+            </div>
+          `;
+          els.transcriptFeed.appendChild(entry);
+        });
+      }
+
+      // Update UI Banner and classes
+      const bannerDate = new Date(data.exportedAt);
+      $('replayBannerText').textContent = `⚠️ Replay Mode: Viewing session from ${bannerDate.toLocaleDateString()} ${bannerDate.toLocaleTimeString()}`;
+      $('replayBanner').style.display = 'flex';
+      document.body.classList.add('replay-active');
+      
+      toggleSettings(); // Close settings drawer
+      showToast('📂 Session replay loaded!', 'success');
+
+    } catch (err) {
+      console.error(err);
+      showToast('❌ Failed to load replay: ' + err.message, 'error');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function exitReplayMode() {
+  if (!state.replayMode || !state.savedStateBeforeReplay) return;
+
+  // Restore live session state
+  const cached = state.savedStateBeforeReplay;
+  state.sessionTime = cached.sessionTime;
+  state.transcriptHistory = cached.transcriptHistory;
+  state.lastAnswer = cached.lastAnswer;
+  els.answersFeed.innerHTML = cached.answersFeedHtml;
+  els.transcriptFeed.innerHTML = cached.transcriptFeedHtml;
+
+  // Reset Replay Mode flags
+  state.replayMode = false;
+  state.savedStateBeforeReplay = null;
+
+  // Hide Replay Banner and remove styles
+  $('replayBanner').style.display = 'none';
+  document.body.classList.remove('replay-active');
+  $('replayFileSelector').value = '';
+
+  showToast('👁 Returned to Live Session', 'success');
 }
