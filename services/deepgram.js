@@ -25,66 +25,128 @@ class DeepgramService {
   }
 
   /**
-   * Start capturing audio from both microphone and system audio loopback (WASAPI),
-   * mixing them together using the Web Audio API, and streaming to Deepgram.
+   * Start capturing audio according to the selected mode (interviewer, candidate, or mixed),
+   * and streaming it to Deepgram.
    */
-  async startMicrophone() {
+  async startMicrophone(audioMode = 'interviewer') {
     try {
       this._setStatus('connecting');
+      let finalStream = null;
 
-      // 1. Request microphone access
-      const micStream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          channelCount: 1,
-          sampleRate: 16000,
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
+      if (audioMode === 'candidate') {
+        // Mode 1: Candidate Only (Microphone Only)
+        console.log('[Audio] Starting Candidate-only (Microphone) audio capture');
+        const micStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            channelCount: 1,
+            sampleRate: 16000,
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+          }
+        });
+        this.micStreamTracks = micStream.getTracks();
+        finalStream = micStream;
+
+      } else if (audioMode === 'interviewer') {
+        // Mode 2: Interviewer Only (System Audio Loopback Only)
+        console.log('[Audio] Starting Interviewer-only (System Loopback) audio capture');
+        if (!window.electronAPI || !window.electronAPI.getSystemAudioSourceId) {
+          throw new Error('System audio loopback requires Electron process environment.');
         }
-      });
 
-      let finalStream = micStream;
-      this.micStreamTracks = micStream.getTracks();
+        const sourceId = await window.electronAPI.getSystemAudioSourceId();
+        console.log('[Audio] Capturing system loopback source:', sourceId);
 
-      // 2. Query system audio source ID from Electron main process
-      if (window.electronAPI && window.electronAPI.getSystemAudioSourceId) {
-        try {
-          const sourceId = await window.electronAPI.getSystemAudioSourceId();
-          console.log('[Deepgram] Capturing system audio loopback for source ID:', sourceId);
-          
-          const systemStream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-              mandatory: {
-                chromeMediaSource: 'desktop',
-                chromeMediaSourceId: sourceId
-              }
-            },
-            video: {
-              mandatory: {
-                chromeMediaSource: 'desktop',
-                chromeMediaSourceId: sourceId,
-                maxHeight: 1,
-                maxWidth: 1
-              }
+        const systemStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            mandatory: {
+              chromeMediaSource: 'desktop',
+              chromeMediaSourceId: sourceId
             }
-          });
+          },
+          video: {
+            mandatory: {
+              chromeMediaSource: 'desktop',
+              chromeMediaSourceId: sourceId,
+              maxHeight: 1,
+              maxWidth: 1
+            }
+          }
+        });
 
-          this.systemStreamTracks = systemStream.getTracks();
+        // Store system stream tracks
+        this.systemStreamTracks = systemStream.getTracks();
 
-          // Mix the streams together using Web Audio API
-          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          const micSource = audioCtx.createMediaStreamSource(micStream);
-          const systemSource = audioCtx.createMediaStreamSource(systemStream);
-          const dest = audioCtx.createMediaStreamDestination();
+        // IMMEDIATELY stop the video track so Electron/Chrome doesn't show recording badge
+        // and to free CPU/GPU resources
+        systemStream.getVideoTracks().forEach(track => {
+          console.log('[Audio] Stopping unused loopback video track:', track.label);
+          track.stop();
+        });
 
-          micSource.connect(dest);
-          systemSource.connect(dest);
+        finalStream = systemStream;
 
-          finalStream = dest.stream;
-          console.log('[Audio] Successfully mixed Mic and System Audio (WASAPI Loopback) streams');
-        } catch (sysErr) {
-          console.warn('[Audio] Loopback capture failed or was rejected. Falling back to mic only.', sysErr);
+      } else if (audioMode === 'both') {
+        // Mode 3: Mixed (Mic + System Loopback)
+        console.log('[Audio] Starting mixed Microphone and System Loopback audio capture');
+        
+        // 1. Capture microphone
+        const micStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            channelCount: 1,
+            sampleRate: 16000,
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+          }
+        });
+        this.micStreamTracks = micStream.getTracks();
+
+        let mixedStream = micStream;
+
+        // 2. Capture system audio and mix it
+        if (window.electronAPI && window.electronAPI.getSystemAudioSourceId) {
+          try {
+            const sourceId = await window.electronAPI.getSystemAudioSourceId();
+            const systemStream = await navigator.mediaDevices.getUserMedia({
+              audio: {
+                mandatory: {
+                  chromeMediaSource: 'desktop',
+                  chromeMediaSourceId: sourceId
+                }
+              },
+              video: {
+                mandatory: {
+                  chromeMediaSource: 'desktop',
+                  chromeMediaSourceId: sourceId,
+                  maxHeight: 1,
+                  maxWidth: 1
+                }
+              }
+            });
+
+            this.systemStreamTracks = systemStream.getTracks();
+
+            // Stop unused video track
+            systemStream.getVideoTracks().forEach(track => track.stop());
+
+            // Mix streams using AudioContext
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const micSource = audioCtx.createMediaStreamSource(micStream);
+            const systemSource = audioCtx.createMediaStreamSource(systemStream);
+            const dest = audioCtx.createMediaStreamDestination();
+
+            micSource.connect(dest);
+            systemSource.connect(dest);
+
+            mixedStream = dest.stream;
+            console.log('[Audio] Mixed Mic and System Audio successfully');
+          } catch (sysErr) {
+            console.warn('[Audio] Loopback capture failed, mixing fallback to mic only.', sysErr);
+          }
         }
+        finalStream = mixedStream;
       }
 
       this.mediaStream = finalStream;
@@ -100,8 +162,8 @@ class DeepgramService {
   /**
    * Alias for unified audio capture
    */
-  async startSystemAudio() {
-    await this.startMicrophone();
+  async startSystemAudio(audioMode = 'interviewer') {
+    await this.startMicrophone(audioMode);
   }
 
   /**

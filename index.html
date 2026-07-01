@@ -309,6 +309,21 @@
         </div>
       </div>
       
+      <!-- Audio Settings Section -->
+      <div class="settings-section">
+        <h3 class="section-title">Audio & Transcription Settings</h3>
+        
+        <div class="form-group">
+          <label for="settingAudioMode">Audio Input Source</label>
+          <select id="settingAudioMode" class="form-select">
+            <option value="interviewer">🎙️ Interviewer Only (System Audio Loopback)</option>
+            <option value="both">👥 Both (Mic + System Loopback)</option>
+            <option value="candidate">👤 Candidate Only (Microphone Only)</option>
+          </select>
+          <span class="input-tip">Select "Interviewer Only" to transcribe only the interviewer's voice and keep your mic completely disabled.</span>
+        </div>
+      </div>
+      
       <!-- Resume / Job Context Section -->
       <div class="settings-section">
         <h3 class="section-title">Interview Context Injection</h3>

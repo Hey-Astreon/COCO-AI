@@ -16,6 +16,7 @@ const state = {
   apiKeys: { cerebras: '', deepgram: '', gemini: '' },
   resume: '',
   jobDescription: '',
+  audioMode: 'interviewer', // 'interviewer' | 'both' | 'candidate'
   transcriptHistory: [],  // { role, text } for AI context
   deepgramService: null,
   interimTranscriptEl: null, // For updating interim results
@@ -343,14 +344,21 @@ function toggleMic() {
 
   if (state.micActive) {
     state.deepgramService.pause();
-    showToast('🔇 Microphone paused');
+    showToast('🔇 Audio capture paused');
   } else {
     if (state.deepgramService.isListening) {
       state.deepgramService.resume();
     } else {
-      state.deepgramService.startMicrophone();
+      state.deepgramService.startMicrophone(state.audioMode);
     }
-    showToast('🎙 Microphone active', 'success');
+    
+    if (state.audioMode === 'interviewer') {
+      showToast('🎙️ Interviewer mode active (Mic Disabled)', 'success');
+    } else if (state.audioMode === 'both') {
+      showToast('🎙️ Mixed audio capture active', 'success');
+    } else {
+      showToast('🎙️ Microphone capture active', 'success');
+    }
   }
 }
 
@@ -836,12 +844,16 @@ function loadSettings() {
     state.resume = localStorage.getItem('cocoai_resume') || '';
     state.jobDescription = localStorage.getItem('cocoai_jd') || '';
     
+    // Load audio mode
+    state.audioMode = localStorage.getItem('cocoai_audio_mode') || 'interviewer';
+    
     // Set UI input values
     $('settingCerebrasKey').value = state.apiKeys.cerebras;
     $('settingDeepgramKey').value = state.apiKeys.deepgram;
     $('settingGeminiKey').value = state.apiKeys.gemini || '';
     $('settingResume').value = state.resume;
     $('settingJd').value = state.jobDescription;
+    $('settingAudioMode').value = state.audioMode;
     
     console.log('🥥 Local settings loaded');
   } catch (e) {
@@ -859,15 +871,18 @@ function saveSettings() {
     
     const resume = $('settingResume').value.trim();
     const jd = $('settingJd').value.trim();
+    const audioMode = $('settingAudioMode').value;
     
     localStorage.setItem('cocoai_api_keys', JSON.stringify(keys));
     localStorage.setItem('cocoai_resume', resume);
     localStorage.setItem('cocoai_jd', jd);
+    localStorage.setItem('cocoai_audio_mode', audioMode);
     
     // Update active state
     state.apiKeys = keys;
     state.resume = resume;
     state.jobDescription = jd;
+    state.audioMode = audioMode;
     
     showToast('⚙ Configuration saved successfully!', 'success');
     toggleSettings();
@@ -896,6 +911,7 @@ function toggleSettings() {
     $('settingGeminiKey').value = state.apiKeys.gemini || '';
     $('settingResume').value = state.resume || '';
     $('settingJd').value = state.jobDescription || '';
+    $('settingAudioMode').value = state.audioMode || 'interviewer';
     
     drawer.classList.add('open');
     overlay.style.display = 'block';
