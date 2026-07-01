@@ -1461,3 +1461,119 @@ body.replay-active #settingsBtn {
   pointer-events: none !important;
   cursor: not-allowed;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   STEALTH MODE SYSTEM
+   Three-mode cycle: Full → Compact → Ghost
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Stealth Toggle Button ──────────────────────────────────────── */
+.btn-stealth {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.28);
+  color: #a78bfa;
+  transition: all var(--t-fast);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.btn-stealth:hover {
+  background: rgba(139, 92, 246, 0.25);
+  border-color: rgba(139, 92, 246, 0.5);
+  transform: translateY(-1px);
+}
+.stealth-label {
+  font-size: 9px;
+  font-weight: 700;
+}
+
+/* Stealth Hotkey Hint */
+.stealth-hint .hotkey-label {
+  color: #a78bfa;
+}
+.stealth-hint kbd {
+  border-color: rgba(139, 92, 246, 0.3);
+  color: #c4b5fd;
+}
+
+/* ─── Compact Mode ───────────────────────────────────────────────── */
+body.compact-mode .panel-transcript {
+  width: 0;
+  overflow: hidden;
+  border: none;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.2s ease;
+}
+body.compact-mode .panel-answers {
+  flex: 1;
+  max-width: 100%;
+}
+body.compact-mode .toolbar-center {
+  display: none; /* hide hotkey hints in compact to save space */
+}
+
+/* Compact button indicator: amber */
+body.compact-mode .btn-stealth {
+  background: rgba(251, 191, 36, 0.15);
+  border-color: rgba(251, 191, 36, 0.35);
+  color: #fbbf24;
+}
+body.compact-mode .btn-stealth:hover {
+  background: rgba(251, 191, 36, 0.28);
+  border-color: rgba(251, 191, 36, 0.5);
+}
+
+/* ─── Ghost Mode ─────────────────────────────────────────────────── */
+body.ghost-mode .main-container {
+  opacity: 0.35;
+  transition: opacity 0.4s ease;
+}
+body.ghost-mode .toolbar {
+  opacity: 0.5;
+  transition: opacity 0.4s ease;
+}
+
+/* Keep the stealth button fully visible and interactive */
+body.ghost-mode .btn-stealth {
+  opacity: 1 !important;
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+  position: relative;
+  z-index: 99999;
+  animation: ghostPulse 2s ease-in-out infinite;
+}
+body.ghost-mode .btn-stealth:hover {
+  background: rgba(239, 68, 68, 0.35);
+  border-color: rgba(239, 68, 68, 0.6);
+  animation: none;
+}
+
+@keyframes ghostPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+}
+
+/* Ghost also inherits compact layout (transcript hidden) */
+body.ghost-mode .panel-transcript {
+  width: 0;
+  overflow: hidden;
+  border: none;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+body.ghost-mode .toolbar-center {
+  display: none;
+}
+

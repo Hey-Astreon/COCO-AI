@@ -16,6 +16,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setOpacity: (opacity) => ipcRenderer.send('set-opacity', opacity),
   moveToEdge: (edge) => ipcRenderer.send('move-to-edge', edge),
 
+  // ─── Stealth Mode Controls ───────────────────────────────────
+  setWindowSize: (width, height) => ipcRenderer.send('set-window-size', { width, height }),
+  setClickthrough: (enabled) => ipcRenderer.send('set-clickthrough', enabled),
+  onCycleStealth: (callback) => {
+    ipcRenderer.on('cycle-stealth', () => callback());
+  },
+
   // ─── API Keys ─────────────────────────────────────────────────
   getApiKeys: () => ipcRenderer.invoke('get-api-keys'),
   getCerebrasModels: () => ipcRenderer.invoke('get-cerebras-models'),

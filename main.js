@@ -113,6 +113,39 @@ ipcMain.on('move-to-edge', (event, edge) => {
   }
 });
 
+// ─── Stealth Mode: Window Resize ──────────────────────────────
+ipcMain.on('set-window-size', (event, { width, height }) => {
+  if (!mainWindow) return;
+  const bounds = mainWindow.getBounds();
+  const { width: screenW } = screen.getPrimaryDisplay().workAreaSize;
+  // Re-anchor to whichever edge is closer
+  const centerX = bounds.x + bounds.width / 2;
+  let newX;
+  if (centerX > screenW / 2) {
+    // Right-anchored: keep right edge in place
+    newX = bounds.x + bounds.width - width;
+  } else {
+    // Left-anchored: keep left edge in place
+    newX = bounds.x;
+  }
+  mainWindow.setBounds({
+    x: Math.max(0, newX),
+    y: bounds.y,
+    width,
+    height: height || bounds.height
+  });
+});
+
+// ─── Stealth Mode: Click-Through (Ghost) ──────────────────────
+ipcMain.on('set-clickthrough', (event, enabled) => {
+  if (!mainWindow) return;
+  if (enabled) {
+    mainWindow.setIgnoreMouseEvents(true, { forward: true });
+  } else {
+    mainWindow.setIgnoreMouseEvents(false);
+  }
+});
+
 // ═══════════════════════════════════════════════════════════════════
 //  IPC HANDLERS — API Keys
 // ═══════════════════════════════════════════════════════════════════
@@ -245,6 +278,12 @@ app.whenReady().then(() => {
   globalShortcut.register('CommandOrControl+Shift+A', () => {
     if (mainWindow && mainWindow.webContents) {
       mainWindow.webContents.send('analyze-screen');
+    }
+  });
+
+  globalShortcut.register('CommandOrControl+Shift+G', () => {
+    if (mainWindow && mainWindow.webContents) {
+      mainWindow.webContents.send('cycle-stealth');
     }
   });
 

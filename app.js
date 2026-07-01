@@ -22,6 +22,7 @@ const state = {
   interimTranscriptEl: null, // For updating interim results
   replayMode: false,
   savedStateBeforeReplay: null,
+  stealthMode: 'full', // 'full' | 'compact' | 'ghost'
 };
 
 // ─── DOM Refs ─────────────────────────────────────────────────
@@ -43,6 +44,8 @@ const els = {
   typingIndicator: $('typingIndicator'),
   toast: $('toast'),
   modelSelect: $('modelSelect'),
+  stealthBtn: $('stealthBtn'),
+  stealthLabel: $('stealthLabel'),
 };
 
 // ─── Initialization ────────────────────────────────────────────
@@ -86,6 +89,13 @@ async function initElectronBridge() {
     window.electronAPI.onAnalyzeScreen(() => {
       analyzeScreen();
     });
+
+    // Listen for stealth cycle from main process (global hotkey)
+    if (window.electronAPI.onCycleStealth) {
+      window.electronAPI.onCycleStealth(() => {
+        cycleStealthMode();
+      });
+    }
 
     console.log('🥥 CocoAI running in Electron (stealth mode active)');
   } else {
@@ -319,6 +329,10 @@ function initHotkeys() {
       e.preventDefault();
       analyzeScreen();
     }
+    if (ctrl && shift && key === 'g') {
+      e.preventDefault();
+      cycleStealthMode();
+    }
     if (key === 'enter' && document.activeElement === els.askInput) {
       submitQuestion();
     }
@@ -336,6 +350,120 @@ function toggleVisibility() {
   els.mainContainer.style.pointerEvents = isVisible ? 'all' : 'none';
   showToast(isVisible ? '👁 Overlay visible' : '🙈 Overlay hidden', 'success');
 }
+
+// ─── Stealth Mode Cycling ──────────────────────────────────────
+// Cycles: Full → Compact → Ghost → Full
+const STEALTH_FULL_WIDTH = 520;
+const STEALTH_COMPACT_WIDTH = 300;
+
+function cycleStealthMode() {
+  const body = document.body;
+  const current = state.stealthMode;
+
+  if (current === 'full') {
+    // ── Full → Compact ──────────────────────────────────────
+    state.stealthMode = 'compact';
+    body.classList.add('compact-mode');
+    body.classList.remove('ghost-mode');
+
+    // Resize window via IPC
+    if (window.electronAPI?.setWindowSize) {
+      window.electronAPI.setWindowSize(STEALTH_COMPACT_WIDTH);
+    }
+
+    updateStealthButton('compact');
+    showToast('📐 Compact Mode — transcript hidden', 'success');
+
+  } else if (current === 'compact') {
+    // ── Compact → Ghost ─────────────────────────────────────
+    state.stealthMode = 'ghost';
+    body.classList.add('ghost-mode');
+    // Keep compact-mode class so transcript stays hidden
+
+    // Enable click-through
+    if (window.electronAPI?.setClickthrough) {
+      window.electronAPI.setClickthrough(true);
+    }
+
+    updateStealthButton('ghost');
+    showToast('👻 Ghost Mode — clicks pass through', 'success');
+
+  } else {
+    // ── Ghost → Full ────────────────────────────────────────
+    state.stealthMode = 'full';
+    body.classList.remove('compact-mode', 'ghost-mode');
+
+    // Disable click-through
+    if (window.electronAPI?.setClickthrough) {
+      window.electronAPI.setClickthrough(false);
+    }
+
+    // Restore window size
+    if (window.electronAPI?.setWindowSize) {
+      window.electronAPI.setWindowSize(STEALTH_FULL_WIDTH);
+    }
+
+    // Reset inline opacity overrides from ghost
+    els.mainContainer.style.opacity = '';
+    els.mainContainer.style.pointerEvents = '';
+
+    updateStealthButton('full');
+    showToast('👁 Full Mode — all panels restored', 'success');
+  }
+}
+
+function updateStealthButton(mode) {
+  if (!els.stealthLabel) return;
+  const labels = { full: 'Full', compact: 'Compact', ghost: 'Ghost' };
+  els.stealthLabel.textContent = labels[mode] || 'Full';
+
+  // Update the SVG icon
+  const svg = document.getElementById('stealthIcon');
+  if (!svg) return;
+
+  if (mode === 'full') {
+    // Eye open icon
+    svg.innerHTML = `
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+      <circle cx="12" cy="12" r="3"/>
+    `;
+  } else if (mode === 'compact') {
+    // Minimize/compress icon
+    svg.innerHTML = `
+      <polyline points="4 14 10 14 10 20"/>
+      <polyline points="20 10 14 10 14 4"/>
+      <line x1="14" y1="10" x2="21" y2="3"/>
+      <line x1="3" y1="21" x2="10" y2="14"/>
+    `;
+  } else {
+    // Ghost / invisible icon (eye with slash)
+    svg.innerHTML = `
+      <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/>
+      <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/>
+      <line x1="1" y1="1" x2="23" y2="23"/>
+    `;
+  }
+}
+
+// ─── Ghost Mode Hot-Zone ───────────────────────────────────────
+// In ghost mode, the window ignores mouse events but forwards hover.
+// When hovering over the stealth button, temporarily allow clicks.
+(function initGhostHotZone() {
+  const stealthBtn = document.getElementById('stealthBtn');
+  if (!stealthBtn) return;
+
+  stealthBtn.addEventListener('mouseenter', () => {
+    if (state.stealthMode === 'ghost' && window.electronAPI?.setClickthrough) {
+      window.electronAPI.setClickthrough(false);
+    }
+  });
+
+  stealthBtn.addEventListener('mouseleave', () => {
+    if (state.stealthMode === 'ghost' && window.electronAPI?.setClickthrough) {
+      window.electronAPI.setClickthrough(true);
+    }
+  });
+})();
 
 // ─── Mic Toggle ────────────────────────────────────────────────
 function toggleMic() {
