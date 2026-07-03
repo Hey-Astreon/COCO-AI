@@ -543,6 +543,7 @@ kbd {
 
 /* Welcome Card */
 .welcome-card {
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -586,6 +587,7 @@ kbd {
 
 /* Q&A Cards */
 .qa-card {
+  flex-shrink: 0;
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
@@ -819,6 +821,7 @@ kbd {
 
 /* Transcript Entry */
 .transcript-entry {
+  flex-shrink: 0;
   display: flex;
   gap: 8px;
   align-items: flex-start;
