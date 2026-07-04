@@ -385,8 +385,8 @@ function switchTab(tabName) {
 
 // ─── Stealth Mode Cycling ──────────────────────────────────────
 // Cycles: Full → Compact → Ghost → Full
-const STEALTH_FULL_WIDTH = 360;
-const STEALTH_COMPACT_WIDTH = 300;
+const STEALTH_FULL_WIDTH = 400;
+const STEALTH_COMPACT_WIDTH = 340;
 
 function cycleStealthMode() {
   const body = document.body;

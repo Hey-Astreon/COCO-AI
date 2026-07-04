@@ -1194,8 +1194,8 @@ body.tab-transcript .panel-answers { display: none; }
 .settings-drawer {
   position: fixed;
   top: var(--toolbar-h);
-  right: -380px; /* Hidden by default */
-  width: 360px;
+  right: -400px; /* Hidden by default */
+  width: 380px;
   bottom: 0;
   background: rgba(15, 15, 25, 0.95);
   backdrop-filter: blur(28px) saturate(180%);
