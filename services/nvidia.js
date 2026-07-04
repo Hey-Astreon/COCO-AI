@@ -9,9 +9,9 @@ const NvidiaService = {
 
   ENDPOINT: 'https://integrate.api.nvidia.com/v1/chat/completions',
 
-  // Model fallback chain — minimax-m3 primary (better vision accuracy), nemotron as fallback
+  // Model fallback chain — minimaxai/minimax-m3 primary (better vision accuracy), nemotron as fallback
   MODEL_CHAIN: [
-    'minimax-ai/minimax-m3',                          // Primary: multimodal MoE, strong vision + coding
+    'minimaxai/minimax-m3',                           // Primary: multimodal MoE, strong vision + coding
     'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning',  // Fallback: omni-modal reasoning
   ],
 
