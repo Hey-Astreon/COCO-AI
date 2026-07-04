@@ -151,11 +151,10 @@ html, body {
   align-items: center;
   gap: 6px;
 }
-
-.compact-opacity .slider {
+.compact-slider {
   width: 56px;
 }
-.compact-opacity .control-value {
+.compact-value {
   font-size: 10px;
   min-width: 24px;
 }
