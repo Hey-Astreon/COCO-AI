@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await initElectronBridge();
   loadSettings();
   initDeepgram();
+  initDragAndDrop();
 });
 
 // ─── Electron Bridge ──────────────────────────────────────────
@@ -985,6 +986,8 @@ function loadSettings() {
     $('settingJd').value = state.jobDescription;
     $('settingAudioMode').value = state.audioMode;
     
+    updateResumeDropZoneState();
+    
     console.log('🥥 Local settings loaded');
   } catch (e) {
     console.error('Failed to load settings from localStorage:', e);
@@ -1042,6 +1045,8 @@ function toggleSettings() {
     $('settingResume').value = state.resume || '';
     $('settingJd').value = state.jobDescription || '';
     $('settingAudioMode').value = state.audioMode || 'interviewer';
+    
+    updateResumeDropZoneState();
     
     drawer.classList.add('open');
     overlay.style.display = 'block';
@@ -1309,4 +1314,144 @@ function exitReplayMode() {
   $('replayFileSelector').value = '';
 
   showToast('👁 Returned to Live Session', 'success');
+}
+
+// ─── Resume PDF Drag-and-Drop & Parser ─────────────────────────
+
+function initDragAndDrop() {
+  const dropZone = $('resumeDropZone');
+  const fileInput = $('resumeFileSelector');
+
+  if (!dropZone || !fileInput) return;
+
+  // Open file selector on click
+  dropZone.addEventListener('click', () => fileInput.click());
+
+  // Prevent default drag behaviors
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, preventDefaults, false);
+    document.body.addEventListener(eventName, preventDefaults, false);
+  });
+
+  // Handle hover visual states
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropZone.addEventListener(eventName, () => dropZone.classList.add('drag-over'), false);
+  });
+  ['dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, () => dropZone.classList.remove('drag-over'), false);
+  });
+
+  // Handle dropped files
+  dropZone.addEventListener('drop', (e) => {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    if (files.length > 0) {
+      processResumeFile(files[0]);
+    }
+  }, false);
+
+  // Handle file picker selection
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+      processResumeFile(e.target.files[0]);
+    }
+  });
+
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+}
+
+function processResumeFile(file) {
+  const dropZone = $('resumeDropZone');
+  if (!dropZone || !file) return;
+  const dropZoneText = dropZone.querySelector('.drop-zone-text');
+  if (!dropZoneText) return;
+
+  // Enforce PDF format only
+  if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+    dropZone.className = 'drop-zone error';
+    dropZoneText.textContent = '❌ Only PDF format is supported';
+    showToast('Failed: Resume must be a PDF file', 'error');
+    return;
+  }
+
+  // Update visual UI state to loading/parsing
+  dropZone.className = 'drop-zone';
+  dropZoneText.textContent = `⏳ Reading ${file.name}...`;
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const arrayBuffer = e.target.result;
+      const text = await parsePDF(arrayBuffer);
+      
+      if (!text || text.trim().length === 0) {
+        throw new Error('No readable text contents found in PDF');
+      }
+
+      // Populate settings textarea
+      const resumeTextArea = $('settingResume');
+      if (resumeTextArea) {
+        resumeTextArea.value = text;
+      }
+      
+      // Update drop zone success state
+      dropZone.className = 'drop-zone success';
+      const wordCount = text.split(/\s+/).filter(Boolean).length;
+      dropZoneText.textContent = `✅ Parsed: ${file.name} (${wordCount} words)`;
+      showToast('PDF resume parsed successfully!', 'success');
+
+    } catch (err) {
+      console.error(err);
+      dropZone.className = 'drop-zone error';
+      dropZoneText.textContent = `❌ Error: ${err.message}`;
+      showToast('Failed to parse PDF: ' + err.message, 'error');
+    }
+  };
+
+  reader.onerror = () => {
+    dropZone.className = 'drop-zone error';
+    dropZoneText.textContent = '❌ Failed to read file';
+    showToast('Failed to read file contents', 'error');
+  };
+
+  reader.readAsArrayBuffer(file);
+}
+
+async function parsePDF(arrayBuffer) {
+  const pdfjsLib = window['pdfjs-dist/build/pdf'];
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'services/pdf.worker.min.js';
+
+  const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+  const pdf = await loadingTask.promise;
+  let fullText = '';
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const textContent = await page.getTextContent();
+    const pageText = textContent.items.map(item => item.str).join(' ');
+    fullText += pageText + '\n';
+  }
+
+  return fullText;
+}
+
+function updateResumeDropZoneState() {
+  const dropZone = $('resumeDropZone');
+  if (!dropZone) return;
+  const dropZoneText = dropZone.querySelector('.drop-zone-text');
+  if (!dropZoneText) return;
+
+  const currentResumeText = $('settingResume') ? $('settingResume').value.trim() : state.resume;
+
+  if (currentResumeText) {
+    const wordCount = currentResumeText.split(/\s+/).filter(Boolean).length;
+    dropZone.className = 'drop-zone success';
+    dropZoneText.textContent = `✅ Active Resume Injected (${wordCount} words)`;
+  } else {
+    dropZone.className = 'drop-zone';
+    dropZoneText.textContent = 'Drag & drop PDF Resume or click to upload';
+  }
 }

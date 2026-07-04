@@ -371,7 +371,12 @@
         <h3 class="section-title">Interview Context Injection</h3>
         
         <div class="form-group">
-          <label for="settingResume">Your Resume (Plain Text)</label>
+          <label for="settingResume">Your Resume</label>
+          <div class="drop-zone" id="resumeDropZone">
+            <span class="drop-zone-icon">📄</span>
+            <span class="drop-zone-text">Drag & drop PDF Resume or click to upload</span>
+            <input type="file" id="resumeFileSelector" accept=".pdf" style="display: none" />
+          </div>
           <textarea id="settingResume" placeholder="Paste your resume contents here. CocoAI will use this to personalize answers..." class="form-textarea"></textarea>
         </div>
         
@@ -391,6 +396,7 @@
 
   <div class="toast" id="toast"></div>
 
+  <script src="services/pdf.min.js"></script>
   <script src="services/deepgram.js"></script>
   <script src="services/gemini.js"></script>
   <script src="app.js"></script>
