@@ -914,14 +914,36 @@ function endSession() {
     if (state.deepgramService) {
       state.deepgramService.stop();
     }
+    
+    // Reset state variables
     state.transcriptHistory = [];
-    showToast('Session ended. Good luck! 🍀', 'success');
-    setTimeout(() => {
-      clearAnswers();
-      if (window.electronAPI) {
-        window.electronAPI.closeApp();
-      }
-    }, 1500);
+    state.sessionTime = 0;
+    state.messageCount = 0;
+    state.lastAnswer = '';
+    
+    // Reset UI feeds
+    clearAnswers();
+    if (els.transcriptFeed) {
+      els.transcriptFeed.innerHTML = `
+        <div class="welcome-card">
+          <div class="welcome-icon">🎙️</div>
+          <div class="welcome-text">
+            <strong>Transcript is empty</strong>
+            <p>Transcript will appear here in real time as audio is detected.</p>
+          </div>
+        </div>
+      `;
+    }
+
+    // Reset status elements
+    updateStatus('idle', 'Ready');
+    if (els.micBtn) {
+      els.micBtn.classList.remove('active');
+      state.micActive = false;
+    }
+    document.querySelectorAll('.wave-bar').forEach(b => b.style.animationPlayState = 'paused');
+
+    showToast('Interview session ended & cleared! 🍀', 'success');
   }
 }
 
