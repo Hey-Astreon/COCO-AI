@@ -101,7 +101,6 @@ html, body {
   padding: 0 8px;
   gap: 6px;
   z-index: 1000;
-  drag: none;
   -webkit-app-region: drag;
 }
 
