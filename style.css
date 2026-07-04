@@ -151,6 +151,14 @@ html, body {
   align-items: center;
   gap: 6px;
 }
+
+.compact-opacity .slider {
+  width: 56px;
+}
+.compact-opacity .control-value {
+  font-size: 10px;
+  min-width: 24px;
+}
 .control-icon {
   font-size: 13px;
   color: var(--text-muted);
