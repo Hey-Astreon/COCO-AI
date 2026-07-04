@@ -13,7 +13,7 @@ const state = {
   autoScroll: true,
   lastAnswer: '',
   currentModel: 'llama-3.3-70b',
-  apiKeys: { cerebras: '', deepgram: '', gemini: '' },
+  apiKeys: { cerebras: '', deepgram: '', gemini: '', nvidia: '' },
   resume: '',
   jobDescription: '',
   activeTab: 'answers',           // 'answers' | 'transcript',
@@ -680,31 +680,47 @@ function handleAIError({ requestId, error }) {
 
 // ─── Format AI Answer (simple markdown) ────────────────────────
 function formatAnswer(text) {
-  let html = escHtml(text);
+  // Extract ALL code fences first, before any markdown regex runs.
+  // This prevents print("****") from having its stars eaten by the bold regex.
+  var stash = [];
+  var html = escHtml(text);
 
-  // Bold: **text**
-  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-  // Code inline: `text`
-  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-
-  // Code blocks: ```...```
-  html = html.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => {
-    return `<pre class="code-block"><code>${code.trim()}</code></pre>`;
+  // 1a. Triple-backtick fenced blocks: ```lang\n...\n```
+  html = html.replace(/```(\w*)\n?([\s\S]*?)```/g, function(_m, _lang, code) {
+    var idx = stash.length;
+    stash.push('<pre class="code-block"><code>' + code.trim() + '</code></pre>');
+    return '\x00B' + idx + '\x00';
   });
 
-  // Bullet points: - or *
+  // 1b. Double-backtick blocks: ``lang\n...\n`` (some models output these)
+  html = html.replace(/``(\w*)\n?([\s\S]*?)``/g, function(_m, _lang, code) {
+    var idx = stash.length;
+    stash.push('<pre class="code-block"><code>' + code.trim() + '</code></pre>');
+    return '\x00B' + idx + '\x00';
+  });
+
+  // 1c. Inline code: `text`
+  html = html.replace(/`([^`]+)`/g, function(_m, code) {
+    var idx = stash.length;
+    stash.push('<code>' + code + '</code>');
+    return '\x00B' + idx + '\x00';
+  });
+
+  // 2. Apply markdown on remaining (non-code) text.
+  // Use .+? (one-or-more) not .*? (zero-or-more) to avoid matching empty ** **
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
   html = html.replace(/^[\-\*] (.+)$/gm, '<li>$1</li>');
-  html = html.replace(/(<li>.*<\/li>\n?)+/gs, (match) => `<ul>${match}</ul>`);
-
-  // Numbered lists: 1. 2. etc
+  html = html.replace(/(<li>.*<\/li>\n?)+/gs, function(m) { return '<ul>' + m + '</ul>'; });
   html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
-
-  // Line breaks
   html = html.replace(/\n\n/g, '</p><p>');
   html = html.replace(/\n/g, '<br>');
 
-  return `<p>${html}</p>`;
+  // 3. Restore all protected code blocks.
+  stash.forEach(function(block, idx) {
+    html = html.split('\x00B' + idx + '\x00').join(block);
+  });
+
+  return '<p>' + html + '</p>';
 }
 
 // ─── Stream text character by character (demo mode) ────────────
@@ -783,7 +799,7 @@ async function analyzeScreen() {
         <div class="thinking-dots">
           <span></span><span></span><span></span>
         </div>
-        <span class="thinking-text">Capturing screen and analyzing with Gemini...</span>
+        <span class="thinking-text">Capturing screen and analyzing...</span>
       </div>
     </div>
     <div class="qa-footer">
@@ -803,55 +819,111 @@ async function analyzeScreen() {
 
   try {
     let imgDataUrl = '';
-    
+
     if (window.electronAPI && window.electronAPI.captureScreen) {
-      // Capture the real screen!
       imgDataUrl = await window.electronAPI.captureScreen();
     } else {
-      // Browser demo mode fallback — mock a captured screen
       console.log('🥥 Browser mode: mocking screenshot');
       await sleep(1000);
-      imgDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='; // 1x1 transparent pixel
+      imgDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
     }
 
+    const prompt = `You are a world-class software engineer and competitive programmer assisting a candidate during a live technical interview. Analyze the screenshot carefully.
+
+Determine if the screenshot shows a CODING PROBLEM (requires writing a program) or a CONCEPTUAL/MCQ PROBLEM (multiple-choice questions, quizzes, or text questions).
+
+─── IF IT IS A CODING PROBLEM ───
+Follow these exact steps:
+
+STEP 1 — READ THE PROBLEM:
+Identify the title, description, input/output formats, constraints, and all sample cases.
+
+STEP 2 — IDENTIFY THE TASK:
+State in one sentence what the program must do.
+
+STEP 3 — WRITE THE SOLUTION:
+Provide a single, complete, correct, runnable code solution using the language shown in the editor (default to Python if unclear).
+- Match the expected output EXACTLY (character by character, line by line).
+- Do NOT write placeholder code. Write REAL working code.
+- Add brief inline comments on key lines.
+
+STEP 4 — EXPLAIN:
+In 2-3 sentences, explain your approach, time complexity (O(?)), and space complexity (O(?)).
+
+─── IF IT IS A CONCEPTUAL/MCQ PROBLEM ───
+Follow these exact steps:
+
+STEP 1 — READ THE QUIZ:
+Identify the question and all visible options (A, B, C, D or listed choices).
+
+STEP 2 — STATE THE CORRECT ANSWER:
+State clearly and bold which option is correct (e.g. **Option 3: print(Hello World)**).
+
+STEP 3 — EXPLAIN WHY:
+In 2-3 sentences, explain why the chosen option is correct or incorrect based on syntax, logic, or language rules. Keep it clear, direct, and helpful. Do not output any code blocks unless asked.
+
+─── STRICT RULES FOR ALL ANSWERS ───
+- Never write out internal debates, monologues, or "let me think" style text. Output ONLY the clean final steps.
+- Write code/answer ONCE. Do NOT repeat or add a "Final Solution Code" summary at the end.`;
+    let fullText = '';
+
+    const onChunk = (chunk) => {
+      if (!fullText) answerEl.innerHTML = '';
+      fullText += chunk;
+      answerEl.innerHTML = formatAnswer(fullText) + '<span class="cursor-blink"></span>';
+      if (state.autoScroll) els.answersFeed.scrollTop = els.answersFeed.scrollHeight;
+    };
+
+    const onStatus = (msg) => {
+      const thinkingText = answerEl.querySelector('.thinking-text');
+      if (thinkingText) thinkingText.textContent = msg;
+      showToast(msg, 'warning');
+    };
+
+    // ── Primary: NVIDIA NIM (nemotron-3-nano-omni → minimax-m3) ──
+    if (state.apiKeys.nvidia) {
+      answerEl.innerHTML = `
+        <div class="thinking-dots"><span></span><span></span><span></span></div>
+        <span class="thinking-text">🟢 NVIDIA is solving the problem...</span>
+      `;
+      try {
+        const analysis = await window.NvidiaService.analyzeImage(
+          state.apiKeys.nvidia,
+          imgDataUrl,
+          prompt,
+          onChunk,
+          onStatus
+        );
+        answerEl.innerHTML = formatAnswer(analysis || fullText);
+        state.lastAnswer = analysis || fullText;
+        showToast('✅ Analyzed via NVIDIA NIM!', 'success');
+        return;
+      } catch (nvidiaErr) {
+        console.warn('⚠️ NVIDIA failed, falling back to Gemini:', nvidiaErr.message);
+        showToast('⚠️ NVIDIA failed — trying Gemini...', 'warning');
+        fullText = '';
+      }
+    }
+
+    // ── Fallback: Gemini Vision ──
     if (!state.apiKeys.gemini) {
-      throw new Error('Gemini API key is not configured. Add it in the settings panel.');
+      throw new Error('No API key available. Set NVIDIA or Gemini key in Settings.');
     }
-
     answerEl.innerHTML = `
-      <div class="thinking-dots">
-        <span></span><span></span><span></span>
-      </div>
+      <div class="thinking-dots"><span></span><span></span><span></span></div>
       <span class="thinking-text">Gemini is solving the problem...</span>
     `;
-    
-    // Call the real Gemini Vision API with live status updates!
-    const prompt = "Please analyze the code, question, error, or diagram in this screenshot. Provide a clear, structured step-by-step solution, complete corrected code blocks, and time/space complexity analysis where applicable.";
-    let fullText = '';
     const analysis = await window.GeminiService.analyzeImage(
       state.apiKeys.gemini,
       imgDataUrl,
       prompt,
-      (chunk) => {
-        // Clear the thinking dots indicator on the first chunk
-        if (!fullText) {
-          answerEl.innerHTML = '';
-        }
-        fullText += chunk;
-        answerEl.innerHTML = formatAnswer(fullText) + '<span class="cursor-blink"></span>';
-        if (state.autoScroll) els.answersFeed.scrollTop = els.answersFeed.scrollHeight;
-      },
-      (statusMsg) => {
-        // Live update the thinking text when retrying/falling back
-        const thinkingText = answerEl.querySelector('.thinking-text');
-        if (thinkingText) thinkingText.textContent = statusMsg;
-        showToast(statusMsg, 'warning');
-      }
+      onChunk,
+      onStatus
     );
-    
     answerEl.innerHTML = formatAnswer(analysis || fullText);
     state.lastAnswer = analysis || fullText;
     showToast('✅ Problem analyzed successfully!', 'success');
+
   } catch (err) {
     console.error('Screen analysis failed:', err);
     answerEl.innerHTML = `

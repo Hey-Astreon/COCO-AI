@@ -154,14 +154,15 @@ ipcMain.handle('get-api-keys', () => {
   return {
     cerebras: process.env.CEREBRAS_API_KEY || '',
     deepgram: process.env.DEEPGRAM_API_KEY || '',
-    gemini: process.env.GEMINI_API_KEY || '',
+    gemini:   process.env.GEMINI_API_KEY   || '',
+    nvidia:   process.env.BUILD_NVIDIA_API_KEY || '',
   };
 });
 
 ipcMain.handle('capture-screen', async () => {
   const sources = await desktopCapturer.getSources({
     types: ['screen'],
-    thumbnailSize: { width: 1280, height: 720 } // Speed up screenshot capture with 720p resolution
+    thumbnailSize: { width: 1920, height: 1080 } // 1080p for sharper text recognition by vision models
   });
   
   if (sources.length > 0) {
