@@ -16,6 +16,7 @@ const state = {
   apiKeys: { cerebras: '', deepgram: '', gemini: '' },
   resume: '',
   jobDescription: '',
+  activeTab: 'answers',           // 'answers' | 'transcript',
   audioMode: 'interviewer', // 'interviewer' | 'both' | 'candidate'
   transcriptHistory: [],  // { role, text } for AI context
   deepgramService: null,
@@ -126,6 +127,12 @@ function initDeepgram() {
     if (isFinal) {
       // Final result — add to transcript feed
       addTranscriptEntry(speaker, text);
+
+      // Notify badge if user is on answers tab
+      if (state.activeTab !== 'transcript') {
+        const badge = $('badgeTranscript');
+        if (badge) badge.classList.add('visible');
+      }
 
       // Store in history for AI context
       state.transcriptHistory.push({ role: speaker, text });
@@ -352,9 +359,33 @@ function toggleVisibility() {
   showToast(isVisible ? '👁 Overlay visible' : '🙈 Overlay hidden', 'success');
 }
 
+// ─── Tab Switching ─────────────────────────────────────────────
+function switchTab(tabName) {
+  state.activeTab = tabName;
+
+  // Update body class
+  document.body.classList.remove('tab-answers', 'tab-transcript');
+  document.body.classList.add(`tab-${tabName}`);
+
+  // Update active button styles
+  const btnAnswers = $('tabBtnAnswers');
+  const btnTranscript = $('tabBtnTranscript');
+  if (btnAnswers) btnAnswers.classList.toggle('active', tabName === 'answers');
+  if (btnTranscript) btnTranscript.classList.toggle('active', tabName === 'transcript');
+
+  // Clear the notification badge for this tab
+  const badge = tabName === 'answers' ? $('badgeAnswers') : $('badgeTranscript');
+  if (badge) badge.classList.remove('visible');
+
+  // Auto-scroll if switching to transcript
+  if (tabName === 'transcript' && state.autoScroll) {
+    setTimeout(() => scrollToBottom(els.transcriptFeed), 50);
+  }
+}
+
 // ─── Stealth Mode Cycling ──────────────────────────────────────
 // Cycles: Full → Compact → Ghost → Full
-const STEALTH_FULL_WIDTH = 520;
+const STEALTH_FULL_WIDTH = 360;
 const STEALTH_COMPACT_WIDTH = 300;
 
 function cycleStealthMode() {
@@ -530,6 +561,12 @@ async function addQACard(question) {
   state.messageCount++;
   const requestId = `req-${state.messageCount}-${Date.now()}`;
   const timestamp = getTimestamp();
+
+  // Notify badge if user is on transcript tab
+  if (state.activeTab !== 'answers') {
+    const badge = $('badgeAnswers');
+    if (badge) badge.classList.add('visible');
+  }
 
   // Remove welcome card if present
   const welcome = els.answersFeed.querySelector('.welcome-card');

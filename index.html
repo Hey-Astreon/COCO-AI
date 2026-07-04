@@ -9,9 +9,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
+<body class="tab-answers">
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <!--  TOP TOOLBAR                                               -->
+  <!--  TOP TOOLBAR (compact — icon-only)                         -->
   <!-- ═══════════════════════════════════════════════════════════ -->
   <div class="toolbar" id="toolbar">
     <div class="toolbar-left">
@@ -19,64 +19,25 @@
         <span class="logo-icon">🥥</span>
         <span class="logo-text">CocoAI</span>
       </div>
-
-      <div class="toolbar-divider"></div>
-
-      <!-- Opacity Slider -->
-      <div class="control-group" title="Overlay Opacity">
-        <span class="control-icon">☀</span>
-        <input type="range" min="35" max="100" value="85" class="slider" id="opacitySlider" />
-        <span class="control-value" id="opacityValue">85%</span>
-      </div>
-    </div>
-
-    <div class="toolbar-center">
-      <div class="hotkey-hint">
-        <span class="hotkey-label">Show/Hide</span>
-        <kbd>Ctrl</kbd><span>+</span><kbd>Shift</kbd><span>+</span><kbd>H</kbd>
-      </div>
-      <div class="toolbar-divider"></div>
-      <div class="hotkey-hint">
-        <span class="hotkey-label">Move</span>
-        <kbd>Alt</kbd><span>+</span><kbd>← →</kbd>
-      </div>
-      <div class="toolbar-divider"></div>
-      <div class="hotkey-hint">
-        <span class="hotkey-label">Analyze</span>
-        <kbd>Ctrl</kbd><span>+</span><kbd>Shift</kbd><span>+</span><kbd>A</kbd>
-      </div>
-      <div class="toolbar-divider"></div>
-      <div class="hotkey-hint panic-hint">
-        <span class="hotkey-label">Panic</span>
-        <kbd>Ctrl</kbd><span>+</span><kbd>Shift</kbd><span>+</span><kbd>P</kbd>
+      <!-- Status Indicator (moved here from right) -->
+      <div class="status-badge" id="statusBadge">
+        <span class="status-dot idle"></span>
+        <span class="status-text" id="statusText">Ready</span>
       </div>
     </div>
 
     <div class="toolbar-right">
-      <!-- Status Indicator -->
-      <div class="status-badge" id="statusBadge">
-        <span class="status-dot idle"></span>
-        <span class="status-text" id="statusText">Initializing...</span>
-      </div>
-
-      <!-- Model Selector -->
-      <select class="model-select" id="modelSelect">
-        <option value="llama-3.3-70b">⚡ Llama 3.3 70B</option>
-        <option value="llama-3.1-8b">🚀 Llama 3.1 8B (Fast)</option>
-        <option value="qwen-3-32b">🧠 Qwen 3 32B</option>
-      </select>
-
-      <!-- Analyze Button -->
-      <button class="btn btn-analyze" id="analyzeBtn" onclick="analyzeScreen()">
+      <!-- Analyze Button (icon-only) -->
+      <button class="btn btn-icon-only btn-analyze" id="analyzeBtn" onclick="analyzeScreen()" title="Analyze Screen (Ctrl+Shift+A)">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <rect x="3" y="3" width="18" height="18" rx="2"/>
-          <path d="M9 9l6 6M15 9l-6 6"/>
+          <rect x="2" y="3" width="20" height="14" rx="2"/>
+          <path d="M8 21h8M12 17v4"/>
+          <path d="M9 9l2 2 4-4"/>
         </svg>
-        Analyze Screen
       </button>
 
-      <!-- Mic Toggle -->
-      <button class="btn btn-mic" id="micBtn" onclick="toggleMic()">
+      <!-- Mic Toggle (icon-only) -->
+      <button class="btn btn-icon-only btn-mic" id="micBtn" onclick="toggleMic()" title="Toggle Mic">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" id="micIcon">
           <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
           <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
@@ -85,16 +46,16 @@
         </svg>
       </button>
 
-      <!-- End Session Button -->
-      <button class="btn btn-end" onclick="endSession()">
+      <!-- End Session Button (icon-only) -->
+      <button class="btn btn-icon-only btn-end" onclick="endSession()" title="End Session">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <rect x="3" y="3" width="18" height="18" rx="2" fill="currentColor" opacity="0.4"/>
           <rect x="3" y="3" width="18" height="18" rx="2"/>
         </svg>
-        End
       </button>
 
       <!-- Settings Button -->
-      <button class="btn btn-settings" id="settingsBtn" onclick="toggleSettings()" title="Settings">
+      <button class="btn btn-icon-only btn-settings" id="settingsBtn" onclick="toggleSettings()" title="Settings">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <circle cx="12" cy="12" r="3"/>
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -102,12 +63,11 @@
       </button>
 
       <!-- Stealth Mode Toggle -->
-      <button class="btn btn-stealth" id="stealthBtn" onclick="cycleStealthMode()" title="Stealth Mode (Ctrl+Shift+G)">
+      <button class="btn btn-icon-only btn-stealth" id="stealthBtn" onclick="cycleStealthMode()" title="Cycle Stealth (Ctrl+Shift+G)">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" id="stealthIcon">
           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
           <circle cx="12" cy="12" r="3"/>
         </svg>
-        <span class="stealth-label" id="stealthLabel">Full</span>
       </button>
 
       <div class="toolbar-divider"></div>
@@ -118,6 +78,29 @@
         <button class="win-btn win-close" onclick="closeWindow()" title="Close">×</button>
       </div>
     </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!--  TAB BAR                                                    -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="tab-bar" id="tabBar">
+    <button class="tab-btn active" id="tabBtnAnswers" onclick="switchTab('answers')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
+      </svg>
+      AI Answers
+      <span class="tab-badge" id="badgeAnswers"></span>
+    </button>
+    <button class="tab-btn" id="tabBtnTranscript" onclick="switchTab('transcript')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        <line x1="12" y1="19" x2="12" y2="23"/>
+        <line x1="8" y1="23" x2="16" y2="23"/>
+      </svg>
+      Live Transcript
+      <span class="tab-badge" id="badgeTranscript"></span>
+    </button>
   </div>
 
   <!-- Replay Mode Banner -->
@@ -305,6 +288,29 @@
     </div>
     
     <div class="drawer-body">
+      <!-- Appearance Settings Section -->
+      <div class="settings-section">
+        <h3 class="section-title">Appearance & Model</h3>
+        
+        <div class="form-group">
+          <label for="settingOpacity">Overlay Opacity</label>
+          <div class="opacity-row">
+            <input type="range" min="35" max="100" value="85" class="slider" id="opacitySlider" />
+            <span class="control-value" id="opacityValue">85%</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="modelSelect">AI Model</label>
+          <select class="form-select" id="modelSelect">
+            <option value="llama-3.3-70b">⚡ Llama 3.3 70B</option>
+            <option value="llama-3.1-8b">🚀 Llama 3.1 8B (Fast)</option>
+            <option value="qwen-3-32b">🧠 Qwen 3 32B</option>
+          </select>
+          <span class="input-tip">Select the Cerebras model for AI answer generation.</span>
+        </div>
+      </div>
+
       <!-- API Keys Section -->
       <div class="settings-section">
         <h3 class="section-title">API Key Configuration</h3>
