@@ -27,33 +27,39 @@
 | 🎙 Live Transcript | Real-time speech-to-text with animated waveform |
 | ⚡ AI Answers | Streaming character-by-character responses |
 | 🛡 Stealth Mode | Invisible to Zoom, Teams, Google Meet |
-| 🔥 Model Selector | Switch between Gemini, GPT-4o, Claude, Local |
+| 🔥 Model Selector | Switch between Gemini, Llama 3.3, Qwen |
 
 ---
 
 ## ✨ Features
 
-### 🔥 Core Features (v1.0)
-- **⚡ Streaming AI Answers** — Character-by-character response like ChatGPT, sub-500ms perceived latency
-- **🎙 Live Audio Transcript** — Real-time speech transcription with animated waveform visualizer
-- **🛡 Screen-Share Invisible** — Overlay excluded from all screen capture (Win32 `WDA_EXCLUDEFROMCAPTURE`)
-- **📸 Screen Analyze** — Capture & analyze coding problems from screen with `Ctrl+Shift+A`
-- **🧠 Context-Aware** — Personalized answers using your resume + job description + live conversation
-- **🔄 Model Agnostic** — Switch between Gemini Flash, GPT-4o, Claude Sonnet, or Local (Ollama)
+### 🔥 Core Features (v1.0 & v1.5)
+- **⚡ Streaming AI Answers** — Character-by-character response like ChatGPT, sub-200ms perceived latency using Cerebras Llama-3.3.
+- **🎙 Live Audio Transcript** — Real-time speech transcription using Deepgram with animated waveform visualizer.
+- **🛡 Screen-Share Invisible** — Electron-level exclusion from all screen capture (Win32 API `setContentProtection(true)`).
+- **📸 Screen Analyze** — Capture & analyze coding problems from screen with `Ctrl+Shift+A` (powered by Gemini 2.5 Flash).
+- **🧠 Context-Aware** — Personalized answers using your resume + job description + live conversation.
+- **📂 Resume PDF Uploader** — Local drag-and-drop PDF parsing using client-side PDF.js (completely offline & secure).
+- **🔄 Model Agnostic** — Switch between Llama 3.3 70B, Llama 3.1 8B, and Qwen 3 32B dynamically.
+- **💾 Replays & History** — Export interview sessions to JSON and reload them inside a dedicated session player to replay transcripts and answers.
 
 ### 🎨 UI/UX Highlights
-- Dark **glassmorphism** design with Electric Violet (`#6C63FF`) + Teal (`#00D4AA`) accents
-- **Animated waveform** visualizer showing live audio capture
-- **Per-card actions**: Copy, Retry, 👍 Thumbs Up
-- **⚡ Answer badges** on each transcript entry — click to instantly generate answer
-- Auto-scrolling transcript with toggle
-- Toast notifications for all actions
+- Dark **glassmorphism** design with Electric Violet (`#6C63FF`) + Teal (`#00D4AA`) accents.
+- **Tabs Interface** — Tabbed navigation below toolbar between AI Answers and Live Transcript for compact floating.
+- **Tab Notification Badges** — Violet/Teal glowing badge indicators notifying you of new content on the inactive tab.
+- **Animated waveform** visualizer showing live audio capture.
+- **Per-card actions**: Copy, Retry, 👍 Thumbs Up.
+- **⚡ Answer badges** on each transcript entry — click to instantly generate answer.
+- Auto-scrolling feeds with toggle.
+- Toast notifications for all actions.
 
 ### ⌨️ Keyboard Shortcuts
 | Shortcut | Action |
 |---|---|
 | `Ctrl + Shift + H` | Hide / Show overlay instantly |
 | `Ctrl + Shift + A` | Capture & analyze screen |
+| `Ctrl + Shift + G` | Cycle Stealth (Full -> Compact -> Ghost) |
+| `Ctrl + Shift + P` | Panic (instantly clear and safe-state) |
 | `Enter` | Submit question from Ask bar |
 | `Escape` | Focus Ask input |
 | `Alt + ← →` | Move overlay position |
@@ -62,30 +68,18 @@
 
 ## 🚀 Getting Started
 
-### Option 1 — Direct Browser (Preview)
+### Run the Electron Application (Recommended)
 ```bash
 # Clone the repo
 git clone https://github.com/Hey-Astreon/COCO-AI.git
 cd COCO-AI
 
-# Open directly in browser
-# Windows:
-start index.html
+# Install dependencies
+npm install
 
-# macOS:
-open index.html
+# Start the application
+npm start
 ```
-
-### Option 2 — Local Dev Server (Recommended)
-```bash
-# If you have Node.js installed
-npx serve .
-
-# Or use Python
-python -m http.server 8080
-```
-
-Then open `http://localhost:8080` in your browser.
 
 ---
 
@@ -93,9 +87,17 @@ Then open `http://localhost:8080` in your browser.
 
 ```
 COCO-AI/
+├── main.js             # Electron main process (protection layers, window, screenshot capture)
+├── preload.js          # Secure bridge interface
 ├── index.html          # Main overlay UI structure
 ├── style.css           # Premium dark glassmorphism styles
-├── app.js              # AI logic, streaming, hotkeys, transcript
+├── app.js              # UI controller, uploader, tabs, state management
+├── services/
+│   ├── deepgram.js     # Audio loopback and Deepgram WebSocket transcriber
+│   ├── cerebras.js     # Cerebras ultra-fast Llama answer generator
+│   ├── gemini.js       # Google Gemini Vision screen analyzer
+│   ├── pdf.min.js      # Client-side PDF reader
+│   └── pdf.worker.min.js # PDF.js background worker
 └── README.md           # You are here
 ```
 
@@ -104,27 +106,29 @@ COCO-AI/
 ## 🏗 Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                    TOOLBAR                          │
-│  🥥 CocoAI | Shortcuts | Status | Model | Analyze  │
-├──────────────────────────┬──────────────────────────┤
-│                          │                          │
-│    ⚡ AI ANSWERS PANEL   │  🎙 LIVE TRANSCRIPT      │
-│                          │                          │
-│  ┌──────────────────┐    │  ~~~~waveform~~~~        │
-│  │ Ask Input + Btn  │    │                          │
-│  └──────────────────┘    │  [Interviewer] [Answer]  │
-│                          │  Question text here...   │
-│  Q: Question text        │                          │
-│  ─────────────────       │  [You]                   │
-│  ⚡ Answer               │  Your response...        │
-│  • Bullet point 1        │                          │
-│  • Bullet point 2        │  [Interviewer] [Answer]  │
-│  • code snippet          │  Next question...        │
-│                          │                          │
-│  [Copy] [↻ Retry] [👍]  │                          │
-│                          │                          │
-└──────────────────────────┴──────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│                               TOOLBAR                                  │
+│  🥥 CocoAI  |  ☀ ─── 85%  |  [+]  |  🎙  |  ⏹  |  ⚙  |  👁  |  ─  ×     │
+├────────────────────────────────────────────────────────────────────────┤
+│                     ⚡ AI Answers   |   🎙 Live Transcript            │
+├────────────────────────────────────────────────────────────────────────┤
+│                                                                        │
+│    ⚡ AI ANSWERS PANEL                 🎙 LIVE TRANSCRIPT              │
+│                                                                        │
+│  ┌────────────────────────┐          ~~~~waveform~~~~                  │
+│  │ Ask Input + Ask Button │                                            │
+│  └────────────────────────┘          [Interviewer] [Answer]            │
+│                                      Question text here...             │
+│  Q: Question text                                                      │
+│  ─────────────────────────           [You]                             │
+│  ⚡ Answer                            Your response...                  │
+│  • Bullet point 1                                                      │
+│  • Bullet point 2                    [Interviewer] [Answer]            │
+│  • code snippet                      Next question...                  │
+│                                                                        │
+│  [Copy] [↻ Retry] [👍]                                                │
+│                                                                        │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -133,29 +137,25 @@ COCO-AI/
 
 | Layer | Method | Protection Against |
 |---|---|---|
-| **Visual** | Win32 `SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE)` | Zoom, Teams, Meet screen share |
-| **Network** | Local Ollama processing (no outbound API calls) | Corporate firewalls, network monitoring |
-| **Audio** | System audio loopback (WASAPI) | No virtual mic injection |
-| **Process** | No browser extension injection | Extension detection |
+| **Visual** | Electron `setContentProtection(true)` | Zoom, Teams, Meet screen share, OS-level screen captures |
+| **Network** | BYOK (Direct client-to-API calls) | Corporate firewalls, corporate network monitoring |
+| **Audio** | System audio loopback (WASAPI) | No virtual mic injection, records loopback audio directly |
+| **Process** | Native Electron app | Browser extension injection detectors |
 
 ---
 
 ## 🗺 Roadmap
 
-### v1.0 — Current (UI Preview)
+### v1.0 & v1.5 — Desktop App (Electron)
 - [x] Glassmorphism overlay UI
-- [x] Streaming AI responses
-- [x] Live transcript panel
+- [x] Streaming AI responses (Cerebras)
+- [x] Live transcript panel & WASAPI audio loopback
 - [x] Animated waveform visualizer
-- [x] Hotkey system
-- [x] Model selector
-
-### v1.5 — Desktop App (Electron/Tauri)
-- [ ] Real screen capture exclusion (Win32 API)
-- [ ] Real audio loopback (WASAPI/CoreAudio)
-- [ ] Whisper.cpp local transcription
-- [ ] Ollama local AI integration
-- [ ] Resume + JD upload & parsing
+- [x] Hotkey system (Hide, Capture, Stealth)
+- [x] Real screen capture exclusion (setContentProtection)
+- [x] Resume + JD upload & client-side PDF parsing
+- [x] Replay & session history export/import
+- [x] Responsive layout (Full 850px side-by-side / Compact 580px tabs)
 
 ### v2.0 — Full Product
 - [ ] Cross-device Phone Mode (bypass all detection)
@@ -168,8 +168,6 @@ COCO-AI/
 ---
 
 ## 🤝 Contributing
-
-Contributions are welcome! Please:
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
