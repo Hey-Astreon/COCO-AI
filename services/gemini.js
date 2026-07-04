@@ -6,11 +6,10 @@
 
 const GeminiService = {
   // Model fallback chain — if one model is rate-limited, try the next
-  // Putting gemini-2.0-flash-lite first as it is the fastest and least prone to limits.
   MODEL_CHAIN: [
-    'gemini-2.0-flash-lite',
-    'gemini-2.0-flash',
     'gemini-2.5-flash',
+    'gemini-2.5-pro',
+    'gemini-1.5-flash',
   ],
 
   MAX_RETRIES: 3,
