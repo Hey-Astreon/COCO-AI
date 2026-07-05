@@ -854,17 +854,18 @@ In 2-3 sentences, explain your approach, time complexity (O(?)), and space compl
 Follow these exact steps:
 
 STEP 1 — READ THE QUIZ:
-Identify the question and all visible options (A, B, C, D or listed choices).
+Identify the question and all visible options. Pay extreme attention to the exact characters, casing, newlines, and subtle spacing (like leading or trailing spaces) in the choices.
 
 STEP 2 — STATE THE CORRECT ANSWER:
-State clearly and bold which option is correct (e.g. **Option 3: print(Hello World)**).
+State clearly and bold which option is correct. If the correct code output contains a space (e.g. " World!") but the choices do not match that space exactly, select **None of the above** if available.
 
 STEP 3 — EXPLAIN WHY:
-In 2-3 sentences, explain why the chosen option is correct or incorrect based on syntax, logic, or language rules. Keep it clear, direct, and helpful. Do not output any code blocks unless asked.
+Explain why the chosen option is correct or incorrect based on syntax, spacing, logic, or language rules. Be very explicit about any subtle spaces or syntax details. Do not output any code blocks.
 
 ─── STRICT RULES FOR ALL ANSWERS ───
 - Never write out internal debates, monologues, or "let me think" style text. Output ONLY the clean final steps.
-- Write code/answer ONCE. Do NOT repeat or add a "Final Solution Code" summary at the end.`;
+- Write code/answer ONCE. Do NOT repeat or add a "Final Solution Code" summary at the end.
+- Double-check your final answer for formatting and alignment before outputting.`;
     let fullText = '';
 
     const onChunk = (chunk) => {
