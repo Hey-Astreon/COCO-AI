@@ -945,7 +945,7 @@ Explain why the chosen option is correct or incorrect based on syntax, spacing, 
 // ─── Button Actions ────────────────────────────────────────────
 function copyAnswer(btn) {
   const card = btn.closest('.qa-card');
-  const text = card.querySelector('.qa-a-text').innerText;
+  const text = card.querySelector('.qa-a-text').textContent;
   navigator.clipboard.writeText(text).then(() => {
     showToast('📋 Answer copied!', 'success');
     btn.textContent = '✓ Copied';

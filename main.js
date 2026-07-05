@@ -169,11 +169,17 @@ ipcMain.handle('capture-screen', async () => {
     types: ['screen'],
     thumbnailSize: { width: 1920, height: 1080 } // 1080p for sharper text recognition by vision models
   });
-  
-  if (sources.length > 0) {
-    return sources[0].thumbnail.toDataURL();
-  }
-  throw new Error('No screen sources found');
+
+  if (sources.length === 0) throw new Error('No screen sources found');
+
+  // On multi-monitor setups, match the source to the primary display
+  // to avoid capturing the wrong (background/secondary) screen
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const primarySource =
+    sources.find(s => String(s.display_id) === String(primaryDisplay.id)) ||
+    sources[0]; // fallback to first source on single-monitor setups
+
+  return primarySource.thumbnail.toDataURL();
 });
 
 ipcMain.handle('get-system-audio-source-id', async () => {
