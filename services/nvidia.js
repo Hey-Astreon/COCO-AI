@@ -11,7 +11,7 @@ const NvidiaService = {
 
   // Model fallback chain
   MODEL_CHAIN: [
-    'meta/llama-3.2-90b-vision-instruct',            // Primary: 90B state-of-the-art vision and reasoning
+    'meta/llama-3.2-11b-vision-instruct',            // Primary: 11B high-speed vision model (instant TTFT)
     'minimaxai/minimax-m3',                           // Fallback 1: High-speed MoE vision model
     'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning',  // Fallback 2: Omni-modal reasoning
   ],
