@@ -1,8 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════════
    CocoAI — NVIDIA NIM Vision Service
    Multimodal image analysis via NVIDIA Integrate API (OpenAI-compatible)
-   Primary model:  nvidia/nemotron-3-nano-omni-30b-a3b-reasoning
-   Fallback model: minimax-ai/minimax-m3
+   Primary model:  minimaxai/minimax-m3 (High-speed MoE, best accuracy)
+   Fallback 1:     meta/llama-3.2-11b-vision-instruct
+   Fallback 2:     nvidia/nemotron-3-nano-omni-30b-a3b-reasoning
    ═══════════════════════════════════════════════════════════════════ */
 
 const NvidiaService = {
@@ -87,11 +88,6 @@ const NvidiaService = {
             },
             body
           });
-
-          if (onStatus) {
-            const friendlyName = model.split('/')[1] || model;
-            onStatus(`🧠 Processing image tokens on ${friendlyName}...`);
-          }
 
           const response = await fetchPromise;
 

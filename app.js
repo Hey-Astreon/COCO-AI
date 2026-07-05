@@ -312,8 +312,10 @@ function scrollToBottom(el) {
 }
 
 // ─── Session Timer ─────────────────────────────────────────────
+let sessionTimerId = null;
 function startSessionTimer() {
-  setInterval(() => { state.sessionTime++; }, 1000);
+  if (sessionTimerId) clearInterval(sessionTimerId);
+  sessionTimerId = setInterval(() => { state.sessionTime++; }, 1000);
 }
 
 function getTimestamp() {
@@ -709,9 +711,12 @@ function formatAnswer(text) {
   // 2. Apply markdown on remaining (non-code) text.
   // Use .+? (one-or-more) not .*? (zero-or-more) to avoid matching empty ** **
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  html = html.replace(/^[\-\*] (.+)$/gm, '<li>$1</li>');
-  html = html.replace(/(<li>.*<\/li>\n?)+/gs, function(m) { return '<ul>' + m + '</ul>'; });
-  html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+  // Generate list items with distinct class markers BEFORE wrapping
+  html = html.replace(/^[\-\*] (.+)$/gm, '<li class="ul-item">$1</li>');
+  html = html.replace(/^\d+\. (.+)$/gm, '<li class="ol-item">$1</li>');
+  // Wrap each group separately so numbered lists go into <ol>, not <ul>
+  html = html.replace(/(<li class="ul-item">.*?<\/li>\n?)+/gs, m => '<ul>' + m + '</ul>');
+  html = html.replace(/(<li class="ol-item">.*?<\/li>\n?)+/gs, m => '<ol>' + m + '</ol>');
   html = html.replace(/\n\n/g, '</p><p>');
   html = html.replace(/\n/g, '<br>');
 
@@ -993,6 +998,8 @@ function endSession() {
     state.sessionTime = 0;
     state.messageCount = 0;
     state.lastAnswer = '';
+    // Restart the session timer cleanly
+    startSessionTimer();
     
     // Reset UI feeds
     clearAnswers();
@@ -1143,8 +1150,13 @@ function saveSettings() {
     localStorage.setItem('cocoai_jd', jd);
     localStorage.setItem('cocoai_audio_mode', audioMode);
     
-    // Update active state
-    state.apiKeys = keys;
+    // Update active state — preserve nvidia key (it comes from .env via Electron, not the settings UI)
+    state.apiKeys = {
+      cerebras: keys.cerebras,
+      deepgram: keys.deepgram,
+      gemini: keys.gemini,
+      nvidia: state.apiKeys.nvidia, // keep the env-loaded key intact
+    };
     state.resume = resume;
     state.jobDescription = jd;
     state.audioMode = audioMode;

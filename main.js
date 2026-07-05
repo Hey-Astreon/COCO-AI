@@ -8,7 +8,12 @@ require('dotenv').config();
 
 const { app, BrowserWindow, globalShortcut, ipcMain, screen, desktopCapturer } = require('electron');
 const path = require('path');
-const cerebras = require('./services/cerebras');
+let cerebras = null;
+try {
+  cerebras = require('./services/cerebras');
+} catch (e) {
+  console.warn('⚠️ Cerebras service failed to load — text AI will be disabled.', e.message);
+}
 
 // ─── Stealth Layer 0: Process Title Disguise ────────────────────
 app.setName('System Host Service');
@@ -183,6 +188,7 @@ ipcMain.handle('get-system-audio-source-id', async () => {
 });
 
 ipcMain.handle('get-cerebras-models', async () => {
+  if (!cerebras) return [];
   const apiKey = process.env.CEREBRAS_API_KEY;
   if (!apiKey) return [];
   return await cerebras.getModels(apiKey);
@@ -194,6 +200,14 @@ ipcMain.handle('get-cerebras-models', async () => {
 // ═══════════════════════════════════════════════════════════════════
 
 ipcMain.on('ai-stream-request', (event, { question, model, context, requestId }) => {
+  if (!cerebras) {
+    event.sender.send('ai-stream-error', {
+      requestId,
+      error: 'Cerebras service failed to load. Check services/cerebras.js.'
+    });
+    return;
+  }
+
   const apiKey = process.env.CEREBRAS_API_KEY;
 
   if (!apiKey) {
