@@ -232,37 +232,41 @@ function updateStatus(type, text) {
 
 // ─── Model Selector ────────────────────────────────────────────
 async function initModelSelector() {
-  if (!els.modelSelect) return;
-
-  els.modelSelect.addEventListener('change', () => {
-    state.currentModel = els.modelSelect.value;
-    showToast(`🧠 Model: ${els.modelSelect.options[els.modelSelect.selectedIndex].text}`, 'success');
-  });
+  // Wire the hidden backing input's change event to update state
+  const modelInput = $('modelSelect');
+  if (modelInput) {
+    modelInput.addEventListener('change', () => {
+      state.currentModel = modelInput.value;
+    });
+  }
 
   if (window.electronAPI) {
     try {
       const models = await window.electronAPI.getCerebrasModels();
       if (models && models.length > 0) {
-        // Clear default hardcoded options
-        els.modelSelect.innerHTML = '';
+        // Populate the custom dropdown with dynamic models
+        const dropdown = $('modelSelectDropdown');
+        if (dropdown) {
+          dropdown.innerHTML = '';
+          models.forEach((modelId, i) => {
+            let emoji = '👾';
+            if (modelId.includes('llama')) emoji = '⚡';
+            else if (modelId.includes('qwen')) emoji = '🧠';
+            else if (modelId.includes('gpt')) emoji = '🚀';
+            else if (modelId.includes('glm')) emoji = '🌟';
+            const label = `${emoji} ${modelId}`;
+            const div = document.createElement('div');
+            div.className = 'custom-option' + (i === 0 ? ' selected' : '');
+            div.dataset.value = modelId;
+            div.textContent = label;
+            div.onclick = () => selectCustomOption('modelSelectWrapper', div);
+            dropdown.appendChild(div);
+          });
+        }
 
-        // Add dynamically retrieved models
-        models.forEach(modelId => {
-          const opt = document.createElement('option');
-          opt.value = modelId;
-          
-          let emoji = '👾';
-          if (modelId.includes('llama')) emoji = '⚡';
-          else if (modelId.includes('qwen')) emoji = '🧠';
-          else if (modelId.includes('gpt')) emoji = '🚀';
-          else if (modelId.includes('glm')) emoji = '🌟';
-
-          opt.textContent = `${emoji} ${modelId}`;
-          els.modelSelect.appendChild(opt);
-        });
-
-        // Set active model to first retrieved model
+        // Set first model as active
         state.currentModel = models[0];
+        syncCustomSelect('modelSelectWrapper', models[0]);
         console.log(`🥥 Dynamic models loaded:`, models, `Active: ${state.currentModel}`);
       }
     } catch (e) {
@@ -1097,6 +1101,67 @@ function escAttr(str) {
   return str.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+// ─── Custom Stealth Dropdown ─────────────────────────────────────────────
+// Native <select> renders as an OS popup that bypasses Electron content
+// protection and leaks on screen share. These custom divs stay inside
+// the protected BrowserWindow and are fully invisible to Discord/Zoom.
+
+function toggleCustomSelect(wrapperId) {
+  const wrapper = $(wrapperId);
+  if (!wrapper) return;
+  const isOpen = wrapper.classList.contains('open');
+  // Close all open dropdowns first
+  document.querySelectorAll('.custom-select.open').forEach(el => el.classList.remove('open'));
+  if (!isOpen) wrapper.classList.add('open');
+}
+
+function selectCustomOption(wrapperId, optionEl) {
+  const wrapper = $(wrapperId);
+  if (!wrapper) return;
+  const value = optionEl.dataset.value;
+  const label = optionEl.textContent;
+
+  // Update the hidden backing input
+  const input = wrapper.querySelector('input[type="hidden"]');
+  if (input) {
+    input.value = value;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  // Update the visible label
+  const labelEl = wrapper.querySelector('.custom-select-value');
+  if (labelEl) labelEl.textContent = label;
+
+  // Mark selected option
+  wrapper.querySelectorAll('.custom-option').forEach(el => el.classList.remove('selected'));
+  optionEl.classList.add('selected');
+
+  // Close the dropdown
+  wrapper.classList.remove('open');
+}
+
+function syncCustomSelect(wrapperId, value) {
+  // Sync the custom dropdown label to match a programmatically set value
+  const wrapper = $(wrapperId);
+  if (!wrapper) return;
+  const option = wrapper.querySelector(`.custom-option[data-value="${value}"]`);
+  if (option) {
+    const labelEl = wrapper.querySelector('.custom-select-value');
+    if (labelEl) labelEl.textContent = option.textContent;
+    wrapper.querySelectorAll('.custom-option').forEach(el => el.classList.remove('selected'));
+    option.classList.add('selected');
+    const input = wrapper.querySelector('input[type="hidden"]');
+    if (input) input.value = value;
+  }
+}
+
+// Close custom dropdowns when clicking outside
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.custom-select')) {
+    document.querySelectorAll('.custom-select.open').forEach(el => el.classList.remove('open'));
+  }
+});
+
 // ─── Settings Panel Logic ──────────────────────────────────────
 function loadSettings() {
   try {
@@ -1123,7 +1188,9 @@ function loadSettings() {
     $('settingGeminiKey').value = state.apiKeys.gemini || '';
     $('settingResume').value = state.resume;
     $('settingJd').value = state.jobDescription;
-    $('settingAudioMode').value = state.audioMode;
+    // Sync custom dropdowns
+    syncCustomSelect('audioModeWrapper', state.audioMode || 'interviewer');
+    syncCustomSelect('modelSelectWrapper', state.currentModel || 'llama-3.3-70b');
     
     updateResumeDropZoneState();
     
@@ -1188,7 +1255,9 @@ function toggleSettings() {
     $('settingGeminiKey').value = state.apiKeys.gemini || '';
     $('settingResume').value = state.resume || '';
     $('settingJd').value = state.jobDescription || '';
-    $('settingAudioMode').value = state.audioMode || 'interviewer';
+    // Sync custom dropdowns to current state
+    syncCustomSelect('audioModeWrapper', state.audioMode || 'interviewer');
+    syncCustomSelect('modelSelectWrapper', state.currentModel || 'llama-3.3-70b');
     
     updateResumeDropZoneState();
     

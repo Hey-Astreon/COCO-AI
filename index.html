@@ -307,12 +307,20 @@
         </div>
 
         <div class="form-group">
-          <label for="modelSelect">AI Model</label>
-          <select class="form-select" id="modelSelect">
-            <option value="llama-3.3-70b">⚡ Llama 3.3 70B</option>
-            <option value="llama-3.1-8b">🚀 Llama 3.1 8B (Fast)</option>
-            <option value="qwen-3-32b">🧠 Qwen 3 32B</option>
-          </select>
+          <label>AI Model</label>
+          <!-- Custom stealth dropdown — native <select> leaks through screen share as OS popup -->
+          <div class="custom-select" id="modelSelectWrapper">
+            <div class="custom-select-trigger" onclick="toggleCustomSelect('modelSelectWrapper')">
+              <span class="custom-select-value" id="modelSelectLabel">⚡ Llama 3.3 70B</span>
+              <svg class="custom-select-arrow" width="10" height="6" fill="none" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="rgba(255,255,255,0.6)" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div class="custom-select-dropdown" id="modelSelectDropdown">
+              <div class="custom-option" data-value="llama-3.3-70b" onclick="selectCustomOption('modelSelectWrapper', this)">⚡ Llama 3.3 70B</div>
+              <div class="custom-option" data-value="llama-3.1-8b" onclick="selectCustomOption('modelSelectWrapper', this)">🚀 Llama 3.1 8B (Fast)</div>
+              <div class="custom-option" data-value="qwen-3-32b" onclick="selectCustomOption('modelSelectWrapper', this)">🧠 Qwen 3 32B</div>
+            </div>
+            <input type="hidden" id="modelSelect" value="llama-3.3-70b" />
+          </div>
           <span class="input-tip">Select the Cerebras model for AI answer generation.</span>
         </div>
       </div>
@@ -345,12 +353,20 @@
         <h3 class="section-title">Audio & Transcription Settings</h3>
         
         <div class="form-group">
-          <label for="settingAudioMode">Audio Input Source</label>
-          <select id="settingAudioMode" class="form-select">
-            <option value="interviewer">🎙️ Interviewer Only (System Audio Loopback)</option>
-            <option value="both">👥 Both (Mic + System Loopback)</option>
-            <option value="candidate">👤 Candidate Only (Microphone Only)</option>
-          </select>
+          <label>Audio Input Source</label>
+          <!-- Custom stealth dropdown — native <select> leaks through screen share as OS popup -->
+          <div class="custom-select" id="audioModeWrapper">
+            <div class="custom-select-trigger" onclick="toggleCustomSelect('audioModeWrapper')">
+              <span class="custom-select-value" id="audioModeLabel">🎙️ Interviewer Only (System Audio Loopback)</span>
+              <svg class="custom-select-arrow" width="10" height="6" fill="none" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="rgba(255,255,255,0.6)" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div class="custom-select-dropdown" id="audioModeDropdown">
+              <div class="custom-option" data-value="interviewer" onclick="selectCustomOption('audioModeWrapper', this)">🎙️ Interviewer Only (System Audio Loopback)</div>
+              <div class="custom-option" data-value="both" onclick="selectCustomOption('audioModeWrapper', this)">👥 Both (Mic + System Loopback)</div>
+              <div class="custom-option" data-value="candidate" onclick="selectCustomOption('audioModeWrapper', this)">👤 Candidate Only (Microphone Only)</div>
+            </div>
+            <input type="hidden" id="settingAudioMode" value="interviewer" />
+          </div>
           <span class="input-tip">Select "Interviewer Only" to transcribe only the interviewer's voice and keep your mic completely disabled.</span>
         </div>
       </div>
