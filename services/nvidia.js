@@ -9,10 +9,11 @@ const NvidiaService = {
 
   ENDPOINT: 'https://integrate.api.nvidia.com/v1/chat/completions',
 
-  // Model fallback chain — minimaxai/minimax-m3 primary (better vision accuracy), nemotron as fallback
+  // Model fallback chain
   MODEL_CHAIN: [
-    'minimaxai/minimax-m3',                           // Primary: multimodal MoE, strong vision + coding
-    'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning',  // Fallback: omni-modal reasoning
+    'meta/llama-3.2-90b-vision-instruct',            // Primary: 90B state-of-the-art vision and reasoning
+    'minimaxai/minimax-m3',                           // Fallback 1: High-speed MoE vision model
+    'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning',  // Fallback 2: Omni-modal reasoning
   ],
 
   MAX_RETRIES: 3,
@@ -49,11 +50,16 @@ const NvidiaService = {
 
       for (let attempt = 0; attempt < this.MAX_RETRIES; attempt++) {
         try {
-          if (onStatus && (attempt > 0 || modelIdx > 0)) {
-            const msg = attempt > 0
-              ? `⏳ Rate limited — retry ${attempt}/${this.MAX_RETRIES} on ${model}...`
-              : `🔄 Switching to fallback model: ${model}...`;
-            onStatus(msg);
+          if (onStatus) {
+            const friendlyName = model.split('/')[1] || model;
+            if (attempt > 0 || modelIdx > 0) {
+              const msg = attempt > 0
+                ? `⏳ Rate limited — retry ${attempt}/${this.MAX_RETRIES} on ${friendlyName}...`
+                : `🔄 Switching to fallback model: ${friendlyName}...`;
+              onStatus(msg);
+            } else {
+              onStatus(`📡 Initializing connection to NVIDIA NIM...`);
+            }
           }
 
           const body = JSON.stringify({
@@ -72,7 +78,7 @@ const NvidiaService = {
             stream: true
           });
 
-          const response = await fetch(this.ENDPOINT, {
+          const fetchPromise = fetch(this.ENDPOINT, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${apiKey}`,
@@ -81,6 +87,13 @@ const NvidiaService = {
             },
             body
           });
+
+          if (onStatus) {
+            const friendlyName = model.split('/')[1] || model;
+            onStatus(`🧠 Processing image tokens on ${friendlyName}...`);
+          }
+
+          const response = await fetchPromise;
 
           // ── Rate Limit (429) — Retry with backoff ──
           if (response.status === 429) {
