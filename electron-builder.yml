@@ -1,5 +1,6 @@
 appId: com.cocoai.copilot
 productName: Coco AI
+artifactName: "CocoAI_Setup_${version}.${ext}"
 directories:
   output: dist
 files:
