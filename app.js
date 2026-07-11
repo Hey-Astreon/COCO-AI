@@ -980,7 +980,9 @@ function thumbsUp(btn) {
 function clearAnswers() {
   els.answersFeed.innerHTML = `
     <div class="welcome-card">
-      <div class="welcome-icon">🥥</div>
+      <div class="welcome-icon">
+        <img src="Coco UI Logo.png" class="welcome-icon-img" alt="Logo" />
+      </div>
       <div class="welcome-text">
         <strong>CocoAI is active & listening</strong>
         <p>Cleared! Ask a question or wait for automatic detection.</p>

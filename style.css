@@ -129,6 +129,13 @@ html, body {
   box-shadow: var(--shadow-glow-purple);
 }
 .logo-icon { font-size: 14px; line-height: 1; }
+.logo-icon-img {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  display: inline-block;
+  vertical-align: middle;
+}
 .logo-text {
   font-size: 12px;
   font-weight: 700;
@@ -567,6 +574,12 @@ body.tab-transcript .panel-answers { display: none; }
   margin: 8px 0;
 }
 .welcome-icon { font-size: 28px; }
+.welcome-icon-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  display: block;
+}
 .welcome-text strong {
   display: block;
   font-size: 13px;
