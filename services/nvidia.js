@@ -17,8 +17,9 @@ const NvidiaService = {
     'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning',  // Fallback 2: Omni-modal reasoning
   ],
 
-  MAX_RETRIES: 3,
-  BASE_DELAY_MS: 600,
+  MAX_RETRIES: 2,
+  BASE_DELAY_MS: 300,
+  REQUEST_TIMEOUT_MS: 8000,  // Kill any single request that takes > 8s
 
   /**
    * Analyze a screen capture using NVIDIA NIM vision models.
@@ -79,6 +80,12 @@ const NvidiaService = {
             stream: true
           });
 
+          const controller = new AbortController();
+          const timeoutId = setTimeout(
+            () => controller.abort(),
+            this.REQUEST_TIMEOUT_MS
+          );
+
           const fetchPromise = fetch(this.ENDPOINT, {
             method: 'POST',
             headers: {
@@ -86,10 +93,16 @@ const NvidiaService = {
               'Accept': 'text/event-stream',
               'Content-Type': 'application/json'
             },
-            body
+            body,
+            signal: controller.signal
           });
 
-          const response = await fetchPromise;
+          let response;
+          try {
+            response = await fetchPromise;
+          } finally {
+            clearTimeout(timeoutId);
+          }
 
           // ── Rate Limit (429) — Retry with backoff ──
           if (response.status === 429) {
