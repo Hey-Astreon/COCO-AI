@@ -1426,6 +1426,32 @@ body.tab-transcript .panel-answers { display: none; }
   font-weight: 500;
 }
 
+/* Deprecated model — unselectable, visually muted with warning badge */
+.custom-option.deprecated {
+  cursor: not-allowed;
+  opacity: 0.6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.custom-option.deprecated:hover {
+  background: rgba(255, 160, 0, 0.08);
+  color: rgba(255,255,255,0.5);
+}
+.deprecated-badge {
+  flex-shrink: 0;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: rgba(255, 160, 0, 0.18);
+  color: #ffaa00;
+  border: 1px solid rgba(255, 160, 0, 0.35);
+  white-space: nowrap;
+}
+
 
 .input-tip {
   font-size: 10px;

@@ -240,34 +240,71 @@ async function initModelSelector() {
     });
   }
 
+  // Models known to be deprecated or end-of-life — shown with a warning badge
+  // and made unselectable so the user is never accidentally locked onto them.
+  const DEPRECATED_MODELS = [
+    'glm-4.7',
+    'glm-4-7',
+    'zai-glm-4.7',
+  ];
+
+  // Preferred default: best coding/reasoning model on Cerebras in 2026
+  const PREFERRED_DEFAULT = 'gpt-oss-120b';
+
   if (window.electronAPI) {
     try {
       const models = await window.electronAPI.getCerebrasModels();
       if (models && models.length > 0) {
-        // Populate the custom dropdown with dynamic models
         const dropdown = $('modelSelectDropdown');
         if (dropdown) {
           dropdown.innerHTML = '';
-          models.forEach((modelId, i) => {
+          let firstActive = null;
+
+          models.forEach((modelId) => {
+            const isDeprecated = DEPRECATED_MODELS.some(d =>
+              modelId.toLowerCase().includes(d.toLowerCase())
+            );
+
             let emoji = '👾';
-            if (modelId.includes('llama')) emoji = '⚡';
-            else if (modelId.includes('qwen')) emoji = '🧠';
-            else if (modelId.includes('gpt')) emoji = '🚀';
-            else if (modelId.includes('glm')) emoji = '🌟';
-            const label = `${emoji} ${modelId}`;
+            if (modelId.includes('llama'))  emoji = '⚡';
+            else if (modelId.includes('qwen'))   emoji = '🧠';
+            else if (modelId.includes('gpt'))    emoji = '🚀';
+            else if (modelId.includes('gemma'))  emoji = '💎';
+            else if (modelId.includes('glm'))    emoji = '⚠️';
+
             const div = document.createElement('div');
-            div.className = 'custom-option' + (i === 0 ? ' selected' : '');
-            div.dataset.value = modelId;
-            div.textContent = label;
-            div.onclick = () => selectCustomOption('modelSelectWrapper', div);
+
+            if (isDeprecated) {
+              // Deprecated: show warning badge, disable selection
+              div.className = 'custom-option deprecated';
+              div.dataset.value = modelId;
+              div.title = `⚠️ ${modelId} is deprecated and will be removed soon. Do not use.`;
+              div.innerHTML = `<span style="text-decoration:line-through;opacity:0.45">${emoji} ${modelId}</span> <span class="deprecated-badge">⚠️ Deprecated</span>`;
+              // Block selection entirely
+              div.onclick = (e) => {
+                e.stopPropagation();
+                showToast(`⚠️ ${modelId} is deprecated — please choose another model.`, 'error');
+              };
+            } else {
+              div.className = 'custom-option';
+              div.dataset.value = modelId;
+              div.textContent = `${emoji} ${modelId}`;
+              div.onclick = () => selectCustomOption('modelSelectWrapper', div);
+              if (!firstActive) firstActive = modelId;
+            }
+
             dropdown.appendChild(div);
           });
-        }
 
-        // Set first model as active
-        state.currentModel = models[0];
-        syncCustomSelect('modelSelectWrapper', models[0]);
-        console.log(`🥥 Dynamic models loaded:`, models, `Active: ${state.currentModel}`);
+          // Prefer gpt-oss-120b, then fall back to first non-deprecated model
+          const bestDefault = models.includes(PREFERRED_DEFAULT)
+            ? PREFERRED_DEFAULT
+            : firstActive || models[0];
+
+          state.currentModel = bestDefault;
+          syncCustomSelect('modelSelectWrapper', bestDefault);
+          console.log(`🥥 Dynamic models loaded. Active: ${state.currentModel}`);
+        }
       }
     } catch (e) {
       console.warn('Failed to load Cerebras models dynamically, using defaults:', e);
