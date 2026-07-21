@@ -4,7 +4,7 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 // Load environment variables FIRST
-require('dotenv').config();
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
 const { app, BrowserWindow, globalShortcut, ipcMain, screen, desktopCapturer } = require('electron');
 const path = require('path');
