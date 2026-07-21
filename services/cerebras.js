@@ -61,7 +61,12 @@ function streamCompletion(apiKey, question, options = {}) {
     onChunk = () => {},
     onDone = () => {},
     onError = () => {},
+    attempt = 0,
+    maxRetries = 3,
   } = options;
+
+  let isAborted = false;
+  let activeReq = null;
 
   const systemPrompt = buildSystemPrompt(context);
 
@@ -77,7 +82,7 @@ function streamCompletion(apiKey, question, options = {}) {
     top_p: 0.9,
   });
 
-  const req = https.request({
+  activeReq = https.request({
     hostname: CEREBRAS_BASE,
     path: '/v1/chat/completions',
     method: 'POST',
@@ -87,11 +92,39 @@ function streamCompletion(apiKey, question, options = {}) {
       'Accept': 'text/event-stream',
     },
   }, (res) => {
+    // ── Handle 429 Queue Exceeded — Exponential backoff retry or fallback model ──
+    if (res.statusCode === 429) {
+      if (attempt < maxRetries && !isAborted) {
+        const delay = 600 * Math.pow(2, attempt); // 600ms, 1200ms, 2400ms
+        console.warn(`⚠️ Cerebras 429 Queue Exceeded on ${model}. Retrying in ${delay}ms (Attempt ${attempt + 1}/${maxRetries})...`);
+        setTimeout(() => {
+          if (!isAborted) {
+            streamCompletion(apiKey, question, {
+              ...options,
+              attempt: attempt + 1
+            });
+          }
+        }, delay);
+        return;
+      } else if (model === 'llama-3.3-70b' && !isAborted) {
+        // Fallback to llama-3.1-8b if 70b is queue-clogged
+        console.warn('⚠️ Cerebras 70B queue exhausted — switching fallback model to llama-3.1-8b...');
+        streamCompletion(apiKey, question, {
+          ...options,
+          model: 'llama-3.1-8b',
+          attempt: 0
+        });
+        return;
+      }
+    }
+
     if (res.statusCode !== 200) {
       let errorBody = '';
       res.on('data', (chunk) => { errorBody += chunk.toString(); });
       res.on('end', () => {
-        onError(new Error(`Cerebras API error ${res.statusCode}: ${errorBody}`));
+        if (!isAborted) {
+          onError(new Error(`Cerebras API error ${res.statusCode}: ${errorBody}`));
+        }
       });
       return;
     }
@@ -100,9 +133,10 @@ function streamCompletion(apiKey, question, options = {}) {
     let fullText = '';
 
     res.on('data', (chunk) => {
+      if (isAborted) return;
       buffer += chunk.toString();
       const lines = buffer.split('\n');
-      buffer = lines.pop() || ''; // Keep incomplete line in buffer
+      buffer = lines.pop() || '';
 
       for (const line of lines) {
         const trimmed = line.trim();
@@ -110,39 +144,57 @@ function streamCompletion(apiKey, question, options = {}) {
 
         const data = trimmed.slice(6);
         if (data === '[DONE]') {
-          onDone(fullText);
+          if (!isAborted) onDone(fullText);
           return;
         }
 
         try {
           const parsed = JSON.parse(data);
           const delta = parsed.choices?.[0]?.delta?.content;
-          if (delta) {
+          if (delta && !isAborted) {
             fullText += delta;
             onChunk(delta, fullText);
           }
-        } catch (e) {
-          // Skip malformed JSON chunks
-        }
+        } catch (e) {}
       }
     });
 
     res.on('end', () => {
-      if (fullText) {
+      if (!isAborted && fullText) {
         onDone(fullText);
       }
     });
 
-    res.on('error', onError);
+    res.on('error', (err) => {
+      if (!isAborted) onError(err);
+    });
   });
 
-  req.on('error', onError);
-  req.write(payload);
-  req.end();
+  activeReq.on('error', (err) => {
+    if (attempt < maxRetries && !isAborted) {
+      const delay = 600 * Math.pow(2, attempt);
+      setTimeout(() => {
+        if (!isAborted) {
+          streamCompletion(apiKey, question, {
+            ...options,
+            attempt: attempt + 1
+          });
+        }
+      }, delay);
+      return;
+    }
+    if (!isAborted) onError(err);
+  });
+
+  activeReq.write(payload);
+  activeReq.end();
 
   return {
     abort: () => {
-      try { req.destroy(); } catch (e) {}
+      isAborted = true;
+      if (activeReq) {
+        try { activeReq.destroy(); } catch (e) {}
+      }
     }
   };
 }
