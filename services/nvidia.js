@@ -104,13 +104,11 @@ const NvidiaService = {
             clearTimeout(timeoutId);
           }
 
-          // ── Rate Limit (429) — Retry with backoff ──
+          // ── Rate Limit (429) — Bail immediately, let Gemini handle it ──
           if (response.status === 429) {
-            const delay = this.BASE_DELAY_MS * Math.pow(2, attempt);
-            console.warn(`⚠️ NVIDIA 429 on ${model}. Waiting ${delay / 1000}s...`);
-            if (onStatus) onStatus(`⏳ Rate limited — waiting ${Math.round(delay / 1000)}s before retry...`);
-            await new Promise(r => setTimeout(r, delay));
-            continue;
+            console.warn(`⚠️ NVIDIA 429 on ${model} — skipping all NVIDIA models, switching to Gemini.`);
+            if (onStatus) onStatus('⚡ NVIDIA busy — switching to Gemini instantly...');
+            throw Object.assign(new Error('NVIDIA rate-limited: falling back to Gemini.'), { isRateLimit: true });
           }
 
           // ── Other API error ──
@@ -191,12 +189,15 @@ const NvidiaService = {
         } catch (err) {
           lastError = err;
 
+          // 429 bail-out — propagate immediately to skip all remaining NVIDIA models
+          if (err.isRateLimit) throw err;
+
           // Non-429 NVIDIA errors — skip retries, try next model
           if (err.message?.includes('NVIDIA API error') && !err.message.includes('429')) {
             break;
           }
 
-          // Network errors — retry with backoff
+          // Network/timeout errors — retry with backoff
           if (!err.message?.includes('NVIDIA API error')) {
             const delay = this.BASE_DELAY_MS * Math.pow(2, attempt);
             console.warn(`⚠️ Network error on ${model}. Retrying in ${delay / 1000}s...`, err.message);
