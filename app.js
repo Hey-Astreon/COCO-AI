@@ -122,10 +122,10 @@ function initDeepgram() {
 
   state.deepgramService = new DeepgramService(state.apiKeys.deepgram);
 
-  // Handle transcription results
+  // Handle transcription results — add to transcript feed & accumulate utterance
   state.deepgramService.onTranscript = (text, isFinal, speaker, speechFinal) => {
     if (isFinal) {
-      // Final result — add to transcript feed
+      // Final chunk — add to transcript feed
       addTranscriptEntry(speaker, text);
 
       // Notify badge if user is on answers tab
@@ -137,14 +137,6 @@ function initDeepgram() {
       // Store in history for AI context
       state.transcriptHistory.push({ role: speaker, text });
 
-      // Auto-detect questions and generate answers
-      if (DeepgramService.isQuestion(text)) {
-        setTimeout(() => {
-          addQACard(text);
-          showToast('❓ Question detected — generating answer...', 'success');
-        }, 500);
-      }
-
       // Clear interim element
       if (state.interimTranscriptEl) {
         state.interimTranscriptEl.remove();
@@ -153,6 +145,15 @@ function initDeepgram() {
     } else {
       // Interim result — show live updating text
       showInterimTranscript(text);
+    }
+  };
+
+  // UtteranceEnd fires ONLY after speaker fully stops talking (1500ms silence).
+  // This is the correct place to trigger AI — full question is guaranteed to be complete.
+  state.deepgramService.onUtteranceEnd = (fullUtterance) => {
+    if (DeepgramService.isQuestion(fullUtterance)) {
+      showToast('❓ Question detected — generating answer...', 'success');
+      addQACard(fullUtterance);
     }
   };
 

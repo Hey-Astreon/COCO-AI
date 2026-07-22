@@ -178,7 +178,7 @@ class DeepgramService {
       interim_results: 'true',
       utterance_end_ms: '1500',
       vad_events: 'true',
-      endpointing: '300',
+      endpointing: '800',   // Wait 800ms of silence before finalising — prevents mid-sentence triggers
     });
 
     const wsUrl = `wss://api.deepgram.com/v1/listen?${params.toString()}`;
@@ -262,18 +262,32 @@ class DeepgramService {
       const speechFinal = data.speech_final;
 
       if (transcript && transcript.trim()) {
-        // Determine speaker role (simple heuristic — can be improved)
         const speaker = this._detectSpeaker(transcript);
 
         if (this.onTranscript) {
           this.onTranscript(transcript.trim(), isFinal, speaker, speechFinal);
         }
+
+        // Accumulate final chunks into a pending utterance buffer.
+        // We DO NOT trigger the AI here — we wait for UtteranceEnd to confirm
+        // the speaker has fully stopped talking before generating an answer.
+        if (isFinal) {
+          if (!this._pendingUtterance) this._pendingUtterance = [];
+          this._pendingUtterance.push(transcript.trim());
+        }
       }
     }
 
-    // Handle utterance end events
+    // UtteranceEnd fires only after the speaker has been silent for utterance_end_ms.
+    // This is the correct gate to trigger AI — the question is now fully spoken.
     if (data.type === 'UtteranceEnd') {
-      // Utterance complete — good time to trigger AI if it was a question
+      if (this._pendingUtterance && this._pendingUtterance.length > 0) {
+        const fullUtterance = this._pendingUtterance.join(' ');
+        this._pendingUtterance = [];
+        if (this.onUtteranceEnd) {
+          this.onUtteranceEnd(fullUtterance);
+        }
+      }
     }
   }
 
