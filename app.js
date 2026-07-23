@@ -1694,17 +1694,18 @@ function processResumeFile(file) {
         throw new Error('No readable text contents found in PDF');
       }
 
-      // Populate settings textarea
+      // Populate settings textarea & auto-save immediately to state + localStorage
       const resumeTextArea = $('settingResume');
       if (resumeTextArea) {
         resumeTextArea.value = text;
       }
+      state.resume = text;
+      localStorage.setItem('cocoai_resume', text);
       
       // Update drop zone success state
-      dropZone.className = 'drop-zone success';
       const wordCount = text.split(/\s+/).filter(Boolean).length;
-      dropZoneText.textContent = `✅ Parsed: ${file.name} (${wordCount} words)`;
-      showToast('PDF resume parsed successfully!', 'success');
+      updateResumeDropZoneState();
+      showToast(`✅ PDF resume parsed & activated (${wordCount} words)!`, 'success');
 
     } catch (err) {
       console.error(err);
@@ -1724,7 +1725,10 @@ function processResumeFile(file) {
 }
 
 async function parsePDF(arrayBuffer) {
-  const pdfjsLib = window['pdfjs-dist/build/pdf'];
+  const pdfjsLib = window['pdfjs-dist/build/pdf'] || window.pdfjsLib;
+  if (!pdfjsLib) {
+    throw new Error('PDF.js engine is loading... Please try again in a moment.');
+  }
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'services/pdf.worker.min.js';
 
   const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
