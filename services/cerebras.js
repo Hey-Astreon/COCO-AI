@@ -113,12 +113,13 @@ function streamCompletion(apiKey, question, options = {}) {
           }
         }, delay);
         return;
-      } else if (model === 'llama-3.3-70b' && !isAborted) {
-        // Fallback to llama-3.1-8b if 70b is queue-clogged
-        console.warn('⚠️ Cerebras 70B queue exhausted — switching fallback model to llama-3.1-8b...');
+      } else if (!isAborted) {
+        // Fallback to gemma-4-31b or qwen-3-32b if primary model is queue-clogged
+        const fallbackModel = (model === 'gemma-4-31b') ? 'qwen-3-32b' : 'gemma-4-31b';
+        console.warn(`⚠️ Cerebras ${model} queue exhausted — switching fallback model to ${fallbackModel}...`);
         streamCompletion(apiKey, question, {
           ...options,
-          model: 'llama-3.1-8b',
+          model: fallbackModel,
           attempt: 0
         });
         return;

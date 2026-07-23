@@ -15,6 +15,23 @@ try {
   console.warn('⚠️ Cerebras service failed to load — text AI will be disabled.', e.message);
 }
 
+// ─── Single Instance Lock ──────────────────────────────────────
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (mainWindow) {
+      if (!isOverlayVisible) {
+        mainWindow.show();
+        isOverlayVisible = true;
+      }
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
+    }
+  });
+}
+
 // ─── Stealth Layer 0: Process Title Disguise ────────────────────
 app.setName('System Host Service');
 if (process.platform === 'win32') {
