@@ -39,7 +39,7 @@ CRITICAL ANSWER QUALITY & LENGTH RULES:
    - Avoid overly formal academic jargon or textbook definitions. Use practical industry terms.`;
 
   if (context.resume) {
-    prompt += `\n\nCANDIDATE'S RESUME:\n${context.resume}`;
+    prompt += `\n\nCANDIDATE'S RESUME (MUST USE FOR PERSONAL & BEHAVIORAL QUESTIONS):\n${context.resume}\n\nIMPORTANT INSTRUCTION FOR PERSONAL & RESUME QUESTIONS:\nWhen asked "Tell me about yourself", "Introduce yourself", "Walk me through your background", or any past project/experience question, you MUST generate a personalized, spoken 60-90 word response drawing directly from the candidate's actual projects, job titles, tech stack, and achievements listed in the resume above. Speak in first person ("I am...", "In my recent role at...", "I built...") as if you are the candidate.`;
   }
   if (context.jobDescription) {
     prompt += `\n\nJOB DESCRIPTION:\n${context.jobDescription}`;
