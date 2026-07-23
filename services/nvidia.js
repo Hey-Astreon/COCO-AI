@@ -17,9 +17,9 @@ const NvidiaService = {
     'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning',  // Fallback 2: Omni-modal reasoning
   ],
 
-  MAX_RETRIES: 2,
-  BASE_DELAY_MS: 300,
-  REQUEST_TIMEOUT_MS: 8000,  // Kill any single request that takes > 8s
+  MAX_RETRIES: 1,
+  BASE_DELAY_MS: 150,
+  REQUEST_TIMEOUT_MS: 3000,  // Kill any single request that takes > 3s
 
   /**
    * Analyze a screen capture using NVIDIA NIM vision models.

@@ -947,15 +947,15 @@ In 2-3 short sentences (under 60 words total), explain why the chosen option is 
       showToast(msg, 'warning');
     };
 
-    // ── Primary: NVIDIA NIM (nemotron-3-nano-omni → minimax-m3) ──
-    if (state.apiKeys.nvidia) {
+    // ── Primary: Gemini Vision (Ultra-fast 1-2s response) ──
+    if (state.apiKeys.gemini) {
       answerEl.innerHTML = `
         <div class="thinking-dots"><span></span><span></span><span></span></div>
-        <span class="thinking-text">🟢 NVIDIA is solving the problem...</span>
+        <span class="thinking-text">Gemini is solving the problem...</span>
       `;
       try {
-        const analysis = await window.NvidiaService.analyzeImage(
-          state.apiKeys.nvidia,
+        const analysis = await window.GeminiService.analyzeImage(
+          state.apiKeys.gemini,
           imgDataUrl,
           prompt,
           onChunk,
@@ -963,25 +963,26 @@ In 2-3 short sentences (under 60 words total), explain why the chosen option is 
         );
         answerEl.innerHTML = formatAnswer(analysis || fullText);
         state.lastAnswer = analysis || fullText;
-        showToast('✅ Analyzed via NVIDIA NIM!', 'success');
+        showToast('✅ Problem analyzed successfully!', 'success');
         return;
-      } catch (nvidiaErr) {
-        console.warn('⚠️ NVIDIA failed, falling back to Gemini:', nvidiaErr.message);
-        showToast('⚠️ NVIDIA failed — trying Gemini...', 'warning');
+      } catch (geminiErr) {
+        console.warn('⚠️ Gemini Vision failed, trying NVIDIA NIM fallback:', geminiErr.message);
+        showToast('⚠️ Gemini busy — trying NVIDIA...', 'warning');
         fullText = '';
       }
     }
 
-    // ── Fallback: Gemini Vision ──
-    if (!state.apiKeys.gemini) {
-      throw new Error('No API key available. Set NVIDIA or Gemini key in Settings.');
+    // ── Secondary Fallback: NVIDIA NIM ──
+    if (!state.apiKeys.nvidia) {
+      throw new Error('No Vision API key available. Ensure Gemini or NVIDIA key is set in Settings.');
     }
+
     answerEl.innerHTML = `
       <div class="thinking-dots"><span></span><span></span><span></span></div>
-      <span class="thinking-text">Gemini is solving the problem...</span>
+      <span class="thinking-text">🟢 NVIDIA is solving the problem...</span>
     `;
-    const analysis = await window.GeminiService.analyzeImage(
-      state.apiKeys.gemini,
+    const analysis = await window.NvidiaService.analyzeImage(
+      state.apiKeys.nvidia,
       imgDataUrl,
       prompt,
       onChunk,
@@ -989,7 +990,7 @@ In 2-3 short sentences (under 60 words total), explain why the chosen option is 
     );
     answerEl.innerHTML = formatAnswer(analysis || fullText);
     state.lastAnswer = analysis || fullText;
-    showToast('✅ Problem analyzed successfully!', 'success');
+    showToast('✅ Analyzed via NVIDIA NIM!', 'success');
 
   } catch (err) {
     console.error('Screen analysis failed:', err);
