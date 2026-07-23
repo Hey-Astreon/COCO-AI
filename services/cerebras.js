@@ -39,7 +39,13 @@ CRITICAL ANSWER QUALITY & LENGTH RULES:
    - Avoid overly formal academic jargon or textbook definitions. Use practical industry terms.`;
 
   if (context.resume) {
-    prompt += `\n\nCANDIDATE'S RESUME (MUST USE FOR PERSONAL & BEHAVIORAL QUESTIONS):\n${context.resume}\n\nIMPORTANT INSTRUCTION FOR PERSONAL & RESUME QUESTIONS:\nWhen asked "Tell me about yourself", "Introduce yourself", "Walk me through your background", or any past project/experience question, you MUST generate a personalized, spoken 60-90 word response drawing directly from the candidate's actual projects, job titles, tech stack, and achievements listed in the resume above. Speak in first person ("I am...", "In my recent role at...", "I built...") as if you are the candidate.`;
+    prompt += `\n\nCANDIDATE'S RESUME (PRIMARY SOURCE FOR CANDIDATE'S PERSONALITY, SKILLS & PROJECTS):\n${context.resume}\n\nIMPORTANT CONTEXT INSTRUCTION FOR PERSONAL & BEHAVIORAL QUESTIONS:
+The resume above defines the candidate's professional identity, technical skills, real-world projects, work history, education, and domain expertise.
+For ANY personal, behavioral, or experience-based questions (e.g., "Tell me about yourself", "What are your strengths?", "Describe a challenging project you built", "What technologies do you prefer?", "Why should we hire you?"):
+1. Speak in FIRST PERSON ("I", "my", "we") as the candidate.
+2. Ground your answer directly in the candidate's actual projects, programming languages, frameworks, and job experience listed in the resume.
+3. Reflect the candidate's professional background and technical persona.
+4. Keep spoken personal responses concise (60-90 words max), natural, and confident.`;
   }
   if (context.jobDescription) {
     prompt += `\n\nJOB DESCRIPTION:\n${context.jobDescription}`;
