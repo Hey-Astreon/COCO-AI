@@ -882,15 +882,18 @@ Determine if the screenshot shows a CODING PROBLEM (requires writing a program) 
 ─── IF IT IS A CODING PROBLEM ───
 Follow these exact steps:
 
-STEP 1 — READ THE PROBLEM:
-Identify the title, description, input/output formats, constraints, and all sample cases.
+STEP 1 — DETECT PROGRAMMING LANGUAGE (CRITICAL):
+- Look closely at the code editor in the screenshot: examine the language selector dropdown (e.g. JavaScript, C++, Python3, Java, TypeScript, C#, Go, Rust), syntax keywords in the starter code (e.g., 'function', 'var', 'let', 'const', 'class', 'def', '#include', 'public static void'), file extensions, and editor header.
+- YOU MUST WRITE THE SOLUTION IN THE EXACT PROGRAMMING LANGUAGE SHOWN IN THE EDITOR.
+- FOR EXAMPLE: If the editor shows JavaScript / JS, write in valid JavaScript syntax (use 'function', 'const', 'let', 'return'). DO NOT use Python syntax like 'def' or 'elif' or 'print' when the target language is JavaScript, C++, or Java!
 
-STEP 2 — IDENTIFY THE TASK:
-State in one sentence what the program must do.
+STEP 2 — READ THE PROBLEM & IDENTIFY TASK:
+Identify the title, description, inputs/outputs, constraints, sample cases, and state in one sentence what the program must do.
 
 STEP 3 — WRITE THE SOLUTION:
-Provide a single, complete, correct, runnable code solution using the language shown in the editor (default to Python if unclear).
-- Match the expected output EXACTLY (character by character, line by line).
+Provide a single, complete, correct, runnable code solution in the DETECTED language.
+- Use the exact function name and signature provided in the starter template code.
+- Match the expected output format EXACTLY.
 - Do NOT write placeholder code. Write REAL working code.
 - Add brief inline comments on key lines.
 
