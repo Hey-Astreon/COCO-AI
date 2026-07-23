@@ -723,6 +723,20 @@ function handleAIError({ requestId, error }) {
 }
 
 // ─── Format AI Answer (simple markdown) ────────────────────────
+function createCodeBlockHtml(lang, codeText) {
+  var displayLang = (lang && lang.trim()) ? lang.trim().toLowerCase() : 'code';
+  var cleanCode = codeText.trim();
+  return '<div class="code-container">' +
+           '<div class="code-header">' +
+             '<span class="code-lang-tag">' + escHtml(displayLang) + '</span>' +
+             '<button class="code-copy-btn" onclick="copyCodeBlock(this)" title="Copy code to clipboard">' +
+               '<svg class="copy-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg> Copy Code' +
+             '</button>' +
+           '</div>' +
+           '<pre class="code-block"><code>' + cleanCode + '</code></pre>' +
+         '</div>';
+}
+
 function formatAnswer(text) {
   // Extract ALL code fences first, before any markdown regex runs.
   // This prevents print("****") from having its stars eaten by the bold regex.
@@ -730,16 +744,16 @@ function formatAnswer(text) {
   var html = escHtml(text);
 
   // 1a. Triple-backtick fenced blocks: ```lang\n...\n```
-  html = html.replace(/```(\w*)\n?([\s\S]*?)```/g, function(_m, _lang, code) {
+  html = html.replace(/```(\w*)\n?([\s\S]*?)```/g, function(_m, lang, code) {
     var idx = stash.length;
-    stash.push('<pre class="code-block"><code>' + code.trim() + '</code></pre>');
+    stash.push(createCodeBlockHtml(lang, code));
     return '\x00B' + idx + '\x00';
   });
 
   // 1b. Double-backtick blocks: ``lang\n...\n`` (some models output these)
-  html = html.replace(/``(\w*)\n?([\s\S]*?)``/g, function(_m, _lang, code) {
+  html = html.replace(/``(\w*)\n?([\s\S]*?)``/g, function(_m, lang, code) {
     var idx = stash.length;
-    stash.push('<pre class="code-block"><code>' + code.trim() + '</code></pre>');
+    stash.push(createCodeBlockHtml(lang, code));
     return '\x00B' + idx + '\x00';
   });
 
@@ -987,14 +1001,44 @@ Explain why the chosen option is correct or incorrect based on syntax, spacing, 
   }
 }
 
-// ─── Button Actions ────────────────────────────────────────────
+// ─── Button & Code Copy Actions ────────────────────────────────
+function copyCodeBlock(btn) {
+  const container = btn.closest('.code-container');
+  if (!container) return;
+  const codeEl = container.querySelector('code');
+  if (!codeEl) return;
+
+  const codeText = codeEl.innerText || codeEl.textContent;
+  navigator.clipboard.writeText(codeText).then(() => {
+    showToast('📋 Code copied to clipboard!', 'success');
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#2ed573" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.innerHTML = originalContent;
+      btn.classList.remove('copied');
+    }, 1800);
+  }).catch(err => {
+    console.error('Failed to copy code block:', err);
+    showToast('❌ Copy failed', 'error');
+  });
+}
+
 function copyAnswer(btn) {
   const card = btn.closest('.qa-card');
-  const text = card.querySelector('.qa-a-text').textContent;
+  if (!card) return;
+  const codeBlock = card.querySelector('.code-block code');
+  let text = '';
+  if (codeBlock) {
+    text = codeBlock.innerText || codeBlock.textContent;
+  } else {
+    text = card.querySelector('.qa-a-text')?.textContent || '';
+  }
   navigator.clipboard.writeText(text).then(() => {
-    showToast('📋 Answer copied!', 'success');
+    showToast(codeBlock ? '📋 Code copied!' : '📋 Answer copied!', 'success');
+    const orig = btn.textContent;
     btn.textContent = '✓ Copied';
-    setTimeout(() => btn.textContent = 'Copy', 2000);
+    setTimeout(() => btn.textContent = orig, 2000);
   });
 }
 
