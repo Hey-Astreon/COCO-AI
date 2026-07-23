@@ -165,21 +165,24 @@ ipcMain.handle('get-api-keys', () => {
 });
 
 ipcMain.handle('capture-screen', async () => {
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const scale = primaryDisplay.scaleFactor || 1;
+  const width = Math.round(primaryDisplay.bounds.width * scale);
+  const height = Math.round(primaryDisplay.bounds.height * scale);
+
   const sources = await desktopCapturer.getSources({
     types: ['screen'],
-    thumbnailSize: { width: 1920, height: 1080 } // 1080p for sharper text recognition by vision models
+    thumbnailSize: { width, height } // Native 1:1 screen resolution — ultra-sharp text OCR for vision AI
   });
 
   if (sources.length === 0) throw new Error('No screen sources found');
 
   // On multi-monitor setups, match the source to the primary display
-  // to avoid capturing the wrong (background/secondary) screen
-  const primaryDisplay = screen.getPrimaryDisplay();
   const primarySource =
     sources.find(s => String(s.display_id) === String(primaryDisplay.id)) ||
-    sources[0]; // fallback to first source on single-monitor setups
+    sources[0];
 
-  return primarySource.thumbnail.toDataURL();
+  return primarySource.thumbnail.toDataURL('image/png');
 });
 
 ipcMain.handle('get-system-audio-source-id', async () => {
