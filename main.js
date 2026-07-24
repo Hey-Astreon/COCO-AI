@@ -8,6 +8,19 @@ require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
 const { app, BrowserWindow, globalShortcut, ipcMain, screen, desktopCapturer } = require('electron');
 const path = require('path');
+
+// ─── Auto-Updater (only in packaged builds) ──────────────────
+let autoUpdater = null;
+if (app.isPackaged) {
+  try {
+    autoUpdater = require('electron-updater').autoUpdater;
+    autoUpdater.autoDownload = true;      // Download update in background
+    autoUpdater.autoInstallOnAppQuit = true; // Install on next restart
+    autoUpdater.logger = console;
+  } catch (e) {
+    console.warn('⚠️ electron-updater not available:', e.message);
+  }
+}
 let cerebras = null;
 try {
   cerebras = require('./services/cerebras');
@@ -311,6 +324,46 @@ function panicHide() {
 
 app.whenReady().then(() => {
   createWindow();
+
+  // ─── Auto-Update: Check for updates silently ───────────────
+  if (autoUpdater && app.isPackaged) {
+    autoUpdater.on('update-available', (info) => {
+      console.log(`🆕 Update available: v${info.version}`);
+      if (mainWindow && mainWindow.webContents) {
+        mainWindow.webContents.send('update-available', info.version);
+      }
+    });
+
+    autoUpdater.on('update-downloaded', (info) => {
+      console.log(`✅ Update downloaded: v${info.version} — will install on restart`);
+      if (mainWindow && mainWindow.webContents) {
+        mainWindow.webContents.send('update-downloaded', info.version);
+      }
+    });
+
+    autoUpdater.on('error', (err) => {
+      console.warn('⚠️ Auto-update error:', err.message);
+    });
+
+    // Check for updates 3 seconds after launch (non-blocking)
+    setTimeout(() => {
+      autoUpdater.checkForUpdates().catch(err => {
+        console.warn('⚠️ Update check failed:', err.message);
+      });
+    }, 3000);
+
+    // Re-check every 30 minutes while app is running
+    setInterval(() => {
+      autoUpdater.checkForUpdates().catch(() => {});
+    }, 30 * 60 * 1000);
+  }
+
+  // ─── IPC: Force install update now ─────────────────────────
+  ipcMain.on('install-update-now', () => {
+    if (autoUpdater) {
+      autoUpdater.quitAndInstall(false, true);
+    }
+  });
 
   // Global Hotkeys
   globalShortcut.register('CommandOrControl+Shift+H', toggleOverlay);

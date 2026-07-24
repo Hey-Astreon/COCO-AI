@@ -25,6 +25,7 @@
     "png-to-ico": "^3.0.2"
   },
   "dependencies": {
-    "dotenv": "^17.4.2"
+    "dotenv": "^17.4.2",
+    "electron-updater": "^6.8.9"
   }
 }

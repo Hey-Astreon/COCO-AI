@@ -23,3 +23,10 @@ nsis:
   installerIcon: Coco ai.ico
   uninstallerIcon: Coco ai.ico
   uninstallDisplayName: Coco AI
+
+# ─── Auto-Update via GitHub Releases ───
+publish:
+  provider: github
+  owner: Hey-Astreon
+  repo: COCO-AI
+  releaseType: release

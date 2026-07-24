@@ -103,6 +103,34 @@ async function initElectronBridge() {
       });
     }
 
+    // ─── Auto-Update Notifications ─────────────────────────────
+    if (window.electronAPI.onUpdateAvailable) {
+      window.electronAPI.onUpdateAvailable((version) => {
+        showToast(`🆕 Update v${version} found — downloading...`, 'success');
+      });
+    }
+    if (window.electronAPI.onUpdateDownloaded) {
+      window.electronAPI.onUpdateDownloaded((version) => {
+        showToast(`✅ Update v${version} ready! Restart to apply.`, 'success');
+        // Show a persistent update banner at top of answers feed
+        const banner = document.createElement('div');
+        banner.className = 'qa-card';
+        banner.style.cssText = 'border: 1px solid #2ed573; background: rgba(46,213,115,0.08);';
+        banner.innerHTML = `
+          <div class="qa-answer" style="padding: 10px 14px;">
+            <div class="qa-a-text" style="display: flex; align-items: center; justify-content: space-between;">
+              <span>🆕 <strong>Coco AI v${version}</strong> is ready to install!</span>
+              <button class="qa-action-btn" onclick="window.electronAPI.installUpdateNow()" 
+                style="background: #2ed573; color: #000; font-weight: 600; padding: 4px 12px; border-radius: 6px;">
+                Restart & Update
+              </button>
+            </div>
+          </div>
+        `;
+        els.answersFeed.prepend(banner);
+      });
+    }
+
     console.log('🥥 CocoAI running in Electron (stealth mode active)');
   } else {
     console.log('🥥 CocoAI running in browser (demo mode)');

@@ -52,6 +52,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
   captureScreen: () => ipcRenderer.invoke('capture-screen'),
   getSystemAudioSourceId: () => ipcRenderer.invoke('get-system-audio-source-id'),
 
+  // ─── Auto-Update ──────────────────────────────────────────────
+  onUpdateAvailable: (callback) => {
+    ipcRenderer.on('update-available', (event, version) => callback(version));
+  },
+  onUpdateDownloaded: (callback) => {
+    ipcRenderer.on('update-downloaded', (event, version) => callback(version));
+  },
+  installUpdateNow: () => ipcRenderer.send('install-update-now'),
+
   // ─── Identify ─────────────────────────────────────────────────
   isElectron: true,
 });
