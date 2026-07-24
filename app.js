@@ -889,49 +889,24 @@ async function analyzeScreen() {
       imgDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
     }
 
-    const prompt = `You are a world-class software engineer and competitive programmer assisting a candidate during a live technical interview. Analyze the screenshot carefully. You MUST read ALL text, problem descriptions, instructions, constraints, and sample cases on the screen thoroughly before writing your answer.
+    const prompt = `You are a world-class competitive programmer and expert software engineer assisting a candidate during a live technical interview. Analyze the screenshot carefully.
 
-Determine if the screenshot shows a CODING PROBLEM (requires writing a program) or a CONCEPTUAL/MCQ PROBLEM (multiple-choice questions, quizzes, or text questions).
+MANDATORY RULE FOR CODING PROBLEMS:
+If the screenshot shows a CODING PROBLEM (LeetCode, Micro1, HackerRank, Codility, IDE, or programming exercise):
+1. YOU MUST OUTPUT THE CODE SOLUTION BLOCK FIRST AS THE VERY FIRST THING ON LINE 1 using triple backticks (e.g. \`\`\`javascript ... \`\`\`). NEVER OUTPUT ONLY TEXT OR EXPLANATIONS WITHOUT A CODE BLOCK.
+2. DETECT TARGET LANGUAGE: Look closely at the code editor dropdown or header (e.g., 'JavaScript (Node.js)', 'C++', 'Python3', 'Java', 'TypeScript', 'C#', 'Go', 'Rust'). You MUST write the code in that exact language using valid syntax (e.g., for JavaScript use 'function', 'const', 'let', 'return').
+3. FUNCTION SIGNATURE: If starter code exists in the editor, match the exact function/class signature. If the editor is blank (like Micro1), infer a clean complete function signature from the problem's input/output parameter names (e.g. \`function solve(descriptions, priorities) { ... }\`).
+4. CORRECTNESS & EDGE CASES: Read ALL problem descriptions, constraints, requirements, and sample test cases carefully. Handle all edge cases (e.g., ties, lexicographical sorting, array bounds).
+5. AFTER THE CODE BLOCK: In 2-3 short sentences below the code block, explain your approach, Time Complexity O(?), and Space Complexity O(?).
 
-─── IF IT IS A CODING PROBLEM ───
-Follow these exact steps:
+MANDATORY RULE FOR CONCEPTUAL / MCQ PROBLEMS:
+If the screenshot shows a MULTIPLE CHOICE QUESTION or QUIZ:
+1. State the exact correct option in bold on Line 1 (e.g., **Option B: ...**).
+2. Provide a 2-sentence explanation of why it is correct.
 
-STEP 1 — DETECT PROGRAMMING LANGUAGE (CRITICAL):
-- Look closely at the code editor in the screenshot: examine the language selector dropdown (e.g. JavaScript, C++, Python3, Java, TypeScript, C#, Go, Rust), syntax keywords in the starter code (e.g., 'function', 'var', 'let', 'const', 'class', 'def', '#include', 'public static void'), file extensions, and editor header.
-- YOU MUST WRITE THE SOLUTION IN THE EXACT PROGRAMMING LANGUAGE SHOWN IN THE EDITOR.
-- FOR EXAMPLE: If the editor shows JavaScript / JS, write in valid JavaScript syntax (use 'function', 'const', 'let', 'return'). DO NOT use Python syntax like 'def' or 'elif' or 'print' when the target language is JavaScript, C++, or Java!
-
-STEP 2 — CAREFULLY READ PROBLEM STATEMENT & CONSTRAINTS:
-- Read every line of the problem title, full description, input/output formats, constraints (e.g., array bounds, 0-indexed vs 1-indexed, time limits), and ALL visible sample test cases.
-- State in 1 concise sentence what the program must do.
-
-STEP 3 — WRITE THE SOLUTION:
-Provide a single, complete, correct, runnable code solution in the DETECTED language.
-- Use the exact function name, class structure, and parameter signatures provided in the starter template code.
-- Ensure your code handles all edge cases and constraints specified in the problem text.
-- Match the expected sample output format EXACTLY.
-- Do NOT write placeholder code. Write REAL working code.
-- Add brief inline comments on key lines.
-
-STEP 4 — EXPLAIN:
-In EXACTLY 2-3 short sentences, explain your approach, time complexity (O(?)), and space complexity (O(?)). Keep explanation under 50 words.
-
-─── IF IT IS A CONCEPTUAL/MCQ PROBLEM ───
-Follow these exact steps:
-
-STEP 1 — READ THE QUIZ & ALL OPTIONS THOROUGHLY:
-Identify the question and all visible options. Pay extreme attention to exact characters, syntax, casing, newlines, and subtle spacing (like leading or trailing spaces) in the choices.
-
-STEP 2 — STATE THE CORRECT ANSWER:
-State clearly and bold which option is correct in 1 line. If the correct code output contains a space (e.g. " World!") but the choices do not match that space exactly, select **None of the above** if available.
-
-STEP 3 — EXPLAIN WHY:
-In 2-3 short sentences (under 60 words total), explain why the chosen option is correct or incorrect based on syntax, spacing, or language rules. Do not output any code blocks.
-
-─── STRICT RULES FOR ALL ANSWERS ───
-- NEVER start with preambles or conversational filler ("Sure!", "Certainly!", "Great question!", "Here is a solution..."). Start immediately with Step 1.
-- NEVER end with conversational conclusions ("In summary", "Hope this helps!").
-- Keep total word count concise and natural so it sounds like a real human candidate.`;
+STRICT FORMAT RULES:
+- NO conversational preambles ("Sure!", "Certainly!", "Here is...").
+- Output the CODE BLOCK IMMEDIATELY on Line 1 for all coding problems!`;
     let fullText = '';
 
     const onChunk = (chunk) => {
