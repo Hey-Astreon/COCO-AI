@@ -24,6 +24,10 @@ const state = {
   replayMode: false,
   savedStateBeforeReplay: null,
   stealthMode: 'full', // 'full' | 'compact' | 'ghost'
+  // Multi-screenshot buffer for long scrollable problems
+  screenshotBuffer: [],       // Array of base64 image data URLs
+  screenshotBufferTimer: null, // Timer to auto-clear buffer after inactivity
+  lastScreenshotCardId: null, // Track the card to update with re-analysis
 };
 
 // ─── DOM Refs ─────────────────────────────────────────────────
@@ -835,7 +839,7 @@ function generateDemoAnswer(question) {
   return `**Here's a structured approach to answer this:**\n\n- Start with the **core concept** in one clear sentence\n- Use a **concrete example** from your experience\n- Quantify your impact with **specific metrics** where possible\n- Connect it to the **role's requirements** you're interviewing for\n\nTake a **2-3 second pause** before answering — interviewers appreciate thoughtfulness.`;
 }
 
-// ─── Analyze Screen ────────────────────────────────────────────
+// ─── Analyze Screen (with Multi-Screenshot Buffer for long problems) ───
 async function analyzeScreen() {
   state.messageCount++;
   const requestId = `req-${state.messageCount}-${Date.now()}`;
@@ -845,68 +849,104 @@ async function analyzeScreen() {
   const welcome = els.answersFeed.querySelector('.welcome-card');
   if (welcome) welcome.remove();
 
-  // Create card with thinking state
-  const card = document.createElement('div');
-  card.className = 'qa-card';
-  card.id = `card-${requestId}`;
-  card.innerHTML = `
-    <div class="qa-question">
-      <span class="qa-q-label">📸</span>
-      <span class="qa-q-text">Screenshot Capture Analysis</span>
-    </div>
-    <div class="qa-answer">
-      <div class="qa-a-label">⚡ CocoAI Code Solver</div>
-      <div class="qa-a-text" id="answer-${requestId}">
-        <div class="thinking-dots">
-          <span></span><span></span><span></span>
+  // ── Step 1: Capture the screenshot ──
+  showToast('📸 Capturing screen...', 'success');
+  let imgDataUrl = '';
+  if (window.electronAPI && window.electronAPI.captureScreen) {
+    imgDataUrl = await window.electronAPI.captureScreen();
+  } else {
+    console.log('🥥 Browser mode: mocking screenshot');
+    await sleep(1000);
+    imgDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+  }
+
+  // ── Step 2: Add to multi-screenshot buffer ──
+  state.screenshotBuffer.push(imgDataUrl);
+  const captureCount = state.screenshotBuffer.length;
+
+  // Reset the auto-clear timer (45s of inactivity clears the buffer)
+  if (state.screenshotBufferTimer) clearTimeout(state.screenshotBufferTimer);
+  state.screenshotBufferTimer = setTimeout(() => {
+    state.screenshotBuffer = [];
+    state.lastScreenshotCardId = null;
+    console.log('🥥 Screenshot buffer auto-cleared after 45s inactivity.');
+  }, 45000);
+
+  // ── Step 3: Create or reuse card ──
+  let card, answerEl;
+
+  if (captureCount > 1 && state.lastScreenshotCardId) {
+    // Reuse existing card — user scrolled down and captured more context
+    card = $(state.lastScreenshotCardId);
+    const qText = card?.querySelector('.qa-q-text');
+    if (qText) qText.textContent = `Screenshot Analysis (${captureCount} captures — full problem)`;
+    answerEl = card?.querySelector('.qa-a-text');
+    if (answerEl) {
+      answerEl.innerHTML = `
+        <div class="thinking-dots"><span></span><span></span><span></span></div>
+        <span class="thinking-text">Re-analyzing with ${captureCount} screenshots...</span>
+      `;
+    }
+    showToast(`📸 Captured page ${captureCount} — re-analyzing full problem...`, 'success');
+  } else {
+    // First capture — create new card
+    card = document.createElement('div');
+    card.className = 'qa-card';
+    card.id = `card-${requestId}`;
+    state.lastScreenshotCardId = `card-${requestId}`;
+    card.innerHTML = `
+      <div class="qa-question">
+        <span class="qa-q-label">📸</span>
+        <span class="qa-q-text">Screenshot Capture Analysis</span>
+      </div>
+      <div class="qa-answer">
+        <div class="qa-a-label">⚡ CocoAI Code Solver</div>
+        <div class="qa-a-text" id="answer-${requestId}">
+          <div class="thinking-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <span class="thinking-text">Analyzing problem...</span>
         </div>
-        <span class="thinking-text">Capturing screen and analyzing...</span>
       </div>
-    </div>
-    <div class="qa-footer">
-      <span class="qa-time">${timestamp}</span>
-      <div class="qa-actions">
-        <button class="qa-action-btn" onclick="copyAnswer(this)">Copy</button>
-        <button class="qa-action-btn" onclick="thumbsUp(this)">👍</button>
+      <div class="qa-footer">
+        <span class="qa-time">${timestamp}</span>
+        <div class="qa-actions">
+          <button class="qa-action-btn" onclick="copyAnswer(this)">Copy</button>
+          <button class="qa-action-btn" onclick="thumbsUp(this)">👍</button>
+        </div>
       </div>
-    </div>
-  `;
-  els.answersFeed.appendChild(card);
+    `;
+    els.answersFeed.appendChild(card);
+    answerEl = $(`answer-${requestId}`);
+  }
   scrollToBottom(els.answersFeed);
 
-  showToast('📸 Capturing screen...', 'success');
-
-  const answerEl = $(`answer-${requestId}`);
+  if (!answerEl) {
+    console.error('Answer element not found');
+    return;
+  }
 
   try {
-    let imgDataUrl = '';
+    // ── Step 4: Build prompt ──
+    const multiImageNote = captureCount > 1
+      ? `\n\nIMPORTANT: You are receiving ${captureCount} screenshots of the SAME problem. The user scrolled down to capture the full question. Combine ALL visible information from ALL images to understand the complete problem before writing your solution.`
+      : '';
 
-    if (window.electronAPI && window.electronAPI.captureScreen) {
-      imgDataUrl = await window.electronAPI.captureScreen();
-    } else {
-      console.log('🥥 Browser mode: mocking screenshot');
-      await sleep(1000);
-      imgDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
-    }
+    const prompt = `You are a world-class competitive programmer. Analyze the screenshot(s) and solve the problem.${multiImageNote}
 
-    const prompt = `You are a world-class competitive programmer and expert software engineer assisting a candidate during a live technical interview. Analyze the screenshot carefully.
+FOR CODING PROBLEMS:
+1. OUTPUT THE CODE BLOCK FIRST on Line 1 (\`\`\`language ... \`\`\`). This is mandatory.
+2. DETECT LANGUAGE from editor dropdown/header (JavaScript, Python3, C++, Java, etc.) and write in that exact language.
+3. If editor is blank (e.g. Micro1), infer function signature from the problem's input/output description.
+4. Read ALL constraints, edge cases, and sample test cases. Write correct, complete, runnable code.
+5. AFTER code block: 1 sentence with approach + O(?) time/space. Nothing more.
 
-MANDATORY RULE FOR CODING PROBLEMS:
-If the screenshot shows a CODING PROBLEM (LeetCode, Micro1, HackerRank, Codility, IDE, or programming exercise):
-1. YOU MUST OUTPUT THE CODE SOLUTION BLOCK FIRST AS THE VERY FIRST THING ON LINE 1 using triple backticks (e.g. \`\`\`javascript ... \`\`\`). NEVER OUTPUT ONLY TEXT OR EXPLANATIONS WITHOUT A CODE BLOCK.
-2. DETECT TARGET LANGUAGE: Look closely at the code editor dropdown or header (e.g., 'JavaScript (Node.js)', 'C++', 'Python3', 'Java', 'TypeScript', 'C#', 'Go', 'Rust'). You MUST write the code in that exact language using valid syntax (e.g., for JavaScript use 'function', 'const', 'let', 'return').
-3. FUNCTION SIGNATURE: If starter code exists in the editor, match the exact function/class signature. If the editor is blank (like Micro1), infer a clean complete function signature from the problem's input/output parameter names (e.g. \`function solve(descriptions, priorities) { ... }\`).
-4. CORRECTNESS & EDGE CASES: Read ALL problem descriptions, constraints, requirements, and sample test cases carefully. Handle all edge cases (e.g., ties, lexicographical sorting, array bounds).
-5. AFTER THE CODE BLOCK: In 2-3 short sentences below the code block, explain your approach, Time Complexity O(?), and Space Complexity O(?).
+FOR MCQ/QUIZ:
+1. Bold the correct answer on Line 1.
+2. 1-sentence explanation.
 
-MANDATORY RULE FOR CONCEPTUAL / MCQ PROBLEMS:
-If the screenshot shows a MULTIPLE CHOICE QUESTION or QUIZ:
-1. State the exact correct option in bold on Line 1 (e.g., **Option B: ...**).
-2. Provide a 2-sentence explanation of why it is correct.
+RULES: No preambles. No filler. Code block Line 1. Minimal explanation.`;
 
-STRICT FORMAT RULES:
-- NO conversational preambles ("Sure!", "Certainly!", "Here is...").
-- Output the CODE BLOCK IMMEDIATELY on Line 1 for all coding problems!`;
     let fullText = '';
 
     const onChunk = (chunk) => {
@@ -922,7 +962,10 @@ STRICT FORMAT RULES:
       showToast(msg, 'warning');
     };
 
-    // ── Primary: Gemini Vision (Ultra-fast 1-2s response) ──
+    // ── Step 5: Send ALL buffered screenshots to Vision API ──
+    const imagesToSend = [...state.screenshotBuffer];
+
+    // ── Primary: Gemini Vision ──
     if (state.apiKeys.gemini) {
       answerEl.innerHTML = `
         <div class="thinking-dots"><span></span><span></span><span></span></div>
@@ -931,14 +974,14 @@ STRICT FORMAT RULES:
       try {
         const analysis = await window.GeminiService.analyzeImage(
           state.apiKeys.gemini,
-          imgDataUrl,
+          imagesToSend,  // Pass array of images
           prompt,
           onChunk,
           onStatus
         );
         answerEl.innerHTML = formatAnswer(analysis || fullText);
         state.lastAnswer = analysis || fullText;
-        showToast('✅ Problem analyzed successfully!', 'success');
+        showToast('✅ Problem solved!', 'success');
         return;
       } catch (geminiErr) {
         console.warn('⚠️ Gemini Vision failed, trying NVIDIA NIM fallback:', geminiErr.message);
@@ -958,14 +1001,14 @@ STRICT FORMAT RULES:
     `;
     const analysis = await window.NvidiaService.analyzeImage(
       state.apiKeys.nvidia,
-      imgDataUrl,
+      imagesToSend,  // Pass array of images
       prompt,
       onChunk,
       onStatus
     );
     answerEl.innerHTML = formatAnswer(analysis || fullText);
     state.lastAnswer = analysis || fullText;
-    showToast('✅ Analyzed via NVIDIA NIM!', 'success');
+    showToast('✅ Problem solved via NVIDIA!', 'success');
 
   } catch (err) {
     console.error('Screen analysis failed:', err);

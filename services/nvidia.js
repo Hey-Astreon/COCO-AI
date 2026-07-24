@@ -22,17 +22,18 @@ const NvidiaService = {
   REQUEST_TIMEOUT_MS: 3000,  // Kill any single request that takes > 3s
 
   /**
-   * Analyze a screen capture using NVIDIA NIM vision models.
+   * Analyze screen capture(s) using NVIDIA NIM vision models.
+   * Supports single image (string) or multiple images (array) for long scrollable problems.
    * Streams the response chunk-by-chunk just like GeminiService.analyzeImage.
    *
    * @param {string} apiKey        - NVIDIA NIM API key (nvapi-...)
-   * @param {string} base64Image   - Base64 image string (with or without data URL prefix)
+   * @param {string|string[]} base64Images - Single base64 image string or array of base64 image strings
    * @param {string} prompt        - Instruction text sent to the model
    * @param {function} [onChunk]   - Called with each streamed text chunk
    * @param {function} [onStatus]  - Called with status strings (retry/fallback messages)
    * @returns {Promise<string>}    - Full compiled response text
    */
-  async analyzeImage(apiKey, base64Image, prompt, onChunk, onStatus) {
+  async analyzeImage(apiKey, base64Images, prompt, onChunk, onStatus) {
     if (!apiKey) {
       throw new Error('NVIDIA API key is missing. Add BUILD_NVIDIA_API_KEY in Settings.');
     }
@@ -40,10 +41,17 @@ const NvidiaService = {
       prompt = 'Analyze the code, question, error, or diagram in this screenshot. Provide a clear step-by-step solution with complete corrected code blocks and time/space complexity analysis where applicable.';
     }
 
-    // Normalise base64 — keep data URL prefix since NVIDIA accepts it
-    const imageUrl = base64Image.startsWith('data:')
-      ? base64Image
-      : `data:image/png;base64,${base64Image}`;
+    // Normalize to array
+    const imageArray = Array.isArray(base64Images) ? base64Images : [base64Images];
+
+    // Build content: text first, then all images
+    const contentParts = [{ type: 'text', text: prompt }];
+    for (const img of imageArray) {
+      const imageUrl = img.startsWith('data:')
+        ? img
+        : `data:image/png;base64,${img}`;
+      contentParts.push({ type: 'image_url', image_url: { url: imageUrl } });
+    }
 
     let lastError = null;
 
@@ -69,14 +77,11 @@ const NvidiaService = {
             messages: [
               {
                 role: 'user',
-                content: [
-                  { type: 'text', text: prompt },
-                  { type: 'image_url', image_url: { url: imageUrl } }
-                ]
+                content: contentParts
               }
             ],
             temperature: 0.2,
-            max_tokens: 2048,
+            max_tokens: 4096,
             stream: true
           });
 

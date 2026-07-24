@@ -16,18 +16,19 @@ const GeminiService = {
   BASE_DELAY_MS: 800,  // 800ms initial delay for faster retries
 
   /**
-   * Analyze screen capture with Gemini Vision API (REST)
+   * Analyze screen capture(s) with Gemini Vision API (REST)
+   * Supports single image (string) or multiple images (array) for long scrollable problems.
    * Automatically retries on 429 rate-limit errors with exponential backoff,
    * and falls back to alternative models if all retries are exhausted.
    *
    * @param {string} apiKey - Gemini API Key
-   * @param {string} base64Image - Base64 image data (with or without prefix)
+   * @param {string|string[]} base64Images - Single base64 image string or array of base64 image strings
    * @param {string} prompt - Vision prompt
    * @param {function} [onChunk] - Optional callback for streaming text chunks
    * @param {function} [onStatus] - Optional callback for status updates (e.g. "Retrying...")
    * @returns {Promise<string>} - The full compiled response text
    */
-  async analyzeImage(apiKey, base64Image, prompt, onChunk, onStatus) {
+  async analyzeImage(apiKey, base64Images, prompt, onChunk, onStatus) {
     if (!prompt) {
       prompt = 'Identify the coding problem, question, or diagram in this screenshot and provide a clear, concise step-by-step solution with code.';
     }
@@ -35,26 +36,26 @@ const GeminiService = {
       throw new Error('Gemini API key is missing. Set it in the Settings panel (⚙).');
     }
 
-    // Remove the data URL prefix if present
-    const cleanBase64 = base64Image.replace(/^data:image\/\w+;base64,/, '');
+    // Normalize to array
+    const imageArray = Array.isArray(base64Images) ? base64Images : [base64Images];
+
+    // Build parts: text prompt first, then all images
+    const parts = [{ text: prompt }];
+    for (const img of imageArray) {
+      const cleanBase64 = img.replace(/^data:image\/\w+;base64,/, '');
+      parts.push({
+        inlineData: {
+          mimeType: 'image/png',
+          data: cleanBase64
+        }
+      });
+    }
 
     const requestBody = JSON.stringify({
-      contents: [
-        {
-          parts: [
-            { text: prompt },
-            {
-              inlineData: {
-                mimeType: 'image/png',
-                data: cleanBase64
-              }
-            }
-          ]
-        }
-      ],
+      contents: [{ parts }],
       generationConfig: {
         temperature: 0.2,
-        maxOutputTokens: 2048
+        maxOutputTokens: 4096
       }
     });
 
