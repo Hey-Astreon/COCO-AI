@@ -19,7 +19,7 @@ const NvidiaService = {
 
   MAX_RETRIES: 1,
   BASE_DELAY_MS: 150,
-  REQUEST_TIMEOUT_MS: 3000,  // Kill any single request that takes > 3s
+  REQUEST_TIMEOUT_MS: 20000,  // 20s timeout — multi-image payloads need more upload time
 
   /**
    * Analyze screen capture(s) using NVIDIA NIM vision models.

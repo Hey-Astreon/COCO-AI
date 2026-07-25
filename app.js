@@ -25,9 +25,10 @@ const state = {
   savedStateBeforeReplay: null,
   stealthMode: 'full', // 'full' | 'compact' | 'ghost'
   // Multi-screenshot buffer for long scrollable problems
-  screenshotBuffer: [],       // Array of base64 image data URLs
+  screenshotBuffer: [],        // Array of base64 image data URLs
   screenshotBufferTimer: null, // Timer to auto-clear buffer after inactivity
-  lastScreenshotCardId: null, // Track the card to update with re-analysis
+  lastScreenshotCardId: null,  // Track the card to update with re-analysis
+  isAnalyzing: false,          // Guard: prevent concurrent analyzeScreen() calls
 };
 
 // ─── DOM Refs ─────────────────────────────────────────────────
@@ -869,6 +870,14 @@ function generateDemoAnswer(question) {
 
 // ─── Analyze Screen (with Multi-Screenshot Buffer for long problems) ───
 async function analyzeScreen() {
+  // ── Guard: prevent concurrent calls ──
+  // If a capture + analysis is already in progress, ignore the extra press
+  if (state.isAnalyzing) {
+    showToast('⏳ Already analyzing — please wait...', 'warning');
+    return;
+  }
+  state.isAnalyzing = true;
+
   state.messageCount++;
   const requestId = `req-${state.messageCount}-${Date.now()}`;
   const timestamp = getTimestamp();
@@ -880,15 +889,28 @@ async function analyzeScreen() {
   // ── Step 1: Capture the screenshot ──
   showToast('📸 Capturing screen...', 'success');
   let imgDataUrl = '';
-  if (window.electronAPI && window.electronAPI.captureScreen) {
-    imgDataUrl = await window.electronAPI.captureScreen();
-  } else {
-    console.log('🥥 Browser mode: mocking screenshot');
-    await sleep(1000);
-    imgDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+  try {
+    if (window.electronAPI && window.electronAPI.captureScreen) {
+      imgDataUrl = await window.electronAPI.captureScreen();
+    } else {
+      console.log('🥥 Browser mode: mocking screenshot');
+      await sleep(1000);
+      imgDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+    }
+  } catch (captureErr) {
+    console.error('Screen capture failed:', captureErr);
+    showToast('❌ Screen capture failed', 'error');
+    state.isAnalyzing = false;
+    return;
   }
 
-  // ── Step 2: Add to multi-screenshot buffer ──
+  // ── Step 2: Add to multi-screenshot buffer (max 5 screenshots) ──
+  const MAX_SCREENSHOTS = 5;
+  if (state.screenshotBuffer.length >= MAX_SCREENSHOTS) {
+    showToast(`⚠️ Max ${MAX_SCREENSHOTS} screenshots per problem reached`, 'warning');
+    state.isAnalyzing = false;
+    return;
+  }
   state.screenshotBuffer.push(imgDataUrl);
   const captureCount = state.screenshotBuffer.length;
 
@@ -903,21 +925,33 @@ async function analyzeScreen() {
   // ── Step 3: Create or reuse card ──
   let card, answerEl;
 
+  // Try to reuse the existing card for multi-capture
+  let reuseSucceeded = false;
   if (captureCount > 1 && state.lastScreenshotCardId) {
-    // Reuse existing card — user scrolled down and captured more context
     card = $(state.lastScreenshotCardId);
-    const qText = card?.querySelector('.qa-q-text');
-    if (qText) qText.textContent = `Screenshot Analysis (${captureCount} captures — full problem)`;
-    answerEl = card?.querySelector('.qa-a-text');
-    if (answerEl) {
-      answerEl.innerHTML = `
-        <div class="thinking-dots"><span></span><span></span><span></span></div>
-        <span class="thinking-text">Re-analyzing with ${captureCount} screenshots...</span>
-      `;
+    if (card) {
+      const qText = card.querySelector('.qa-q-text');
+      if (qText) qText.textContent = `Screenshot Analysis (${captureCount} captures — full problem)`;
+      answerEl = card.querySelector('.qa-a-text');
+      if (answerEl) {
+        answerEl.innerHTML = `
+          <div class="thinking-dots"><span></span><span></span><span></span></div>
+          <span class="thinking-text">Re-analyzing with ${captureCount} screenshots...</span>
+        `;
+        reuseSucceeded = true;
+        showToast(`📸 Captured page ${captureCount} — re-analyzing full problem...`, 'success');
+      }
     }
-    showToast(`📸 Captured page ${captureCount} — re-analyzing full problem...`, 'success');
-  } else {
-    // First capture — create new card
+    // If card or answerEl not found (e.g. user cleared answers), fall through to create new card
+    if (!reuseSucceeded) {
+      console.warn('🥥 Could not reuse previous card — creating a fresh one.');
+      state.screenshotBuffer = [imgDataUrl]; // reset buffer to just this screenshot
+      state.lastScreenshotCardId = null;
+    }
+  }
+
+  if (!reuseSucceeded) {
+    // First capture (or fallback) — create new card
     card = document.createElement('div');
     card.className = 'qa-card';
     card.id = `card-${requestId}`;
@@ -950,14 +984,16 @@ async function analyzeScreen() {
   scrollToBottom(els.answersFeed);
 
   if (!answerEl) {
-    console.error('Answer element not found');
+    console.error('Answer element not found — aborting analysis.');
+    state.isAnalyzing = false;
     return;
   }
 
   try {
     // ── Step 4: Build prompt ──
-    const multiImageNote = captureCount > 1
-      ? `\n\nIMPORTANT: You are receiving ${captureCount} screenshots of the SAME problem. The user scrolled down to capture the full question. Combine ALL visible information from ALL images to understand the complete problem before writing your solution.`
+    const captureCountNow = state.screenshotBuffer.length;
+    const multiImageNote = captureCountNow > 1
+      ? `\n\nIMPORTANT: You are receiving ${captureCountNow} screenshots of the SAME problem. The user scrolled down to capture the full question. Combine ALL visible information from ALL images to understand the complete problem before writing your solution.`
       : '';
 
     const prompt = `You are a world-class competitive programmer. Analyze the screenshot(s) and solve the problem.${multiImageNote}
@@ -990,8 +1026,20 @@ RULES: No preambles. No filler. Code block Line 1. Minimal explanation.`;
       showToast(msg, 'warning');
     };
 
-    // ── Step 5: Send ALL buffered screenshots to Vision API ──
+    // ── Step 5: Snapshot the buffer NOW (immutable for this request) ──
+    // Take a copy so that if user presses Ctrl+Shift+A again during streaming,
+    // the new screenshot goes into the NEXT request's buffer, not this one.
     const imagesToSend = [...state.screenshotBuffer];
+
+    // ── Step 6: Clear buffer BEFORE API call ──
+    // This ensures the next Ctrl+Shift+A press starts fresh for a NEW problem.
+    // The buffer has already been snapshotted into imagesToSend above.
+    state.screenshotBuffer = [];
+    state.lastScreenshotCardId = null;
+    if (state.screenshotBufferTimer) {
+      clearTimeout(state.screenshotBufferTimer);
+      state.screenshotBufferTimer = null;
+    }
 
     // ── Primary: Gemini Vision ──
     if (state.apiKeys.gemini) {
@@ -1002,7 +1050,7 @@ RULES: No preambles. No filler. Code block Line 1. Minimal explanation.`;
       try {
         const analysis = await window.GeminiService.analyzeImage(
           state.apiKeys.gemini,
-          imagesToSend,  // Pass array of images
+          imagesToSend,
           prompt,
           onChunk,
           onStatus
@@ -1029,7 +1077,7 @@ RULES: No preambles. No filler. Code block Line 1. Minimal explanation.`;
     `;
     const analysis = await window.NvidiaService.analyzeImage(
       state.apiKeys.nvidia,
-      imagesToSend,  // Pass array of images
+      imagesToSend,
       prompt,
       onChunk,
       onStatus
@@ -1047,6 +1095,9 @@ RULES: No preambles. No filler. Code block Line 1. Minimal explanation.`;
       </div>
     `;
     showToast('❌ Analysis failed', 'error');
+  } finally {
+    // Always release the guard so future presses work
+    state.isAnalyzing = false;
   }
 }
 
