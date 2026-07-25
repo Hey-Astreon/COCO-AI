@@ -369,9 +369,17 @@ app.whenReady().then(() => {
   globalShortcut.register('CommandOrControl+Shift+H', toggleOverlay);
   globalShortcut.register('CommandOrControl+Shift+P', panicHide);
 
+  // Ctrl+Shift+A = Fresh single-shot analyze (always clears buffer)
   globalShortcut.register('CommandOrControl+Shift+A', () => {
     if (mainWindow && mainWindow.webContents) {
-      mainWindow.webContents.send('analyze-screen');
+      mainWindow.webContents.send('analyze-screen-fresh');
+    }
+  });
+
+  // Ctrl+Shift+S = Add screenshot to current problem (multi-screenshot mode)
+  globalShortcut.register('CommandOrControl+Shift+S', () => {
+    if (mainWindow && mainWindow.webContents) {
+      mainWindow.webContents.send('analyze-screen-add');
     }
   });
 

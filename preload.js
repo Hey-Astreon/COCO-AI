@@ -46,8 +46,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
 
   // ─── Events from Main Process ─────────────────────────────────
-  onAnalyzeScreen: (callback) => {
-    ipcRenderer.on('analyze-screen', () => callback());
+  // Ctrl+Shift+A: Fresh single-shot analyze (always clears buffer)
+  onAnalyzeScreenFresh: (callback) => {
+    ipcRenderer.on('analyze-screen-fresh', () => callback());
+  },
+  // Ctrl+Shift+S: Add screenshot to current problem (multi-screenshot mode)
+  onAnalyzeScreenAdd: (callback) => {
+    ipcRenderer.on('analyze-screen-add', () => callback());
   },
   captureScreen: () => ipcRenderer.invoke('capture-screen'),
   getSystemAudioSourceId: () => ipcRenderer.invoke('get-system-audio-source-id'),

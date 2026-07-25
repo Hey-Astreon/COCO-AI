@@ -92,9 +92,14 @@ async function initElectronBridge() {
       handleAIError(data);
     });
 
-    // Listen for analyze-screen from main process
-    window.electronAPI.onAnalyzeScreen(() => {
-      analyzeScreen();
+    // Ctrl+Shift+A: Fresh single-shot analyze (always clears buffer first)
+    window.electronAPI.onAnalyzeScreenFresh(() => {
+      analyzeScreen(true);
+    });
+
+    // Ctrl+Shift+S: Add screenshot to current problem (multi-screenshot mode)
+    window.electronAPI.onAnalyzeScreenAdd(() => {
+      analyzeScreen(false);
     });
 
     // Listen for stealth cycle from main process (global hotkey)
@@ -868,8 +873,10 @@ function generateDemoAnswer(question) {
   return `**Here's a structured approach to answer this:**\n\n- Start with the **core concept** in one clear sentence\n- Use a **concrete example** from your experience\n- Quantify your impact with **specific metrics** where possible\n- Connect it to the **role's requirements** you're interviewing for\n\nTake a **2-3 second pause** before answering — interviewers appreciate thoughtfulness.`;
 }
 
-// ─── Analyze Screen (with Multi-Screenshot Buffer for long problems) ───
-async function analyzeScreen() {
+// ─── Analyze Screen ─────────────────────────────────────────────────────────
+// freshMode = true  → Ctrl+Shift+A: always a clean single-shot solve
+// freshMode = false → Ctrl+Shift+S: add screenshot to current problem buffer
+async function analyzeScreen(freshMode = true) {
   // ── Guard: prevent concurrent calls ──
   // If a capture + analysis is already in progress, ignore the extra press
   if (state.isAnalyzing) {
@@ -887,7 +894,7 @@ async function analyzeScreen() {
   if (welcome) welcome.remove();
 
   // ── Step 1: Capture the screenshot ──
-  showToast('📸 Capturing screen...', 'success');
+  showToast(freshMode ? '📸 Capturing screen...' : '📸 Adding screenshot to problem...', 'success');
   let imgDataUrl = '';
   try {
     if (window.electronAPI && window.electronAPI.captureScreen) {
@@ -904,17 +911,29 @@ async function analyzeScreen() {
     return;
   }
 
-  // ── Step 2: Add to multi-screenshot buffer (max 5 screenshots) ──
-  const MAX_SCREENSHOTS = 5;
-  if (state.screenshotBuffer.length >= MAX_SCREENSHOTS) {
-    showToast(`⚠️ Max ${MAX_SCREENSHOTS} screenshots per problem reached`, 'warning');
-    state.isAnalyzing = false;
-    return;
+  // ── Step 2: Fresh mode resets buffer; Add mode accumulates ──
+  if (freshMode) {
+    // Ctrl+Shift+A: always start clean — discard any previous screenshots
+    state.screenshotBuffer = [];
+    state.lastScreenshotCardId = null;
+    if (state.screenshotBufferTimer) {
+      clearTimeout(state.screenshotBufferTimer);
+      state.screenshotBufferTimer = null;
+    }
+  } else {
+    // Ctrl+Shift+S: add mode — enforce screenshot cap
+    const MAX_SCREENSHOTS = 5;
+    if (state.screenshotBuffer.length >= MAX_SCREENSHOTS) {
+      showToast(`⚠️ Max ${MAX_SCREENSHOTS} screenshots per problem reached`, 'warning');
+      state.isAnalyzing = false;
+      return;
+    }
   }
+
   state.screenshotBuffer.push(imgDataUrl);
   const captureCount = state.screenshotBuffer.length;
 
-  // Reset the auto-clear timer (45s of inactivity clears the buffer)
+  // Reset the 45s auto-clear timer on every capture
   if (state.screenshotBufferTimer) clearTimeout(state.screenshotBufferTimer);
   state.screenshotBufferTimer = setTimeout(() => {
     state.screenshotBuffer = [];
