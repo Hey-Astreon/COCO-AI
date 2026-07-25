@@ -1055,7 +1055,10 @@ FOR MCQ/QUIZ:
 1. Bold the correct answer on Line 1.
 2. 1-sentence explanation.
 
-RULES: No preambles. No filler. Code block Line 1. Minimal explanation.`;
+FOR DESKTOP / FILE EXPLORER / GENERAL WINDOWS (Not a coding question or quiz):
+- Briefly describe what is visible in 1-2 short sentences. Do NOT generate random code or automation scripts unless an actual programming question is shown.
+
+RULES: No preambles. No filler. Minimal explanation.`;
 
     let fullText = '';
 
