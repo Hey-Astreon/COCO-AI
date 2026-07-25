@@ -1026,20 +1026,11 @@ RULES: No preambles. No filler. Code block Line 1. Minimal explanation.`;
       showToast(msg, 'warning');
     };
 
-    // ── Step 5: Snapshot the buffer NOW (immutable for this request) ──
-    // Take a copy so that if user presses Ctrl+Shift+A again during streaming,
-    // the new screenshot goes into the NEXT request's buffer, not this one.
+    // ── Step 5: Snapshot buffer for this API call ──
+    // We copy the buffer now so the API call uses exactly what's in it.
+    // We do NOT clear the buffer here — the user might press Ctrl+Shift+A again
+    // during streaming to add a 3rd screenshot to this same problem.
     const imagesToSend = [...state.screenshotBuffer];
-
-    // ── Step 6: Clear buffer BEFORE API call ──
-    // This ensures the next Ctrl+Shift+A press starts fresh for a NEW problem.
-    // The buffer has already been snapshotted into imagesToSend above.
-    state.screenshotBuffer = [];
-    state.lastScreenshotCardId = null;
-    if (state.screenshotBufferTimer) {
-      clearTimeout(state.screenshotBufferTimer);
-      state.screenshotBufferTimer = null;
-    }
 
     // ── Primary: Gemini Vision ──
     if (state.apiKeys.gemini) {
@@ -1057,6 +1048,14 @@ RULES: No preambles. No filler. Code block Line 1. Minimal explanation.`;
         );
         answerEl.innerHTML = formatAnswer(analysis || fullText);
         state.lastAnswer = analysis || fullText;
+        // ── Clear buffer after successful solve ──
+        // Next Ctrl+Shift+A press starts fresh for a new problem
+        state.screenshotBuffer = [];
+        state.lastScreenshotCardId = null;
+        if (state.screenshotBufferTimer) {
+          clearTimeout(state.screenshotBufferTimer);
+          state.screenshotBufferTimer = null;
+        }
         showToast('✅ Problem solved!', 'success');
         return;
       } catch (geminiErr) {
@@ -1084,6 +1083,13 @@ RULES: No preambles. No filler. Code block Line 1. Minimal explanation.`;
     );
     answerEl.innerHTML = formatAnswer(analysis || fullText);
     state.lastAnswer = analysis || fullText;
+    // ── Clear buffer after successful NVIDIA solve ──
+    state.screenshotBuffer = [];
+    state.lastScreenshotCardId = null;
+    if (state.screenshotBufferTimer) {
+      clearTimeout(state.screenshotBufferTimer);
+      state.screenshotBufferTimer = null;
+    }
     showToast('✅ Problem solved via NVIDIA!', 'success');
 
   } catch (err) {

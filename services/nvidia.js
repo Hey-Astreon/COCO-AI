@@ -19,7 +19,7 @@ const NvidiaService = {
 
   MAX_RETRIES: 1,
   BASE_DELAY_MS: 150,
-  REQUEST_TIMEOUT_MS: 20000,  // 20s timeout — multi-image payloads need more upload time
+  REQUEST_TIMEOUT_MS: 15000,  // 15s — enough time to upload multi-image payloads (was 3s, too short for 2-3 screenshots)
 
   /**
    * Analyze screen capture(s) using NVIDIA NIM vision models.
