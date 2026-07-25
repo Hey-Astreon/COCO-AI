@@ -56,6 +56,7 @@ let isOverlayVisible = true;
 
 // Store active AI request so we can abort it
 let activeAIRequest = null;
+let activeRequestId = null;
 
 function createWindow() {
   const { width: screenW, height: screenH } = screen.getPrimaryDisplay().workAreaSize;
@@ -237,9 +238,6 @@ ipcMain.handle('get-cerebras-models', async () => {
 // ═══════════════════════════════════════════════════════════════════
 //  IPC HANDLERS — Cerebras AI (Streaming)
 // ═══════════════════════════════════════════════════════════════════
-
-let activeAIRequest = null;
-let activeRequestId = null;
 
 ipcMain.on('ai-stream-request', (event, { question, model, context, requestId }) => {
   if (!cerebras) {
