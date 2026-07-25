@@ -44,6 +44,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onAIError: (callback) => {
     ipcRenderer.on('ai-stream-error', (event, data) => callback(data));
   },
+  onAIAborted: (callback) => {
+    ipcRenderer.on('ai-stream-aborted', (event, data) => callback(data));
+  },
 
   // ─── Events from Main Process ─────────────────────────────────
   // Ctrl+Shift+A: Fresh single-shot analyze (always clears buffer)

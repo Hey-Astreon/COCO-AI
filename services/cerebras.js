@@ -39,7 +39,12 @@ CRITICAL ANSWER QUALITY & LENGTH RULES:
    - Avoid overly formal academic jargon or textbook definitions. Use practical industry terms.`;
 
   if (context.resume) {
-    prompt += `\n\nCANDIDATE'S RESUME (PRIMARY SOURCE FOR CANDIDATE'S PERSONALITY, SKILLS & PROJECTS):\n${context.resume}\n\nIMPORTANT CONTEXT INSTRUCTION FOR PERSONAL & BEHAVIORAL QUESTIONS:
+    // Sanitize and cap resume to max 1,500 words (~6000 chars) to prevent token context window bloat
+    const cleanResume = String(context.resume).trim();
+    const words = cleanResume.split(/\s+/);
+    const cappedResume = words.length > 1500 ? words.slice(0, 1500).join(' ') + ' ...[truncated]' : cleanResume;
+
+    prompt += `\n\nCANDIDATE'S RESUME (PRIMARY SOURCE FOR CANDIDATE'S PERSONALITY, SKILLS & PROJECTS):\n${cappedResume}\n\nIMPORTANT CONTEXT INSTRUCTION FOR PERSONAL & BEHAVIORAL QUESTIONS:
 The resume above defines the candidate's professional identity, technical skills, real-world projects, work history, education, and domain expertise.
 For ANY personal, behavioral, or experience-based questions (e.g., "Tell me about yourself", "What are your strengths?", "Describe a challenging project you built", "What technologies do you prefer?", "Why should we hire you?"):
 1. Speak in FIRST PERSON ("I", "my", "we") as the candidate.
@@ -48,7 +53,10 @@ For ANY personal, behavioral, or experience-based questions (e.g., "Tell me abou
 4. Keep spoken personal responses concise (60-90 words max), natural, and confident.`;
   }
   if (context.jobDescription) {
-    prompt += `\n\nJOB DESCRIPTION:\n${context.jobDescription}`;
+    const cleanJD = String(context.jobDescription).trim();
+    const jdWords = cleanJD.split(/\s+/);
+    const cappedJD = jdWords.length > 1000 ? jdWords.slice(0, 1000).join(' ') + ' ...[truncated]' : cleanJD;
+    prompt += `\n\nJOB DESCRIPTION:\n${cappedJD}`;
   }
   if (context.transcript && context.transcript.length > 0) {
     const recentTranscript = context.transcript.slice(-10).map(t =>
@@ -139,6 +147,9 @@ function streamCompletion(apiKey, question, options = {}) {
         if (!isAborted) {
           onError(new Error(`Cerebras API error ${res.statusCode}: ${errorBody}`));
         }
+      });
+      res.on('error', (err) => {
+        if (!isAborted) onError(err);
       });
       return;
     }

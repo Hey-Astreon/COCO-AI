@@ -238,6 +238,9 @@ ipcMain.handle('get-cerebras-models', async () => {
 //  IPC HANDLERS — Cerebras AI (Streaming)
 // ═══════════════════════════════════════════════════════════════════
 
+let activeAIRequest = null;
+let activeRequestId = null;
+
 ipcMain.on('ai-stream-request', (event, { question, model, context, requestId }) => {
   if (!cerebras) {
     event.sender.send('ai-stream-error', {
@@ -257,12 +260,17 @@ ipcMain.on('ai-stream-request', (event, { question, model, context, requestId })
     return;
   }
 
-  // Abort any previous active request
+  // Abort any previous active request and notify renderer to clean up memory
   if (activeAIRequest) {
+    if (activeRequestId && !event.sender.isDestroyed()) {
+      event.sender.send('ai-stream-aborted', { requestId: activeRequestId });
+    }
     activeAIRequest.abort();
     activeAIRequest = null;
+    activeRequestId = null;
   }
 
+  activeRequestId = requestId;
   activeAIRequest = cerebras.streamCompletion(apiKey, question, {
     model: model || cerebras.DEFAULT_MODEL,
     context: context || {},
@@ -273,12 +281,14 @@ ipcMain.on('ai-stream-request', (event, { question, model, context, requestId })
     },
     onDone: (fullText) => {
       activeAIRequest = null;
+      activeRequestId = null;
       if (!event.sender.isDestroyed()) {
         event.sender.send('ai-stream-done', { requestId, fullText });
       }
     },
     onError: (err) => {
       activeAIRequest = null;
+      activeRequestId = null;
       if (!event.sender.isDestroyed()) {
         event.sender.send('ai-stream-error', {
           requestId,
@@ -289,10 +299,14 @@ ipcMain.on('ai-stream-request', (event, { question, model, context, requestId })
   });
 });
 
-ipcMain.on('ai-stream-abort', () => {
+ipcMain.on('ai-stream-abort', (event) => {
   if (activeAIRequest) {
+    if (activeRequestId && event.sender && !event.sender.isDestroyed()) {
+      event.sender.send('ai-stream-aborted', { requestId: activeRequestId });
+    }
     activeAIRequest.abort();
     activeAIRequest = null;
+    activeRequestId = null;
   }
 });
 

@@ -91,6 +91,11 @@ async function initElectronBridge() {
     window.electronAPI.onAIError((data) => {
       handleAIError(data);
     });
+    if (window.electronAPI.onAIAborted) {
+      window.electronAPI.onAIAborted((data) => {
+        handleAIAborted(data);
+      });
+    }
 
     // Ctrl+Shift+A: Fresh single-shot analyze (always clears buffer first)
     window.electronAPI.onAnalyzeScreenFresh(() => {
@@ -172,8 +177,11 @@ function initDeepgram() {
         if (badge) badge.classList.add('visible');
       }
 
-      // Store in history for AI context
+      // Store in history for AI context (capped at max 50 to prevent memory leaks over long sessions)
       state.transcriptHistory.push({ role: speaker, text });
+      if (state.transcriptHistory.length > 50) {
+        state.transcriptHistory.shift();
+      }
 
       // Clear interim element
       if (state.interimTranscriptEl) {
@@ -729,9 +737,17 @@ function handleAIChunk({ requestId, chunk, fullText }) {
   // Append the new chunk directly as text
   cardData.fullText = fullText;
 
-  // Render the full text with markdown-like formatting
-  answerEl.innerHTML = formatAnswer(fullText) + '<span class="cursor-blink"></span>';
-  scrollToBottom(els.answersFeed);
+  // Batch DOM updates per animation frame to prevent CPU jank during rapid high-speed streaming
+  if (!cardData.rafScheduled) {
+    cardData.rafScheduled = true;
+    requestAnimationFrame(() => {
+      cardData.rafScheduled = false;
+      if (activeCards.has(requestId)) {
+        answerEl.innerHTML = formatAnswer(cardData.fullText) + '<span class="cursor-blink"></span>';
+        if (state.autoScroll) els.answersFeed.scrollTop = els.answersFeed.scrollHeight;
+      }
+    });
+  }
 }
 
 function handleAIDone({ requestId, fullText }) {
@@ -742,7 +758,7 @@ function handleAIDone({ requestId, fullText }) {
   answerEl.innerHTML = formatAnswer(fullText);
   state.lastAnswer = fullText;
   activeCards.delete(requestId);
-  scrollToBottom(els.answersFeed);
+  if (state.autoScroll) els.answersFeed.scrollTop = els.answersFeed.scrollHeight;
 }
 
 function handleAIError({ requestId, error }) {
@@ -758,6 +774,17 @@ function handleAIError({ requestId, error }) {
   `;
   activeCards.delete(requestId);
   showToast('❌ AI Error: ' + error);
+}
+
+function handleAIAborted({ requestId }) {
+  const cardData = activeCards.get(requestId);
+  if (!cardData) return;
+
+  const { answerEl, fullText } = cardData;
+  if (answerEl) {
+    answerEl.innerHTML = formatAnswer(fullText || '') + ' <span style="opacity:0.5;font-size:11px;font-style:italic;">(superceded)</span>';
+  }
+  activeCards.delete(requestId);
 }
 
 // ─── Format AI Answer (simple markdown) ────────────────────────

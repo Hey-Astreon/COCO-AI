@@ -30,6 +30,7 @@ class DeepgramService {
     this.maxReconnects = 5;       // increased from 3 → 5 for more resilience
     this.micStreamTracks = null;
     this.systemStreamTracks = null;
+    this.audioCtx = null; // AudioContext for stream mixing
 
     // Utterance accumulation
     this._pendingUtterance = [];
@@ -135,11 +136,15 @@ class DeepgramService {
             this.systemStreamTracks = systemStream.getTracks();
             systemStream.getVideoTracks().forEach(track => track.stop());
 
-            // Mix streams using AudioContext
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const micSource = audioCtx.createMediaStreamSource(micStream);
-            const systemSource = audioCtx.createMediaStreamSource(systemStream);
-            const dest = audioCtx.createMediaStreamDestination();
+            // Mix streams using AudioContext (close pre-existing one to avoid hardware limit leak)
+            if (this.audioCtx) {
+              try { await this.audioCtx.close(); } catch (_) {}
+              this.audioCtx = null;
+            }
+            this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const micSource = this.audioCtx.createMediaStreamSource(micStream);
+            const systemSource = this.audioCtx.createMediaStreamSource(systemStream);
+            const dest = this.audioCtx.createMediaStreamDestination();
 
             micSource.connect(dest);
             systemSource.connect(dest);
@@ -420,6 +425,11 @@ class DeepgramService {
     if (this.ws) {
       try { this.ws.close(1000, 'User stopped'); } catch (e) {}
       this.ws = null;
+    }
+
+    if (this.audioCtx) {
+      try { this.audioCtx.close(); } catch (e) {}
+      this.audioCtx = null;
     }
 
     this._setStatus('paused');
