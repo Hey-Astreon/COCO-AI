@@ -830,6 +830,9 @@ function formatAnswer(text) {
   });
 
   // 2. Apply markdown on remaining (non-code) text.
+  // Auto-detect ✅ checkmark answer text and wrap in bold
+  html = html.replace(/(✅[^\n<]+)/g, '<strong>$1</strong>');
+
   // Use .+? (one-or-more) not .*? (zero-or-more) to avoid matching empty ** **
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
   // Generate list items with distinct class markers BEFORE wrapping
@@ -841,7 +844,7 @@ function formatAnswer(text) {
   
   // 2b. Smart sentence boundary & jammed text separator safety net:
   // Fix cases where AI stream outputs concatenated words like "answeringProviding" -> "answering<br><br>Providing"
-  html = html.replace(/([a-z0-9\?\.\)])([A-Z][a-z]{2,}\b)/g, '$1<br><br>$2');
+  html = html.replace(/([a-z0-9\?\.\)])([A-Z][a-z]+)/g, '$1<br><br>$2');
 
   // Fix strong tags jammed directly against following text
   html = html.replace(/<\/strong>([A-Za-z0-9])/g, '</strong><br><br>$1');
