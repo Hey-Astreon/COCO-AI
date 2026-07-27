@@ -2,84 +2,109 @@
 
 # 🥥 CocoAI
 
-### *Your Invisible Interview Copilot — Undetectable. Unstoppable.*
+### *Your Invisible Interview Copilot — Undetectable. Instant. Flawless.*
 
-![CocoAI Banner](https://img.shields.io/badge/CocoAI-Interview%20Copilot-6C63FF?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyQzYuNDggMiAyIDYuNDggMiAxMnM0LjQ4IDEwIDEwIDEwIDEwLTQuNDggMTAtMTBTMTcuNTIgMiAxMiAyeiIvPjwvc3ZnPg==)
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+[![Electron](https://img.shields.io/badge/Electron-31.7.7-47848F?style=for-the-badge&logo=electron&logoColor=white)](https://electronjs.org)
+[![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org)
+[![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)](https://developer.mozilla.org)
+[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-**A next-generation AI interview assistant overlay — inspired by CoPrep AI, designed to be better.**
+**A state-of-the-art, screen-share invisible AI interview assistant overlay designed to act as your ultimate real-time coding and communication copilot.**
 
-[🚀 Live Demo](#) · [📖 Documentation](#features) · [🐛 Report Bug](https://github.com/Hey-Astreon/COCO-AI/issues) · [💡 Request Feature](https://github.com/Hey-Astreon/COCO-AI/issues)
+[📖 Documentation](#-core-features) · [📥 Download Installer](#-getting-started) · [🐛 Report Bug](https://github.com/Hey-Astreon/COCO-AI/issues) · [💡 Request Feature](https://github.com/Hey-Astreon/COCO-AI/issues)
 
 </div>
 
 ---
 
-## 📸 Preview
+## 🌊 Live Preview & Aesthetics
 
-> CocoAI runs as a **transparent overlay** on top of your interview screen — completely invisible to screen share tools.
+CocoAI features a **premium glassmorphism design** with deep purple and cosmic violet hues. It floats on top of your screen as a hardware-protected overlay that is **physically invisible** to Zoom, Discord, Google Meet, and MS Teams screen shares.
 
-| Feature | Preview |
-|---|---|
-| 🎙 Live Transcript | Real-time speech-to-text with animated waveform |
-| ⚡ AI Answers | Streaming character-by-character responses |
-| 🛡 Stealth Mode | Invisible to Zoom, Teams, Google Meet |
-| 🔥 Model Selector | Switch between Gemini, Llama 3.3, Qwen |
+*   **⚡ Streaming Answers:** Character-by-character solutions appearing under **200ms**.
+*   **🎙️ Smart STT Transcription:** Accurate speech tracking with accented audio tolerance.
+*   **📐 Adaptive Stealth Layouts:** Instantly switch overlays based on your visual discretion.
+*   **🌊 Dynamic Audio Level Meter:** Three-bar active voice amplitude meter embedded directly in the toolbar.
 
 ---
 
-## ✨ Features
+## ⚡ Core Features
 
-### 🔥 Core Features (v1.0 & v1.5)
-- **⚡ Streaming AI Answers** — Character-by-character response like ChatGPT, sub-200ms perceived latency using Cerebras Llama-3.3.
-- **🎙 Live Audio Transcript** — Real-time speech transcription using Deepgram with animated waveform visualizer.
-- **🛡 Screen-Share Invisible** — Electron-level exclusion from all screen capture (Win32 API `setContentProtection(true)`).
-- **📸 Screen Analyze** — Capture & analyze coding problems from screen with `Ctrl+Shift+A` (powered by Gemini 2.5 Flash).
-- **🧠 Context-Aware** — Personalized answers using your resume + job description + live conversation.
-- **📂 Resume PDF Uploader** — Local drag-and-drop PDF parsing using client-side PDF.js (completely offline & secure).
-- **🔄 Model Agnostic** — Switch between Llama 3.3 70B, Llama 3.1 8B, and Qwen 3 32B dynamically.
-- **💾 Replays & History** — Export interview sessions to JSON and reload them inside a dedicated session player to replay transcripts and answers.
+### 🧠 Triple-Engine AI Answer Streaming
+*   **Primary Engine (Cerebras):** Super-speed answer generation using Cerebras LPU architecture (up to 2,000 tokens/sec) for Llama-3.3-70b, Llama-3.1-8b, and Qwen-3-32b.
+*   **Groq Auto-Fallback:** An automatic, silent fallback pipeline. If Cerebras rate-limits, errors out, or goes down, your Groq API key seamlessly picks up the request with zero interruption.
+*   **STT Phonetic Error Tolerance:** Prompt instruction filters that understand and correct phonetic transcript errors (e.g., automatically resolving "reactive native" to "React Native" or "usestate hook" to "useState hook") without mentioning the typo.
 
-### 🎨 UI/UX Highlights
-- Dark **glassmorphism** design with Electric Violet (`#6C63FF`) + Teal (`#00D4AA`) accents.
-- **Tabs Interface** — Tabbed navigation below toolbar between AI Answers and Live Transcript for compact floating.
-- **Tab Notification Badges** — Violet/Teal glowing badge indicators notifying you of new content on the inactive tab.
-- **Animated waveform** visualizer showing live audio capture.
-- **Per-card actions**: Copy, Retry, 👍 Thumbs Up.
-- **⚡ Answer badges** on each transcript entry — click to instantly generate answer.
-- Auto-scrolling feeds with toggle.
-- Toast notifications for all actions.
+### 🎙️ CD-Quality Live Transcription (Deepgram Nova-3)
+*   **High-Fidelity Loopback:** Uses WASAPI loopback audio to record interviewer speech directly from system output (avoiding micro-microphone loops).
+*   **Calm Conversational Debounce:** Increased silence checks (`utterance_end_ms` set to 3s and `endpointing` set to 1.5s) ensure CocoAI calmly listens to the entire question and waits for the interviewer to finish speaking instead of triggering early.
+*   **Realtime Audio Meter:** Three glowing wave bars react dynamically to voice volume directly in your toolbar.
 
-### ⌨️ Keyboard Shortcuts
+### 🛡️ Hardware-Level Stealth
+*   **Zero Leak Screen-Share Protection:** Enforced via Electron's `setContentProtection(true)` Win32 hook, blocking all software recorders, desktop screenshots, and screen-sharing programs from seeing the window.
+*   **Custom Form Dropdowns:** Replaced standard HTML/OS select tags with custom-rendered, protected overlay components to prevent system popups from popping through onto Zoom screen shares.
+*   **Stealth Profiles:**
+    *   `Full` (850px): Dual-pane layout showing Answers & Transcript side-by-side.
+    *   `Compact` (580px): Tabs interface showing one panel at a time with notification glow badges.
+    *   `Ghost`: Fully transparent window with click-through enabled. Hovering over the stealth toggle lets you control it while ignoring clicks elsewhere.
+
+### 📸 Multi-Screenshot Screen Solver (`Ctrl + Shift + S`)
+*   **Scroll Capture Buffer:** Don't get limited by scrollable or long programming problems.
+*   **How it works:** Use `Ctrl+Shift+S` to capture different sections of a problem as you scroll. They accumulate in a buffer.
+*   **Context Fusion:** Press `Ctrl+Shift+A` to solve the entire problem using the combined buffer of screenshots (processed via Gemini 2.0 Flash or NVIDIA NIM minimax-m3 fallback).
+
+### 📑 1-Click Post-Interview Exporter
+*   **Instantly save your sessions:** Extract all transcribed speech, coding blocks, timestamps, and AI solutions directly to clean Markdown (`.md`) or structured JSON with a single click.
+
+---
+
+## ⌨️ Keyboard Shortcuts
+
 | Shortcut | Action |
 |---|---|
-| `Ctrl + Shift + H` | Hide / Show overlay instantly |
-| `Ctrl + Shift + A` | Capture & analyze screen |
-| `Ctrl + Shift + G` | Cycle Stealth (Full -> Compact -> Ghost) |
-| `Ctrl + Shift + P` | Panic (instantly clear and safe-state) |
-| `Enter` | Submit question from Ask bar |
-| `Escape` | Focus Ask input |
-| `Alt + ← →` | Move overlay position |
+| `Ctrl + Shift + H` | Toggle Overlay visibility |
+| `Ctrl + Shift + A` | Screen capture & analyze (Fresh Start) |
+| `Ctrl + Shift + S` | Add current screen to multi-screenshot buffer (Scroll Solver) |
+| `Ctrl + Shift + G` | Cycle Stealth Profiles (`Full` ➔ `Compact` ➔ `Ghost`) |
+| `Ctrl + Shift + P` | Panic (Instant window hide & state safety lock) |
+| `Alt + ← / →` | Move window position to Left / Right screen edge |
+| `Enter` | Submit written question from input bar |
+| `Escape` | Focus input bar / Clear focus |
 
 ---
 
 ## 🚀 Getting Started
 
-### Run the Electron Application (Recommended)
-```bash
-# Clone the repo
-git clone https://github.com/Hey-Astreon/COCO-AI.git
-cd COCO-AI
+### Prerequisites
+Make sure you have [Node.js](https://nodejs.org) installed on your system.
 
-# Install dependencies
-npm install
-
-# Start the application
-npm start
-```
+### Installation
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/Hey-Astreon/COCO-AI.git
+   cd COCO-AI
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Set up your API Keys inside a `.env` file in the root directory:
+   ```env
+   CEREBRAS_API_KEY=your_cerebras_key
+   DEEPGRAM_API_KEY=your_deepgram_key
+   GEMINI_API_KEY=your_gemini_key
+   GROQ_API_KEY=your_groq_key
+   BUILD_NVIDIA_API_KEY=your_nvidia_key
+   ```
+4. Start the application:
+   ```bash
+   npm start
+   ```
+5. Build the installer (`.exe`):
+   ```bash
+   npm run build
+   ```
 
 ---
 
@@ -87,117 +112,51 @@ npm start
 
 ```
 COCO-AI/
-├── main.js             # Electron main process (protection layers, window, screenshot capture)
+├── main.js             # Electron main process (stealth hooks, hotkeys, capture logic)
 ├── preload.js          # Secure bridge interface
-├── index.html          # Main overlay UI structure
-├── style.css           # Premium dark glassmorphism styles
-├── app.js              # UI controller, uploader, tabs, state management
+├── index.html          # Main application structure & toolbar
+├── style.css           # Cosmically styled dark glassmorphism system
+├── app.js              # UI controller, local uploader, and state machine
 ├── services/
-│   ├── deepgram.js     # Audio loopback and Deepgram WebSocket transcriber
-│   ├── cerebras.js     # Cerebras ultra-fast Llama answer generator
-│   ├── gemini.js       # Google Gemini Vision screen analyzer
-│   ├── pdf.min.js      # Client-side PDF reader
-│   └── pdf.worker.min.js # PDF.js background worker
+│   ├── deepgram.js     # Nova-3 Audio socket and loopback mixer
+│   ├── cerebras.js     # Cerebras dynamic Llama stream provider
+│   ├── groq.js         # Groq versatile fallback Llama/Qwen provider
+│   ├── gemini.js       # Gemini 2.0 Flash vision screen solver
+│   ├── nvidia.js       # Nvidia integrate API vision solver
+│   ├── pdf.min.js      # Client-side PDF processor
+│   └── pdf.worker.min.js # PDF.js backend worker thread
 └── README.md           # You are here
 ```
 
 ---
 
-## 🏗 Architecture
+## 🛡 Security & Privacy
 
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                               TOOLBAR                                  │
-│  🥥 CocoAI  |  ☀ ─── 85%  |  [+]  |  🎙  |  ⏹  |  ⚙  |  👁  |  ─  ×     │
-├────────────────────────────────────────────────────────────────────────┤
-│                     ⚡ AI Answers   |   🎙 Live Transcript            │
-├────────────────────────────────────────────────────────────────────────┤
-│                                                                        │
-│    ⚡ AI ANSWERS PANEL                 🎙 LIVE TRANSCRIPT              │
-│                                                                        │
-│  ┌────────────────────────┐          ~~~~waveform~~~~                  │
-│  │ Ask Input + Ask Button │                                            │
-│  └────────────────────────┘          [Interviewer] [Answer]            │
-│                                      Question text here...             │
-│  Q: Question text                                                      │
-│  ─────────────────────────           [You]                             │
-│  ⚡ Answer                            Your response...                  │
-│  • Bullet point 1                                                      │
-│  • Bullet point 2                    [Interviewer] [Answer]            │
-│  • code snippet                      Next question...                  │
-│                                                                        │
-│  [Copy] [↻ Retry] [👍]                                                │
-│                                                                        │
-└────────────────────────────────────────────────────────────────────────┘
-```
+*   **100% Client-Side Context Processing:** Your PDF resumes and Job Descriptions are parsed locally inside your browser thread using `PDF.js` and cached in `localStorage`. Nothing is stored on third-party servers.
+*   **Direct API Connections (BYOK):** All AI queries are sent directly from your computer to the model providers (Cerebras, Groq, Google, Nvidia) using your own API keys. No middleware servers can log your transcripts.
 
 ---
 
-## 🛡 Undetectability Layers
+## 📊 Competitor Comparison
 
-| Layer | Method | Protection Against |
-|---|---|---|
-| **Visual** | Electron `setContentProtection(true)` | Zoom, Teams, Meet screen share, OS-level screen captures |
-| **Network** | BYOK (Direct client-to-API calls) | Corporate firewalls, corporate network monitoring |
-| **Audio** | System audio loopback (WASAPI) | No virtual mic injection, records loopback audio directly |
-| **Process** | Native Electron app | Browser extension injection detectors |
-
----
-
-## 🗺 Roadmap
-
-### v1.0 & v1.5 — Desktop App (Electron)
-- [x] Glassmorphism overlay UI
-- [x] Streaming AI responses (Cerebras)
-- [x] Live transcript panel & WASAPI audio loopback
-- [x] Animated waveform visualizer
-- [x] Hotkey system (Hide, Capture, Stealth)
-- [x] Real screen capture exclusion (setContentProtection)
-- [x] Resume + JD upload & client-side PDF parsing
-- [x] Replay & session history export/import
-- [x] Responsive layout (Full 850px side-by-side / Compact 580px tabs)
-
-### v2.0 — Full Product
-- [ ] Cross-device Phone Mode (bypass all detection)
-- [ ] Mock Interview Practice Mode
-- [ ] STAR Answer Builder
-- [ ] 10,000+ Question Bank
-- [ ] Hindi + Indian Language Support
-- [ ] ₹299/mo Indian pricing
+| Copilot Tool | Offline Parsing | Coding Solves | Accented STT | Silent Fallback |
+| :--- | :---: | :---: | :---: | :---: |
+| **CocoAI** | **✅ Yes (PDF.js)** | **✅ Yes** | **✅ Yes (Nova-3)** | **✅ Yes (Groq)** |
+| Cluely | ❌ No | ❌ No | ❌ No | ❌ No |
+| LockedIn AI | ❌ No | ✅ Yes | ❌ No | ❌ No |
+| FinalRound AI | ❌ No | ❌ No | ❌ No | ❌ No |
+| Natively | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
 
 ---
 
-## 🤝 Contributing
+## 👩‍💻 Development Authors
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+*   **Roushan (Astreon)** — [@Hey-Astreon](https://github.com/Hey-Astreon)
+*   **Ayushi Raj** — [@Silenttears-cloud](https://github.com/Silenttears-cloud)
 
----
+*Full-Stack Developers · AI Orchestrators & Prompt Engineers*
 
-## 📊 Competitor Analysis
-
-| Tool | Price | Offline | Coding | Indian Pricing |
-|---|---|---|---|---|
-| **CocoAI** | ₹299/mo | ✅ Yes | ✅ Yes | ✅ Yes |
-| Cluely | $29/mo | ❌ No | ❌ No | ❌ No |
-| LockedIn AI | $55/mo | ❌ No | ✅ Yes | ❌ No |
-| FinalRound AI | $149/mo | ❌ No | ❌ No | ❌ No |
-| MindWhisper | Free/$15 | ❌ No | ❌ No | ❌ No |
-| Natively | $8-35/mo | ✅ Yes | ✅ Yes | ❌ No |
-
----
-
-## 👩‍💻 Authors
-
-* **Roushan (Astreon)** — [@Hey-Astreon](https://github.com/Hey-Astreon)
-* **Ayushi Raj** — [@Silenttears-cloud](https://github.com/Silenttears-cloud)
-
-*1st Year BCA Students at Amity University · Full-Stack Developers · AI Orchestrators & Prompt Engineers*
-
-> *"Nothing is immortal. Every system has a vulnerability. We build better."*
+> *"Every system has a vulnerability. We build better."*
 
 ---
 
