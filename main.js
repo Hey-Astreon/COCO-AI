@@ -319,17 +319,31 @@ ipcMain.on('ai-stream-request', (event, { question, model, context, requestId })
     activeRequestId = null;
   }
 
-  // ── Primary: Cerebras — fallback to Groq on error ────────────
+  // ── Primary: Cerebras — fallback to Groq on error or >1200ms delay ────────────
   activeRequestId = requestId;
+  let receivedFirstChunk = false;
+  let firstChunkTimer = setTimeout(() => {
+    if (!receivedFirstChunk && activeAIRequest) {
+      console.warn('[AI] Cerebras first chunk delayed >1200ms — failing over to Groq LPUs...');
+      if (activeAIRequest.abort) activeAIRequest.abort();
+      activeAIRequest = null;
+      activeRequestId = null;
+      tryGroqFallback('Cerebras response latency > 1200ms');
+    }
+  }, 1200);
+
   activeAIRequest = cerebras.streamCompletion(cerebrasKey, question, {
     model: model || cerebras.DEFAULT_MODEL,
     context: context || {},
     onChunk: (chunk, fullText) => {
+      receivedFirstChunk = true;
+      clearTimeout(firstChunkTimer);
       if (!event.sender.isDestroyed()) {
         event.sender.send('ai-stream-chunk', { requestId, chunk, fullText });
       }
     },
     onDone: (fullText) => {
+      clearTimeout(firstChunkTimer);
       activeAIRequest = null;
       activeRequestId = null;
       if (!event.sender.isDestroyed()) {
@@ -337,6 +351,7 @@ ipcMain.on('ai-stream-request', (event, { question, model, context, requestId })
       }
     },
     onError: (err) => {
+      clearTimeout(firstChunkTimer);
       activeAIRequest = null;
       activeRequestId = null;
       // ⚡ Auto-fallback to Groq instead of showing error

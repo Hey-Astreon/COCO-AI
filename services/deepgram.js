@@ -190,9 +190,9 @@ class DeepgramService {
       smart_format: 'true',         // auto-formats numbers, dates, currency
       punctuate: 'true',            // adds punctuation for better readability
       interim_results: 'true',      // live in-progress text while speaking
-      utterance_end_ms: '3000',     // wait 3s of silence before UtteranceEnd to prevent early triggering during natural mid-question pauses
+      utterance_end_ms: '1000',     // 1000ms (1.0s) silence threshold for rapid answer triggering
       vad_events: 'true',           // voice activity detection events
-      endpointing: '1500',          // 1500ms silence threshold — prevents splitting interviewer sentences too early
+      endpointing: '800',           // 800ms silence threshold — ultra-responsive sentence completion
       no_delay: 'true',             // reduces transcript delivery latency
       filler_words: 'false',        // strip "um", "uh", "like" from transcripts
     });
@@ -276,7 +276,7 @@ class DeepgramService {
 
     this.mediaRecorder = new MediaRecorder(this.mediaStream, {
       mimeType: mimeType,
-      audioBitsPerSecond: 128000,   // 128kbps — was 16000 (8x better quality = 8x better accuracy)
+      audioBitsPerSecond: 128000,   // 128kbps — CD quality capture
     });
 
     this.mediaRecorder.ondataavailable = (event) => {
@@ -307,31 +307,29 @@ class DeepgramService {
         }
 
         // Accumulate final chunks into the utterance buffer.
-        // The AI trigger fires ONLY from UtteranceEnd — not here.
         if (isFinal) {
           if (!this._pendingUtterance) this._pendingUtterance = [];
           this._pendingUtterance.push(transcript.trim());
 
-          // ── Safety debounce net ──────────────────────────────────────
-          // If UtteranceEnd never arrives (network hiccup, Deepgram plan limits),
-          // fire the trigger ourselves after 4.5 seconds of no new isFinal chunks.
+          // ── Fast Safety Debounce Net (1.8s) ──────────────────────────
+          // If UtteranceEnd is delayed by network, trigger answer after 1.8s
           clearTimeout(this._utteranceDebounceTimer);
           this._utteranceDebounceTimer = setTimeout(() => {
             if (this._pendingUtterance && this._pendingUtterance.length > 0) {
               const fullUtterance = this._pendingUtterance.join(' ');
               this._pendingUtterance = [];
-              console.log('[Deepgram] Debounce fired (UtteranceEnd not received):', fullUtterance);
+              console.log('[Deepgram] Debounce fired (1.8s safety net):', fullUtterance);
               if (this.onUtteranceEnd) this.onUtteranceEnd(fullUtterance);
             }
-          }, 4500);
+          }, 1800);
         }
       }
     }
 
     // UtteranceEnd — primary trigger gate.
-    // Fires after speaker has been silent for utterance_end_ms (2000ms).
+    // Fires after speaker has been silent for 1000ms.
     if (data.type === 'UtteranceEnd') {
-      clearTimeout(this._utteranceDebounceTimer);   // cancel safety net — not needed
+      clearTimeout(this._utteranceDebounceTimer);
       this._utteranceDebounceTimer = null;
 
       if (this._pendingUtterance && this._pendingUtterance.length > 0) {
@@ -351,30 +349,19 @@ class DeepgramService {
   }
 
   /**
-   * Check if a transcript line is likely a question worth answering
+   * Check if a transcript line is an interview question/prompt worth answering
    */
   static isQuestion(text) {
+    if (!text) return false;
     const trimmed = text.trim();
+    const words = trimmed.split(/\s+/);
 
-    // Must be at least 4 words to avoid triggering on noise like "what?" or "how?"
-    if (trimmed.split(/\s+/).length < 4) return false;
+    // Ignore single/double word filler background noise like "okay", "yeah"
+    if (words.length < 3) return false;
 
-    // Direct question mark
-    if (trimmed.endsWith('?')) return true;
-
-    // Common question starters (interview-specific)
-    const questionStarters = [
-      'what', 'how', 'why', 'when', 'where', 'who', 'which',
-      'can you', 'could you', 'would you', 'do you', 'did you',
-      'have you', 'are you', 'is there', 'tell me', 'describe',
-      'explain', 'walk me through', 'give me an example',
-      "what's your", 'what is your', 'talk me through',
-      'write a', 'write the', 'implement', 'code a', 'code the',
-      'design a', 'design the', 'find the', 'solve',
-    ];
-
-    const lower = trimmed.toLowerCase();
-    return questionStarters.some(s => lower.startsWith(s));
+    // In a live technical interview, ANY utterance > 2 words spoken by the interviewer
+    // is a question, follow-up, or instruction that needs an AI answer.
+    return true;
   }
 
   /**

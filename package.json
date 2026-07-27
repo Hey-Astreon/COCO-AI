@@ -1,6 +1,6 @@
 {
   "name": "coco-ai",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Stealth assistant for technical interviews.",
   "main": "main.js",
   "scripts": {
