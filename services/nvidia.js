@@ -180,7 +180,7 @@ const NvidiaService = {
               } catch (_) {}
             }
 
-            console.log(`🥥 NVIDIA analysis streaming succeeded — model: ${model}`);
+            console.log(`✨ NVIDIA analysis streaming succeeded — model: ${model}`);
             return fullText;
 
           } catch (streamErr) {

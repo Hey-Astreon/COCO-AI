@@ -73,7 +73,7 @@ async function initElectronBridge() {
     // Get API keys from main process
     try {
       state.apiKeys = await window.electronAPI.getApiKeys();
-      console.log('🥥 API keys loaded:', {
+      console.log('✨ API keys loaded:', {
         cerebras: state.apiKeys.cerebras ? '✅ Set' : '❌ Missing',
         deepgram: state.apiKeys.deepgram ? '✅ Set' : '❌ Missing',
       });
@@ -149,9 +149,9 @@ async function initElectronBridge() {
       });
     }
 
-    console.log('🥥 CocoAI running in Electron (stealth mode active)');
+    console.log('✨ CocoAI running in Electron (stealth mode active)');
   } else {
-    console.log('🥥 CocoAI running in browser (demo mode)');
+    console.log('✨ CocoAI running in browser (demo mode)');
   }
 }
 
@@ -320,7 +320,7 @@ function exportSessionMarkdown() {
   const dateStr = now.toLocaleDateString();
   const timeStr = now.toLocaleTimeString();
 
-  let md = `# 🥥 CocoAI — Interview Session Log\n\n`;
+  let md = `# ✨ CocoAI — Interview Session Log\n\n`;
   md += `**Date:** ${dateStr} at ${timeStr}\n`;
   md += `**AI Model Used:** ${state.currentModel || 'llama-3.3-70b'}\n`;
   md += `**Resume Context Active:** ${state.resume ? 'Yes (Parsed)' : 'No'}\n\n`;
@@ -458,7 +458,7 @@ async function initModelSelector() {
 
           state.currentModel = bestDefault;
           syncCustomSelect('modelSelectWrapper', bestDefault);
-          console.log(`🥥 Dynamic models loaded. Active: ${state.currentModel}`);
+          console.log(`✨ Dynamic models loaded. Active: ${state.currentModel}`);
         }
       }
     } catch (e) {
@@ -1046,7 +1046,7 @@ async function analyzeScreen(freshMode = true) {
     if (window.electronAPI && window.electronAPI.captureScreen) {
       imgDataUrl = await window.electronAPI.captureScreen();
     } else {
-      console.log('🥥 Browser mode: mocking screenshot');
+      console.log('✨ Browser mode: mocking screenshot');
       await sleep(1000);
       imgDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
     }
@@ -1084,7 +1084,7 @@ async function analyzeScreen(freshMode = true) {
   state.screenshotBufferTimer = setTimeout(() => {
     state.screenshotBuffer = [];
     state.lastScreenshotCardId = null;
-    console.log('🥥 Screenshot buffer auto-cleared after 45s inactivity.');
+    console.log('✨ Screenshot buffer auto-cleared after 45s inactivity.');
   }, 45000);
 
   // ── Step 3: Create or reuse card ──
@@ -1109,7 +1109,7 @@ async function analyzeScreen(freshMode = true) {
     }
     // If card or answerEl not found (e.g. user cleared answers), fall through to create new card
     if (!reuseSucceeded) {
-      console.warn('🥥 Could not reuse previous card — creating a fresh one.');
+      console.warn('✨ Could not reuse previous card — creating a fresh one.');
       state.screenshotBuffer = [imgDataUrl]; // reset buffer to just this screenshot
       state.lastScreenshotCardId = null;
     }
@@ -1566,7 +1566,7 @@ function loadSettings() {
     
     updateResumeDropZoneState();
     
-    console.log('🥥 Local settings loaded');
+    console.log('✨ Local settings loaded');
   } catch (e) {
     console.error('Failed to load settings from localStorage:', e);
   }

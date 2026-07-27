@@ -162,7 +162,7 @@ const GeminiService = {
               } catch (_) {}
             }
 
-            console.log(`🥥 Gemini analysis streaming succeeded on model: ${model}`);
+            console.log(`✨ Gemini analysis streaming succeeded on model: ${model}`);
             return fullText;
 
           } catch (streamErr) {

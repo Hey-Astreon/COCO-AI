@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🥥 CocoAI
+# ✨ CocoAI
 
 ### *Your Invisible Interview Copilot — Undetectable. Instant. Flawless.*
 
