@@ -193,9 +193,9 @@ class DeepgramService {
       smart_format: 'true',         // auto-formats numbers, dates, currency
       punctuate: 'true',            // adds punctuation for better readability
       interim_results: 'true',      // required for interim transcripts and VAD
-      utterance_end_ms: '1000',     // 1000ms (1.0s) silence threshold — Deepgram minimum required value
+      utterance_end_ms: '1500',     // 1500ms (1.5s) silence threshold — patient complete sentence detection
       vad_events: 'true',           // voice activity detection events
-      endpointing: '500',           // 500ms silence threshold — sub-second sentence completion
+      endpointing: '1500',          // 1500ms (1.5s) silence threshold — prevents premature answer triggering
       no_delay: 'true',             // reduces transcript delivery latency
       filler_words: 'false',        // strip "um", "uh", "like" from transcripts
     });
@@ -329,18 +329,18 @@ class DeepgramService {
           if (!this._pendingUtterance) this._pendingUtterance = [];
           this._pendingUtterance.push(transcript.trim());
 
-          // ── Silence Safety Timer (1000ms) ──────────────────────────────────
-          // Fires 1.0s after the last final chunk if UtteranceEnd packet is delayed.
+          // ── Silence Safety Timer (1500ms) ──────────────────────────────────
+          // Fires 1.5s after the last final chunk if UtteranceEnd packet is delayed.
           // Guarantees full sentence accumulation without cutting off mid-sentence.
           clearTimeout(this._utteranceDebounceTimer);
           this._utteranceDebounceTimer = setTimeout(() => {
             if (this._pendingUtterance && this._pendingUtterance.length > 0) {
               const fullUtterance = this._pendingUtterance.join(' ');
               this._pendingUtterance = [];
-              console.log('[Deepgram] Speech complete (1.0s silence):', fullUtterance);
+              console.log('[Deepgram] Speech complete (1.5s silence):', fullUtterance);
               if (this.onUtteranceEnd) this.onUtteranceEnd(fullUtterance);
             }
-          }, 1000);
+          }, 1500);
         }
       }
     }
