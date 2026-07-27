@@ -88,10 +88,18 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+# Allow 3 seconds for GitHub REST API database index to register tag
+Write-Host "Waiting 3 seconds for GitHub API to index tag $tag..." -ForegroundColor Yellow
+Start-Sleep -Seconds 3
+
 # 5. Run Release
 Write-Host ""
 Write-Host "[5/5] Building installer and publishing $tag globally to GitHub Releases..." -ForegroundColor Magenta
 npm run release
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "npm run release failed."
+    exit 1
+}
 
 Write-Host ""
 Write-Host "========================================================" -ForegroundColor Green
