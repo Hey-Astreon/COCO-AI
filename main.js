@@ -28,6 +28,14 @@ try {
   console.warn('⚠️ Cerebras service failed to load — text AI will be disabled.', e.message);
 }
 
+let groq = null;
+try {
+  groq = require('./services/groq');
+  console.log('✅ Groq fallback engine loaded.');
+} catch (e) {
+  console.warn('⚠️ Groq service failed to load — fallback AI will be disabled.', e.message);
+}
+
 // ─── Single Instance Lock ──────────────────────────────────────
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
@@ -203,6 +211,7 @@ ipcMain.handle('get-api-keys', () => {
     deepgram: process.env.DEEPGRAM_API_KEY || '',
     gemini:   process.env.GEMINI_API_KEY   || '',
     nvidia:   process.env.BUILD_NVIDIA_API_KEY || '',
+    groq:     process.env.GROQ_API_KEY     || '',
   };
 });
 
@@ -251,25 +260,56 @@ ipcMain.handle('get-cerebras-models', async () => {
 // ═══════════════════════════════════════════════════════════════════
 
 ipcMain.on('ai-stream-request', (event, { question, model, context, requestId }) => {
-  if (!cerebras) {
-    event.sender.send('ai-stream-error', {
-      requestId,
-      error: 'Cerebras service failed to load. Check services/cerebras.js.'
+  const cerebrasKey = process.env.CEREBRAS_API_KEY;
+  const groqKey     = process.env.GROQ_API_KEY;
+
+  // ── Helper: try Groq as silent fallback ──────────────────────
+  function tryGroqFallback(reason) {
+    if (!groq || !groqKey) {
+      console.warn(`[AI] Groq fallback unavailable (${reason}). No fallback engine.`);
+      if (!event.sender.isDestroyed()) {
+        event.sender.send('ai-stream-error', { requestId, error: `Primary AI failed: ${reason}` });
+      }
+      return;
+    }
+    console.warn(`[AI] Cerebras failed (${reason}) — switching to Groq fallback silently...`);
+    if (!event.sender.isDestroyed()) {
+      // Notify UI with a subtle warning (not a full error)
+      event.sender.send('ai-stream-fallback', { requestId, engine: 'groq', reason });
+    }
+    activeRequestId = requestId;
+    activeAIRequest = groq.streamCompletion(groqKey, question, {
+      model: groq.DEFAULT_MODEL,
+      context: context || {},
+      onChunk: (chunk, fullText) => {
+        if (!event.sender.isDestroyed()) {
+          event.sender.send('ai-stream-chunk', { requestId, chunk, fullText });
+        }
+      },
+      onDone: (fullText) => {
+        activeAIRequest = null;
+        activeRequestId = null;
+        if (!event.sender.isDestroyed()) {
+          event.sender.send('ai-stream-done', { requestId, fullText });
+        }
+      },
+      onError: (err) => {
+        activeAIRequest = null;
+        activeRequestId = null;
+        if (!event.sender.isDestroyed()) {
+          event.sender.send('ai-stream-error', { requestId, error: `Both Cerebras and Groq failed: ${err.message}` });
+        }
+      },
     });
+  }
+
+  // ── No Cerebras? Go straight to Groq ─────────────────────────
+  if (!cerebras || !cerebrasKey) {
+    tryGroqFallback('Cerebras not configured');
     return;
   }
 
-  const apiKey = process.env.CEREBRAS_API_KEY;
-
-  if (!apiKey) {
-    event.sender.send('ai-stream-error', {
-      requestId,
-      error: 'Cerebras API key not found. Add it to .env file.'
-    });
-    return;
-  }
-
-  // Abort any previous active request and notify renderer to clean up memory
+  // Abort any previous active request
   if (activeAIRequest) {
     if (activeRequestId && !event.sender.isDestroyed()) {
       event.sender.send('ai-stream-aborted', { requestId: activeRequestId });
@@ -279,8 +319,9 @@ ipcMain.on('ai-stream-request', (event, { question, model, context, requestId })
     activeRequestId = null;
   }
 
+  // ── Primary: Cerebras — fallback to Groq on error ────────────
   activeRequestId = requestId;
-  activeAIRequest = cerebras.streamCompletion(apiKey, question, {
+  activeAIRequest = cerebras.streamCompletion(cerebrasKey, question, {
     model: model || cerebras.DEFAULT_MODEL,
     context: context || {},
     onChunk: (chunk, fullText) => {
@@ -298,12 +339,8 @@ ipcMain.on('ai-stream-request', (event, { question, model, context, requestId })
     onError: (err) => {
       activeAIRequest = null;
       activeRequestId = null;
-      if (!event.sender.isDestroyed()) {
-        event.sender.send('ai-stream-error', {
-          requestId,
-          error: err.message || 'AI request failed'
-        });
-      }
+      // ⚡ Auto-fallback to Groq instead of showing error
+      tryGroqFallback(err.message || 'unknown error');
     },
   });
 });

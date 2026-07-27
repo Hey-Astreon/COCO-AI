@@ -96,6 +96,13 @@ async function initElectronBridge() {
         handleAIAborted(data);
       });
     }
+    if (window.electronAPI.onAIFallback) {
+      window.electronAPI.onAIFallback((data) => {
+        // Subtle toast — doesn't interrupt the answer, just informs
+        showToast('⚡ Switched to Groq fallback engine', 'warning', 2500);
+        console.warn('[AI] Fallback engine active:', data);
+      });
+    }
 
     // Ctrl+Shift+A: Fresh single-shot analyze (always clears buffer first)
     window.electronAPI.onAnalyzeScreenFresh(() => {
