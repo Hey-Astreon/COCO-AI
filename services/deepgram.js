@@ -33,6 +33,7 @@ class DeepgramService {
     this.systemStreamTracks = null;
     this.audioCtx = null; // AudioContext for stream mixing
     this._analyserNode = null;
+    this._audioSourceNode = null;
     this._levelTimer = null;
 
     // Utterance accumulation
@@ -456,10 +457,10 @@ class DeepgramService {
         this.audioCtx.resume();
       }
 
-      const source = this.audioCtx.createMediaStreamSource(this.mediaStream);
+      this._audioSourceNode = this.audioCtx.createMediaStreamSource(this.mediaStream);
       this._analyserNode = this.audioCtx.createAnalyser();
       this._analyserNode.fftSize = 64;
-      source.connect(this._analyserNode);
+      this._audioSourceNode.connect(this._analyserNode);
 
       const dataArray = new Uint8Array(this._analyserNode.frequencyBinCount);
 
@@ -489,7 +490,14 @@ class DeepgramService {
       clearInterval(this._levelTimer);
       this._levelTimer = null;
     }
-    this._analyserNode = null;
+    if (this._audioSourceNode) {
+      try { this._audioSourceNode.disconnect(); } catch (e) {}
+      this._audioSourceNode = null;
+    }
+    if (this._analyserNode) {
+      try { this._analyserNode.disconnect(); } catch (e) {}
+      this._analyserNode = null;
+    }
     if (this.onAudioLevel) {
       this.onAudioLevel(0);
     }
