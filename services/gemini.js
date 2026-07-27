@@ -5,29 +5,16 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 const GeminiService = {
-  // Model fallback chain — if one model is rate-limited, try the next
+  // Model fallback chain — Google Gemini official REST endpoints
   MODEL_CHAIN: [
-    'gemini-3.5-flash',
     'gemini-2.5-flash',
-    'gemini-3.1-flash-lite',
+    'gemini-2.0-flash',
+    'gemini-1.5-flash',
   ],
 
-  MAX_RETRIES: 3,
-  BASE_DELAY_MS: 800,  // 800ms initial delay for faster retries
+  MAX_RETRIES: 2,
+  BASE_DELAY_MS: 500,
 
-  /**
-   * Analyze screen capture(s) with Gemini Vision API (REST)
-   * Supports single image (string) or multiple images (array) for long scrollable problems.
-   * Automatically retries on 429 rate-limit errors with exponential backoff,
-   * and falls back to alternative models if all retries are exhausted.
-   *
-   * @param {string} apiKey - Gemini API Key
-   * @param {string|string[]} base64Images - Single base64 image string or array of base64 image strings
-   * @param {string} prompt - Vision prompt
-   * @param {function} [onChunk] - Optional callback for streaming text chunks
-   * @param {function} [onStatus] - Optional callback for status updates (e.g. "Retrying...")
-   * @returns {Promise<string>} - The full compiled response text
-   */
   async analyzeImage(apiKey, base64Images, prompt, onChunk, onStatus) {
     if (!prompt) {
       prompt = 'Identify the coding problem, question, or diagram in this screenshot and provide a clear, concise step-by-step solution with code.';
@@ -59,13 +46,11 @@ const GeminiService = {
       }
     });
 
-    // Try each model in the fallback chain
     let lastError = null;
 
     for (let modelIdx = 0; modelIdx < this.MODEL_CHAIN.length; modelIdx++) {
       const model = this.MODEL_CHAIN[modelIdx];
 
-      // Retry loop with exponential backoff for each model
       for (let attempt = 0; attempt < this.MAX_RETRIES; attempt++) {
         try {
           const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`;
@@ -73,42 +58,40 @@ const GeminiService = {
           if (onStatus && (attempt > 0 || modelIdx > 0)) {
             const msg = attempt > 0
               ? `⏳ Rate limited — retry ${attempt}/${this.MAX_RETRIES} on ${model}...`
-              : `🔄 Switching to fallback model: ${model}...`;
+              : `🔄 Switching to model: ${model}...`;
             onStatus(msg);
           }
 
-          const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: requestBody
-          });
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 6000); // 6s timeout per model
 
-          // ── Rate Limit (429) — Retry with backoff ──
-          if (response.status === 429) {
-            const delay = this.BASE_DELAY_MS * Math.pow(2, attempt);
-            console.warn(`⚠️ Gemini 429 rate limit on ${model}. Waiting ${delay / 1000}s before retry ${attempt + 1}/${this.MAX_RETRIES}...`);
-
-            if (onStatus) {
-              onStatus(`⏳ Rate limited — waiting ${Math.round(delay / 1000)}s before retry...`);
-            }
-
-            await new Promise(r => setTimeout(r, delay));
-            continue; // retry same model
+          let response;
+          try {
+            response = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: requestBody,
+              signal: controller.signal
+            });
+          } finally {
+            clearTimeout(timeoutId);
           }
 
-          // ── Other API error — don't retry, throw immediately ──
+          // Rate Limit (429) — Retry same model with short backoff
+          if (response.status === 429) {
+            const delay = this.BASE_DELAY_MS * Math.pow(2, attempt);
+            console.warn(`⚠️ Gemini 429 on ${model}. Waiting ${delay}ms...`);
+            if (onStatus) onStatus(`⏳ Gemini rate limited — retrying in ${delay}ms...`);
+            await new Promise(r => setTimeout(r, delay));
+            continue;
+          }
+
+          // Invalid Model (404/400) or Server Error — break attempt loop and switch to next model immediately!
           if (!response.ok) {
             const errText = await response.text();
-            let errMsg = `Gemini API error ${response.status}`;
-            try {
-              const errJson = JSON.parse(errText);
-              if (errJson.error?.message) {
-                errMsg += `: ${errJson.error.message}`;
-              }
-            } catch (_) {
-              errMsg += `: ${errText.slice(0, 200)}`;
-            }
-            throw new Error(errMsg);
+            console.warn(`⚠️ Gemini ${model} returned HTTP ${response.status}: ${errText.slice(0, 150)} — switching model...`);
+            lastError = new Error(`Gemini ${model} failed (${response.status})`);
+            break; // try next model in MODEL_CHAIN
           }
 
           // ── Success: Stream Chunks ──
