@@ -29,7 +29,12 @@ if (-not $env:GH_TOKEN) {
     exit 1
 }
 
-# 1. Read current version from package.json & find next unique tag
+# 1. Fetch ALL tags from GitHub remote
+Write-Host "[1/5] Syncing tags with GitHub remote..." -ForegroundColor Cyan
+git fetch --tags --force origin | Out-Null
+$allTags = git tag -l
+
+# Read current version from package.json
 $packageJsonPath = Join-Path $PSScriptRoot "package.json"
 if (-not (Test-Path $packageJsonPath)) {
     Write-Error "package.json not found in $PSScriptRoot"
@@ -40,18 +45,7 @@ $packageJson = Get-Content -Raw -Path $packageJsonPath | ConvertFrom-Json
 $version = $packageJson.version
 $tag = "v$version"
 
-Write-Host "[1/5] Checking version status ($tag)..." -ForegroundColor Cyan
-
-# Fetch all remote tags from GitHub
-git fetch --tags origin | Out-Null
-$localTags = git tag -l
-$remoteTagLines = git ls-remote --tags origin
-$remoteTags = @()
-if ($remoteTagLines) {
-    $remoteTags = $remoteTagLines | ForEach-Object { $_ -replace '.*refs/tags/', '' -replace '\^{}', '' }
-}
-$allTags = $localTags + $remoteTags
-
+# Auto-bump version until we hit a clean, unused tag
 while ($allTags -contains $tag) {
     Write-Host "Tag $tag already exists in git history. Auto-bumping patch version..." -ForegroundColor Yellow
     npm version patch --no-git-tag-version | Out-Null
