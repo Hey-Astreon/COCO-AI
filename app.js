@@ -17,7 +17,7 @@ const state = {
   resume: '',
   jobDescription: '',
   activeTab: 'answers',           // 'answers' | 'transcript',
-  audioMode: 'both',        // 'both' (Mic + System Loopback) | 'interviewer' | 'candidate'
+  audioMode: 'interviewer', // 'interviewer' (System Audio Loopback) | 'both' | 'candidate'
   transcriptHistory: [],  // { role, text } for AI context
   deepgramService: null,
   interimTranscriptEl: null, // For updating interim results

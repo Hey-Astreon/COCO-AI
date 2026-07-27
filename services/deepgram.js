@@ -250,9 +250,9 @@ class DeepgramService {
       smart_format: 'true',         // auto-formats numbers, dates, currency
       punctuate: 'true',            // adds punctuation
       interim_results: 'true',      // required for live updates and VAD
-      utterance_end_ms: '1200',     // 1200ms (1.2s) silence threshold — responsive VAD
+      utterance_end_ms: '2500',     // 2500ms (2.5s) natural pause threshold
       vad_events: 'true',           // voice activity detection events
-      endpointing: '1200',          // 1200ms (1.2s) endpointing threshold
+      endpointing: '2500',          // 2500ms (2.5s) endpointing threshold
     });
 
     // FIX #2: Append keywords as repeated params (Deepgram nova-2 requires one per key)
@@ -386,6 +386,8 @@ class DeepgramService {
 
   /**
    * Handle incoming transcript results from Deepgram
+   * Smart Utterance Accumulator — guarantees whole question completion
+   * even if speaker pauses for 2-3 seconds mid-sentence.
    */
   _handleTranscript(data) {
     if (data.type === 'Results') {
@@ -405,40 +407,57 @@ class DeepgramService {
           if (!this._pendingUtterance) this._pendingUtterance = [];
           this._pendingUtterance.push(transcript.trim());
 
-          // ── Silence Safety Timer (2000ms) ──────────────────────────────────
-          // Fires 2.0s after the last final chunk if UtteranceEnd packet is delayed.
+          // ── If Deepgram emits speech_final (syntactic clause completion) ──
+          if (speechFinal) {
+            this._flushPendingUtterance('speech_final');
+            return;
+          }
+
+          // ── Silence Safety Timer (3000ms) ──
           clearTimeout(this._utteranceDebounceTimer);
           this._utteranceDebounceTimer = setTimeout(() => {
-            if (this._pendingUtterance && this._pendingUtterance.length > 0) {
-              const fullUtterance = this._pendingUtterance.join(' ');
-              this._pendingUtterance = []; // ALWAYS reset buffer so stale fragments never pollute future questions
-              if (DeepgramService.isQuestion(fullUtterance)) {
-                console.log('[Deepgram] Speech complete (silence safety net):', fullUtterance);
-                if (this.onUtteranceEnd) this.onUtteranceEnd(fullUtterance);
-              } else {
-                console.log('[Deepgram] Ignored non-question / filler speech:', fullUtterance);
-              }
-            }
-          }, 2000);
+            this._flushPendingUtterance('silence_timer');
+          }, 3000);
         }
       }
     }
 
-    // UtteranceEnd — Deepgram's primary indicator that speaker has completed their turn
+    // UtteranceEnd — Deepgram's VAD signal when speaker pauses (2.5s)
     if (data.type === 'UtteranceEnd') {
       clearTimeout(this._utteranceDebounceTimer);
       this._utteranceDebounceTimer = null;
+      this._flushPendingUtterance('UtteranceEnd');
+    }
+  }
 
-      if (this._pendingUtterance && this._pendingUtterance.length > 0) {
-        const fullUtterance = this._pendingUtterance.join(' ');
-        this._pendingUtterance = []; // ALWAYS reset buffer on UtteranceEnd
-        if (DeepgramService.isQuestion(fullUtterance)) {
-          console.log('[Deepgram] UtteranceEnd complete question:', fullUtterance);
-          if (this.onUtteranceEnd) this.onUtteranceEnd(fullUtterance);
-        } else {
-          console.log('[Deepgram] UtteranceEnd — ignored non-question speech:', fullUtterance);
+  /**
+   * Flush pending utterance to AI if question is complete.
+   * If question is incomplete (mid-sentence pause), PRESERVE buffer for next speech chunk!
+   */
+  _flushPendingUtterance(source) {
+    if (!this._pendingUtterance || this._pendingUtterance.length === 0) return;
+
+    const fullUtterance = this._pendingUtterance.join(' ').trim();
+    if (!fullUtterance) return;
+
+    if (DeepgramService.isQuestion(fullUtterance)) {
+      // Question is complete! Clear buffer & fire AI
+      this._pendingUtterance = [];
+      console.log(`[Deepgram] Complete question triggered via ${source}:`, fullUtterance);
+      if (this.onUtteranceEnd) this.onUtteranceEnd(fullUtterance);
+    } else {
+      // Sentence is still incomplete (e.g. ended on "the", "how", "handle")
+      // Do NOT clear _pendingUtterance! Keep accumulating so incoming chunks append cleanly!
+      console.log(`[Deepgram] Mid-sentence pause (${source}) — preserving buffer for next chunk:`, fullUtterance);
+
+      // Hard safety purge timer (5.0s): if speaker completely stops speaking for >5s on an incomplete fragment, purge buffer
+      clearTimeout(this._stalePurgeTimer);
+      this._stalePurgeTimer = setTimeout(() => {
+        if (this._pendingUtterance && this._pendingUtterance.length > 0) {
+          console.log('[Deepgram] 5s stale buffer purge:', this._pendingUtterance.join(' '));
+          this._pendingUtterance = [];
         }
-      }
+      }, 5000);
     }
   }
 
@@ -486,12 +505,23 @@ class DeepgramService {
     }
 
     // Trailing incomplete connector check — ONLY for open prepositions/determiners when paused mid-sentence
-    // e.g. "Tell me about the", "What is the difference of"
+    // e.g. "Tell me about the", "What is the difference of", "How do you handle"
     const lastWord = words[words.length - 1].toLowerCase();
     const trailingIncompleteConnectors = new Set([
-      'the', 'a', 'an', 'your', 'my', 'their', 'his', 'her', 'our', 'its',
-      'of', 'to', 'in', 'for', 'with', 'on', 'at', 'by', 'from',
-      'and', 'or', 'but', 'because', 'than',
+      // Articles & Determiners
+      'the', 'a', 'an', 'this', 'that', 'these', 'those', 'some', 'any', 'each',
+      // Possessives & Pronouns
+      'your', 'my', 'their', 'his', 'her', 'our', 'its', 'me', 'him', 'them', 'us',
+      // Prepositions
+      'of', 'to', 'in', 'for', 'with', 'on', 'at', 'by', 'from', 'as', 'into',
+      'like', 'through', 'after', 'over', 'between', 'out', 'against', 'during',
+      'without', 'before', 'under', 'around', 'among', 'within', 'about', 'across',
+      // Conjunctions & Subordinators
+      'and', 'or', 'but', 'so', 'if', 'because', 'than', 'when', 'where', 'while',
+      'although', 'since', 'unless', 'how', 'what', 'why', 'whether', 'which',
+      // Incomplete transitive verbs / clauses
+      'handle', 'use', 'create', 'build', 'implement', 'do', 'does', 'did',
+      'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had'
     ]);
 
     if (words.length > 2 && trailingIncompleteConnectors.has(lastWord)) {
