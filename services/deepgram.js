@@ -190,9 +190,9 @@ class DeepgramService {
       smart_format: 'true',         // auto-formats numbers, dates, currency
       punctuate: 'true',            // adds punctuation for better readability
       interim_results: 'true',      // live in-progress text while speaking
-      utterance_end_ms: '2000',     // wait 2s of silence before UtteranceEnd — was 1500ms
+      utterance_end_ms: '3000',     // wait 3s of silence before UtteranceEnd to prevent early triggering during natural mid-question pauses
       vad_events: 'true',           // voice activity detection events
-      endpointing: '800',           // 800ms silence threshold — prevents mid-sentence triggers
+      endpointing: '1500',          // 1500ms silence threshold — prevents splitting interviewer sentences too early
       no_delay: 'true',             // reduces transcript delivery latency
       filler_words: 'false',        // strip "um", "uh", "like" from transcripts
     });
@@ -314,7 +314,7 @@ class DeepgramService {
 
           // ── Safety debounce net ──────────────────────────────────────
           // If UtteranceEnd never arrives (network hiccup, Deepgram plan limits),
-          // fire the trigger ourselves after 3 seconds of no new isFinal chunks.
+          // fire the trigger ourselves after 4.5 seconds of no new isFinal chunks.
           clearTimeout(this._utteranceDebounceTimer);
           this._utteranceDebounceTimer = setTimeout(() => {
             if (this._pendingUtterance && this._pendingUtterance.length > 0) {
@@ -323,7 +323,7 @@ class DeepgramService {
               console.log('[Deepgram] Debounce fired (UtteranceEnd not received):', fullUtterance);
               if (this.onUtteranceEnd) this.onUtteranceEnd(fullUtterance);
             }
-          }, 3000);
+          }, 4500);
         }
       }
     }
