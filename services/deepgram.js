@@ -382,12 +382,30 @@ class DeepgramService {
   static isQuestion(text) {
     if (!text) return false;
     const trimmed = text.trim();
-    const words = trimmed.split(/\s+/);
+    const cleanText = trimmed.replace(/[.,?!]+$/, '');
+    const words = cleanText.split(/\s+/);
 
     // Golden Layer 3: 4-Word Minimum Anti-Rushing Guard
-    // If an interviewer pauses mid-sentence after just 2-3 words (e.g., "Can you explain..."),
-    // refuse to trigger, knowing the question is incomplete.
     if (words.length < 4) return false;
+
+    // Golden Layer 5: Trailing Incomplete Connector Guard
+    // If the sentence ends on a preposition, possessive, determiner, or auxiliary verb
+    // (e.g., "Tell me how was your", "What is the definition of"), the speaker paused mid-sentence.
+    // Refuse to trigger and wait for the complete sentence.
+    const lastWord = words[words.length - 1].toLowerCase();
+    const trailingIncompleteWords = new Set([
+      'your', 'my', 'their', 'his', 'her', 'our', 'its',
+      'the', 'a', 'an', 'of', 'to', 'in', 'for', 'with', 'on', 'at', 'by', 'from', 'as',
+      'into', 'like', 'through', 'after', 'over', 'between', 'out', 'against', 'during',
+      'without', 'before', 'under', 'around', 'among', 'is', 'are', 'was', 'were', 'be',
+      'been', 'being', 'have', 'has', 'had', 'and', 'or', 'but', 'so', 'if', 'that',
+      'which', 'who', 'than', 'about', 'how'
+    ]);
+
+    if (trailingIncompleteWords.has(lastWord)) {
+      console.log(`[Deepgram] Sentence ends on incomplete connector ("${lastWord}") — waiting for complete sentence.`);
+      return false;
+    }
 
     return true;
   }
