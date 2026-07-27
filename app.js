@@ -201,13 +201,14 @@ function initDeepgram() {
     }
   };
 
-  // UtteranceEnd fires ONLY after speaker fully stops talking (1500ms silence).
-  // This is the correct place to trigger AI — full question is guaranteed to be complete.
+  // UtteranceEnd fires ONLY after speaker fully stops talking (2000ms silence).
+  // The utterance has already passed ALL Golden Layer guards inside deepgram.js
+  // (_handleTranscript gates: 4-word minimum + trailing connector word check).
+  // Do NOT call isQuestion() again here — it is pre-filtered at the source.
   state.deepgramService.onUtteranceEnd = (fullUtterance) => {
-    if (DeepgramService.isQuestion(fullUtterance)) {
-      showToast('❓ Question detected — generating answer...', 'success');
-      addQACard(fullUtterance);
-    }
+    // Utterance is already validated — fire AI immediately, no redundant re-check
+    showToast('❓ Question detected — generating answer...', 'success');
+    addQACard(fullUtterance);
   };
 
   // Live Audio Level Visualizer — updates 3 wave bars in header matching voice volume
