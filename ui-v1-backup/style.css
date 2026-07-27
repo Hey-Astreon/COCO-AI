@@ -3,44 +3,42 @@
    Design: Dark glassmorphism • Premium • Inspired by CoPrep AI
    ═══════════════════════════════════════════════════════════════════ */
 
-/* ─── CSS Variables (UI V2 Redesign — Infinity Theme) ───────────── */
+/* ─── CSS Variables ─────────────────────────────────────────────── */
 :root {
   /* Colors */
-  --bg-base: rgba(12, 10, 22, 0.94);
-  --bg-panel: rgba(20, 16, 36, 0.90);
-  --bg-panel-hover: rgba(30, 24, 52, 0.92);
+  --bg-base: rgba(10, 10, 18, 0.92);
+  --bg-panel: rgba(18, 18, 32, 0.88);
+  --bg-panel-hover: rgba(25, 25, 45, 0.90);
   --bg-card: rgba(255, 255, 255, 0.04);
-  --bg-card-hover: rgba(255, 255, 255, 0.08);
+  --bg-card-hover: rgba(255, 255, 255, 0.07);
   --bg-input: rgba(255, 255, 255, 0.06);
-  --bg-input-focus: rgba(255, 255, 255, 0.10);
-  --bg-toolbar: rgba(10, 8, 20, 0.96);
+  --bg-input-focus: rgba(255, 255, 255, 0.09);
+  --bg-toolbar: rgba(8, 8, 16, 0.95);
 
-  /* Accent Colors (Infinity Loop Gradient Palette) */
-  --accent-primary: #9D4EDD;    /* Vibrant Orchid */
-  --accent-secondary: #00F5D4;  /* Neon Mint */
-  --accent-glow: #C77DFF;       /* Soft Purple Glow */
+  /* Accent Colors */
+  --accent-primary: #6C63FF;    /* Electric Violet */
+  --accent-secondary: #00D4AA;  /* Teal Green */
   --accent-danger: #FF4757;     /* Red End */
-  --accent-warning: #FFA502;    /* Amber */
-  --accent-blue: #3A86FF;       /* Vivid Blue */
+  --accent-warning: #FFA502;    /* Orange */
+  --accent-blue: #1E90FF;       /* Interview Blue */
 
   /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #7B2CBF 0%, #C77DFF 50%, #E0AAFF 100%);
-  --gradient-infinity: linear-gradient(135deg, #3A0CA3, #7B2CBF, #C77DFF);
-  --gradient-teal: linear-gradient(135deg, #00F5D4, #00B09B);
+  --gradient-primary: linear-gradient(135deg, #6C63FF, #9B59B6);
+  --gradient-teal: linear-gradient(135deg, #00D4AA, #00B09B);
   --gradient-danger: linear-gradient(135deg, #FF4757, #C0392B);
-  --gradient-answer: linear-gradient(135deg, rgba(157, 78, 221, 0.16), rgba(123, 44, 191, 0.06));
-  --gradient-question: linear-gradient(135deg, rgba(0, 245, 212, 0.14), rgba(0, 176, 155, 0.04));
+  --gradient-answer: linear-gradient(135deg, rgba(108,99,255,0.15), rgba(108,99,255,0.05));
+  --gradient-question: linear-gradient(135deg, rgba(0,212,170,0.12), rgba(0,212,170,0.04));
 
   /* Text */
-  --text-primary: rgba(255, 255, 255, 0.96);
-  --text-secondary: rgba(255, 255, 255, 0.68);
-  --text-muted: rgba(255, 255, 255, 0.40);
-  --text-accent: #C77DFF;
+  --text-primary: rgba(255, 255, 255, 0.95);
+  --text-secondary: rgba(255, 255, 255, 0.65);
+  --text-muted: rgba(255, 255, 255, 0.38);
+  --text-accent: #6C63FF;
 
   /* Borders */
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-normal: rgba(255, 255, 255, 0.12);
-  --border-accent: rgba(199, 125, 255, 0.38);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-normal: rgba(255, 255, 255, 0.10);
+  --border-accent: rgba(108, 99, 255, 0.35);
 
   /* Sizing */
   --toolbar-h: 44px;
@@ -51,15 +49,15 @@
   --radius-pill: 999px;
 
   /* Shadows */
-  --shadow-glow-purple: 0 0 24px rgba(199, 125, 255, 0.35);
-  --shadow-glow-teal: 0 0 20px rgba(0, 245, 212, 0.22);
-  --shadow-panel: 0 10px 36px rgba(0, 0, 0, 0.5);
-  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-glow-purple: 0 0 20px rgba(108, 99, 255, 0.25);
+  --shadow-glow-teal: 0 0 20px rgba(0, 212, 170, 0.20);
+  --shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.3);
 
   /* Transitions */
   --t-fast: 120ms ease;
   --t-normal: 220ms ease;
-  --t-slow: 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  --t-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ─── Reset ─────────────────────────────────────────────────────── */
@@ -69,7 +67,7 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
+  font-family: 'Inter', -apple-system, sans-serif;
   font-size: 13px;
   color: var(--text-primary);
   background: transparent;
