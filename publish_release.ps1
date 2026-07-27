@@ -29,7 +29,7 @@ if (-not $env:GH_TOKEN) {
     exit 1
 }
 
-# 1. Read current version from package.json
+# 1. Read current version from package.json & find next unique tag
 $packageJsonPath = Join-Path $PSScriptRoot "package.json"
 if (-not (Test-Path $packageJsonPath)) {
     Write-Error "package.json not found in $PSScriptRoot"
@@ -40,26 +40,31 @@ $packageJson = Get-Content -Raw -Path $packageJsonPath | ConvertFrom-Json
 $version = $packageJson.version
 $tag = "v$version"
 
-Write-Host "[1/4] Checking version status for package.json ($tag)..." -ForegroundColor Cyan
+Write-Host "[1/5] Checking version status ($tag)..." -ForegroundColor Cyan
 
-# Fetch remote tags to ensure no collision
+# Fetch all remote tags from GitHub
 git fetch --tags origin | Out-Null
-$remoteTags = git ls-remote --tags origin
+$localTags = git tag -l
+$remoteTagLines = git ls-remote --tags origin
+$remoteTags = @()
+if ($remoteTagLines) {
+    $remoteTags = $remoteTagLines | ForEach-Object { $_ -replace '.*refs/tags/', '' -replace '\^{}', '' }
+}
+$allTags = $localTags + $remoteTags
 
-if ($remoteTags -match "refs/tags/$tag") {
-    Write-Host "Tag $tag already exists on GitHub remote. Auto-bumping patch version..." -ForegroundColor Yellow
+while ($allTags -contains $tag) {
+    Write-Host "Tag $tag already exists in git history. Auto-bumping patch version..." -ForegroundColor Yellow
     npm version patch --no-git-tag-version | Out-Null
     $packageJson = Get-Content -Raw -Path $packageJsonPath | ConvertFrom-Json
     $version = $packageJson.version
     $tag = "v$version"
-    Write-Host "New version set to: $tag" -ForegroundColor Green
-} else {
-    Write-Host "Publishing version: $tag" -ForegroundColor Green
 }
+
+Write-Host "Target Release Version: $tag" -ForegroundColor Green
 
 # 2. Stage & Commit
 Write-Host ""
-Write-Host "[2/4] Staging files and creating git commit..." -ForegroundColor Cyan
+Write-Host "[2/5] Staging files and creating git commit..." -ForegroundColor Cyan
 git add .
 try {
     git commit -m "release: $tag - Global auto-update release" | Out-Null
@@ -67,18 +72,33 @@ try {
     Write-Host "No uncommitted code changes found. Proceeding with release..." -ForegroundColor Yellow
 }
 
-# 3. Push main branch
+# 3. Create Local Tag
 Write-Host ""
-Write-Host "[3/4] Pushing main branch to GitHub..." -ForegroundColor Cyan
+Write-Host "[3/5] Tagging release $tag locally..." -ForegroundColor Cyan
+git tag -a $tag -m "Release $tag"
+
+# 4. Push Main and Tag to GitHub
+Write-Host ""
+Write-Host "[4/5] Pushing main branch and tag $tag to GitHub..." -ForegroundColor Cyan
 git push origin main
 if ($LASTEXITCODE -ne 0) {
     Write-Error "git push origin main failed. Aborting release."
     exit 1
 }
 
-# 4. Run Electron Builder Release (Handles Tagging + GitHub Release Creation natively)
+git push origin $tag
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "git push origin $tag failed. Aborting release."
+    exit 1
+}
+
+# Allow 3 seconds for GitHub REST API database index to register tag
+Write-Host "Waiting 3 seconds for GitHub API to index tag $tag..." -ForegroundColor Yellow
+Start-Sleep -Seconds 3
+
+# 5. Run Electron Builder Release
 Write-Host ""
-Write-Host "[4/4] Building installer and publishing $tag globally to GitHub Releases..." -ForegroundColor Magenta
+Write-Host "[5/5] Building installer and publishing $tag globally to GitHub Releases..." -ForegroundColor Magenta
 npm run release
 if ($LASTEXITCODE -ne 0) {
     Write-Error "npm run release failed."
