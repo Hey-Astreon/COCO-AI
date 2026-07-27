@@ -1648,6 +1648,40 @@ body.tab-transcript .panel-answers { display: none; }
   letter-spacing: 0.02em;
 }
 
+/* Real-time Audio Level Visualizer */
+.audio-level-visualizer {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 12px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.audio-level-visualizer .wave-bar {
+  width: 2px;
+  height: 3px;
+  min-height: 2px;
+  max-height: 12px;
+  background: var(--accent-secondary, #00F5D4);
+  border-radius: 1px;
+  transition: height 0.04s ease-out, opacity 0.15s ease-out;
+  opacity: 0.35;
+}
+
+.audio-level-visualizer.active .wave-bar {
+  opacity: 1;
+  box-shadow: 0 0 4px var(--accent-secondary, #00F5D4);
+}
+
+.btn-export {
+  color: #7B2CBF;
+}
+.btn-export:hover {
+  background: rgba(123, 44, 191, 0.18);
+  color: #9D4EDD;
+}
+
 .btn-live-mode {
   background: linear-gradient(135deg, var(--accent-secondary), #00b09b);
   border: none;

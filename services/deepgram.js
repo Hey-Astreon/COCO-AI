@@ -26,11 +26,14 @@ class DeepgramService {
     this.onError = null;          // callback(error)
     this.onStatusChange = null;   // callback(status) — 'connecting'|'listening'|'paused'|'error'
     this.onUtteranceEnd = null;   // callback(fullUtterance) — fires when speaker fully stops
+    this.onAudioLevel = null;     // callback(level 0-100) — real-time audio volume level
     this.reconnectAttempts = 0;
     this.maxReconnects = 5;       // increased from 3 → 5 for more resilience
     this.micStreamTracks = null;
     this.systemStreamTracks = null;
     this.audioCtx = null; // AudioContext for stream mixing
+    this._analyserNode = null;
+    this._levelTimer = null;
 
     // Utterance accumulation
     this._pendingUtterance = [];
@@ -159,6 +162,7 @@ class DeepgramService {
       }
 
       this.mediaStream = finalStream;
+      this._startAudioLevelAnalyzer();
       this._connectWebSocket();
 
     } catch (err) {
@@ -398,6 +402,7 @@ class DeepgramService {
   stop() {
     this.isListening = false;
     this._stopKeepAlive();
+    this._stopAudioLevelAnalyzer();
     clearTimeout(this._utteranceDebounceTimer);
     this._utteranceDebounceTimer = null;
     this._pendingUtterance = [];
@@ -434,6 +439,60 @@ class DeepgramService {
 
     this._setStatus('paused');
     console.log('[Deepgram] Stopped');
+  }
+
+  /**
+   * Start real-time audio volume level analyzer (Web Audio API AnalyserNode)
+   */
+  _startAudioLevelAnalyzer() {
+    this._stopAudioLevelAnalyzer();
+    if (!this.mediaStream) return;
+
+    try {
+      if (!this.audioCtx) {
+        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (this.audioCtx.state === 'suspended') {
+        this.audioCtx.resume();
+      }
+
+      const source = this.audioCtx.createMediaStreamSource(this.mediaStream);
+      this._analyserNode = this.audioCtx.createAnalyser();
+      this._analyserNode.fftSize = 64;
+      source.connect(this._analyserNode);
+
+      const dataArray = new Uint8Array(this._analyserNode.frequencyBinCount);
+
+      // Sample volume level at ~30fps (33ms)
+      this._levelTimer = setInterval(() => {
+        if (!this._analyserNode) return;
+        this._analyserNode.getByteFrequencyData(dataArray);
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+          sum += dataArray[i];
+        }
+        const average = sum / dataArray.length;
+        // Normalize 0-255 -> 0-100% volume
+        const level = Math.min(100, Math.round((average / 128) * 100));
+
+        if (this.onAudioLevel) {
+          this.onAudioLevel(level);
+        }
+      }, 33);
+    } catch (e) {
+      console.warn('[Audio] Failed to attach audio level analyzer:', e);
+    }
+  }
+
+  _stopAudioLevelAnalyzer() {
+    if (this._levelTimer) {
+      clearInterval(this._levelTimer);
+      this._levelTimer = null;
+    }
+    this._analyserNode = null;
+    if (this.onAudioLevel) {
+      this.onAudioLevel(0);
+    }
   }
 }
 

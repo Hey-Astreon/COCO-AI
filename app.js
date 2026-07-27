@@ -203,6 +203,11 @@ function initDeepgram() {
     }
   };
 
+  // Live Audio Level Visualizer — updates 3 wave bars in header matching voice volume
+  state.deepgramService.onAudioLevel = (level) => {
+    updateAudioLevelMeter(level);
+  };
+
   // Handle status changes
   state.deepgramService.onStatusChange = (status) => {
     switch (status) {
@@ -275,6 +280,92 @@ function updateStatus(type, text) {
   } else {
     label.style.color = 'var(--text-muted)';
   }
+}
+
+// ─── Live Audio Level Visualizer Meter ─────────────────────────
+function updateAudioLevelMeter(level) {
+  const container = $('audioLevelVisualizer');
+  const bar1 = $('waveBar1');
+  const bar2 = $('waveBar2');
+  const bar3 = $('waveBar3');
+
+  if (!container || !bar1 || !bar2 || !bar3) return;
+
+  if (level > 3) {
+    container.classList.add('active');
+    const h1 = Math.max(3, Math.min(12, Math.round(level * 0.12)));
+    const h2 = Math.max(3, Math.min(14, Math.round(level * 0.16)));
+    const h3 = Math.max(3, Math.min(10, Math.round(level * 0.09)));
+    bar1.style.height = `${h1}px`;
+    bar2.style.height = `${h2}px`;
+    bar3.style.height = `${h3}px`;
+  } else {
+    container.classList.remove('active');
+    bar1.style.height = '3px';
+    bar2.style.height = '3px';
+    bar3.style.height = '3px';
+  }
+}
+
+// ─── 1-Click Post-Interview Session Markdown Exporter ──────────
+function exportSessionMarkdown() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString();
+  const timeStr = now.toLocaleTimeString();
+
+  let md = `# 🥥 CocoAI — Interview Session Log\n\n`;
+  md += `**Date:** ${dateStr} at ${timeStr}\n`;
+  md += `**AI Model Used:** ${state.currentModel || 'llama-3.3-70b'}\n`;
+  md += `**Resume Context Active:** ${state.resume ? 'Yes (Parsed)' : 'No'}\n\n`;
+  md += `---\n\n`;
+
+  // 1. Q&A Solutions
+  md += `## ⚡ AI Q&A Solutions & Code Blocks\n\n`;
+  const cards = els.answersFeed.querySelectorAll('.qa-card');
+  if (cards.length === 0) {
+    md += `*No AI questions analyzed in this session.*\n\n`;
+  } else {
+    cards.forEach((card, index) => {
+      const qText = card.querySelector('.qa-q-text')?.textContent || '';
+      const aText = card.querySelector('.qa-a-text')?.innerText || '';
+      const time = card.querySelector('.qa-time')?.textContent || '';
+
+      md += `### ${index + 1}. Question (${time})\n`;
+      md += `**Question:** ${qText}\n\n`;
+      md += `**Solution:**\n${aText}\n\n`;
+      md += `---\n\n`;
+    });
+  }
+
+  // 2. Transcript Log
+  md += `## 🎙️ Live Speech Transcript History\n\n`;
+  const entries = els.transcriptFeed.querySelectorAll('.transcript-entry');
+  if (entries.length === 0) {
+    md += `*No speech transcript captured in this session.*\n\n`;
+  } else {
+    entries.forEach((entry) => {
+      const isInterviewer = entry.classList.contains('interviewer');
+      const speaker = isInterviewer ? 'Interviewer' : 'Candidate';
+      const text = entry.querySelector('.transcript-text')?.textContent || '';
+      const time = entry.querySelector('.transcript-time')?.textContent || '';
+
+      md += `- **[${speaker} - ${time}]**: ${text}\n`;
+    });
+  }
+
+  // Trigger browser blob download
+  const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const fileNameDate = now.toISOString().slice(0, 10);
+  a.download = `CocoAI_Interview_Session_${fileNameDate}.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showToast('📄 Session exported to Markdown!', 'success');
 }
 
 // ─── Model Selector ────────────────────────────────────────────
