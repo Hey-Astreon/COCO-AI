@@ -1385,6 +1385,12 @@ function minimizeWindow() {
   }
 }
 
+function toggleMaximizeWindow() {
+  if (window.electronAPI && window.electronAPI.toggleMaximizeApp) {
+    window.electronAPI.toggleMaximizeApp();
+  }
+}
+
 function closeWindow() {
   if (window.electronAPI) {
     window.electronAPI.closeApp();

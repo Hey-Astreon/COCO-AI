@@ -8,6 +8,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('electronAPI', {
   // ─── Window Management ────────────────────────────────────────
   minimizeApp: () => ipcRenderer.send('minimize-app'),
+  toggleMaximizeApp: () => ipcRenderer.send('toggle-maximize-app'),
   closeApp: () => ipcRenderer.send('close-app'),
   toggleWindow: () => ipcRenderer.send('toggle-window'),
   setIgnoreMouseEvents: (ignore, options) => {

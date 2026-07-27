@@ -255,6 +255,40 @@ kbd {
   color: #FF6B6B;
 }
 
+/* Window Controls (Minimize, Restore/Maximize, Close) */
+.window-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 4px;
+  -webkit-app-region: no-drag;
+}
+
+.win-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-sm, 6px);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--t-fast, 120ms ease);
+}
+
+.win-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+.win-btn.win-close:hover {
+  background: rgba(255, 71, 87, 0.85);
+  border-color: rgba(255, 71, 87, 1);
+  color: white;
+}
+
 /* Status Badge */
 .status-badge {
   display: flex;

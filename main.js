@@ -120,6 +120,16 @@ ipcMain.on('minimize-app', () => {
   if (mainWindow) mainWindow.minimize();
 });
 
+ipcMain.on('toggle-maximize-app', () => {
+  if (mainWindow) {
+    if (mainWindow.isMaximized()) {
+      mainWindow.unmaximize();
+    } else {
+      mainWindow.maximize();
+    }
+  }
+});
+
 ipcMain.on('close-app', () => {
   app.quit();
 });
