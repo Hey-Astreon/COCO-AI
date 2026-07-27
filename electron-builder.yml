@@ -26,4 +26,4 @@ publish:
   provider: github
   owner: Hey-Astreon
   repo: COCO-AI
-  releaseType: release
+  releaseType: draft
