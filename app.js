@@ -1052,13 +1052,14 @@ FOR CODING PROBLEMS:
 5. AFTER code block: 1 sentence with approach + O(?) time/space. Nothing more.
 
 FOR MCQ/QUIZ:
-1. Bold the correct answer on Line 1.
-2. 1-sentence explanation.
+1. LINE 1 MUST be the exact correct option in BOLD prefixed with a green checkmark (e.g. **✅ Upload the relevant documents and ask the AI to think really hard before answering** or **✅ Option A: ...**).
+2. Insert a newline after Line 1.
+3. Provide a single punchy 1-sentence explanation below.
 
 FOR DESKTOP / FILE EXPLORER / GENERAL WINDOWS (Not a coding question or quiz):
 - Briefly describe what is visible in 1-2 short sentences. Do NOT generate random code or automation scripts unless an actual programming question is shown.
 
-RULES: No preambles. No filler. Minimal explanation.`;
+RULES: No preambles. No filler. Line 1 bolded answer for MCQs. Code block Line 1 for Coding. Minimal explanation.`;
 
     let fullText = '';
 
