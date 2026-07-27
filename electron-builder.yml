@@ -12,7 +12,6 @@ files:
   - "!.gitignore"
   - "!package-lock.json"
 win:
-  icon: assets/coco_logo.ico
   target:
     - nsis
 nsis:
@@ -20,8 +19,6 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: always
   createStartMenuShortcut: true
-  installerIcon: assets/coco_logo.ico
-  uninstallerIcon: assets/coco_logo.ico
   uninstallDisplayName: Coco AI
 
 # ─── Auto-Update via GitHub Releases ───
