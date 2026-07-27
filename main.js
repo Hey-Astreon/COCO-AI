@@ -278,15 +278,37 @@ ipcMain.on('ai-stream-request', (event, { question, model, context, requestId })
       event.sender.send('ai-stream-fallback', { requestId, engine: 'groq', reason });
     }
     activeRequestId = requestId;
+
+    // MID-STREAM WATCHDOG for Groq fallback — same 15s rolling timeout
+    let groqMidStreamTimer = null;
+    const resetGroqWatchdog = () => {
+      clearTimeout(groqMidStreamTimer);
+      groqMidStreamTimer = setTimeout(() => {
+        if (activeAIRequest) {
+          console.warn('[AI] Groq mid-stream stall detected (>15s no new chunk) — aborting.');
+          try { activeAIRequest.abort(); } catch (_) {}
+          activeAIRequest = null;
+          activeRequestId = null;
+          if (!event.sender.isDestroyed()) {
+            event.sender.send('ai-stream-error', { requestId, error: 'AI stream timed out (Groq stalled for 15s). Please try again.' });
+          }
+        }
+      }, 15000);
+    };
+    // Start watchdog immediately — Groq should send first chunk within 15s
+    resetGroqWatchdog();
+
     activeAIRequest = groq.streamCompletion(groqKey, question, {
       model: groq.DEFAULT_MODEL,
       context: context || {},
       onChunk: (chunk, fullText) => {
+        resetGroqWatchdog(); // Reset rolling watchdog on every Groq chunk
         if (!event.sender.isDestroyed()) {
           event.sender.send('ai-stream-chunk', { requestId, chunk, fullText });
         }
       },
       onDone: (fullText) => {
+        clearTimeout(groqMidStreamTimer);
         activeAIRequest = null;
         activeRequestId = null;
         if (!event.sender.isDestroyed()) {
@@ -294,6 +316,7 @@ ipcMain.on('ai-stream-request', (event, { question, model, context, requestId })
         }
       },
       onError: (err) => {
+        clearTimeout(groqMidStreamTimer);
         activeAIRequest = null;
         activeRequestId = null;
         if (!event.sender.isDestroyed()) {
@@ -322,6 +345,8 @@ ipcMain.on('ai-stream-request', (event, { question, model, context, requestId })
   // ── Primary: Cerebras — fallback to Groq on error or >1000ms delay ────────────
   activeRequestId = requestId;
   let receivedFirstChunk = false;
+
+  // WATCHDOG: Fires if first chunk takes >1000ms (Cerebras latency spike → failover)
   let firstChunkTimer = setTimeout(() => {
     if (!receivedFirstChunk && activeAIRequest) {
       console.warn('[AI] Cerebras first chunk delayed >1000ms — failing over to Groq LPUs...');
@@ -332,6 +357,24 @@ ipcMain.on('ai-stream-request', (event, { question, model, context, requestId })
     }
   }, 1000);
 
+  // MID-STREAM WATCHDOG: Fires if stream stalls silently for >15s after first chunk.
+  // Prevents the UI spinner from hanging forever if Cerebras drops the connection mid-generation.
+  let midStreamTimer = null;
+  const resetMidStreamWatchdog = () => {
+    clearTimeout(midStreamTimer);
+    midStreamTimer = setTimeout(() => {
+      if (activeAIRequest) {
+        console.warn('[AI] Cerebras mid-stream stall detected (>15s no new chunk) — aborting.');
+        try { activeAIRequest.abort(); } catch (_) {}
+        activeAIRequest = null;
+        activeRequestId = null;
+        if (!event.sender.isDestroyed()) {
+          event.sender.send('ai-stream-error', { requestId, error: 'AI stream timed out (stalled for 15s mid-response). Please try again.' });
+        }
+      }
+    }, 15000);
+  };
+
   const reqObj = cerebras.streamCompletion(cerebrasKey, question, {
     model: model || cerebras.DEFAULT_MODEL,
     context: context || {},
@@ -339,12 +382,14 @@ ipcMain.on('ai-stream-request', (event, { question, model, context, requestId })
       receivedFirstChunk = true;
       if (reqObj) reqObj.hasStreamedTokens = true;
       clearTimeout(firstChunkTimer);
+      resetMidStreamWatchdog(); // Reset rolling 15s watchdog on every chunk
       if (!event.sender.isDestroyed()) {
         event.sender.send('ai-stream-chunk', { requestId, chunk, fullText });
       }
     },
     onDone: (fullText) => {
       clearTimeout(firstChunkTimer);
+      clearTimeout(midStreamTimer);
       activeAIRequest = null;
       activeRequestId = null;
       if (!event.sender.isDestroyed()) {
@@ -353,6 +398,7 @@ ipcMain.on('ai-stream-request', (event, { question, model, context, requestId })
     },
     onError: (err) => {
       clearTimeout(firstChunkTimer);
+      clearTimeout(midStreamTimer);
       activeAIRequest = null;
       activeRequestId = null;
       // ⚡ Auto-fallback to Groq instead of showing error
