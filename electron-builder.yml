@@ -1,5 +1,7 @@
+# ─── Co-Owned & Co-Created by Hey-Astreon & Silenttears-cloud ───
 appId: com.cocoai.copilot
 productName: Coco AI
+copyright: "Copyright © 2026 Roushan (Hey-Astreon) & Ayushi Raj (Silenttears-cloud). All rights reserved."
 artifactName: "CocoAI_Installer_v${version}.${ext}"
 directories:
   output: dist
@@ -26,4 +28,4 @@ publish:
   provider: github
   owner: Hey-Astreon
   repo: COCO-AI
-  releaseType: draft
+  releaseType: release
