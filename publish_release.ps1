@@ -42,17 +42,20 @@ $tag = "v$version"
 
 Write-Host "[1/5] Checking version status for package.json ($tag)..." -ForegroundColor Cyan
 
-# Check if tag already exists in git
-$existingTags = git tag
-if ($existingTags -contains $tag) {
-    Write-Host "Tag $tag already exists in git history. Auto-bumping patch version..." -ForegroundColor Yellow
+# Fetch remote tags to ensure no collision
+git fetch --tags origin | Out-Null
+$localTags = git tag
+$remoteTags = git ls-remote --tags origin
+
+if ($localTags -contains $tag -or $remoteTags -match "refs/tags/$tag") {
+    Write-Host "Tag $tag already exists in local or remote git history. Auto-bumping patch version..." -ForegroundColor Yellow
     npm version patch --no-git-tag-version | Out-Null
     $packageJson = Get-Content -Raw -Path $packageJsonPath | ConvertFrom-Json
     $version = $packageJson.version
     $tag = "v$version"
     Write-Host "New version set to: $tag" -ForegroundColor Green
 } else {
-    Write-Host "Publishing existing package.json version: $tag" -ForegroundColor Green
+    Write-Host "Publishing version: $tag" -ForegroundColor Green
 }
 
 # 2. Stage & Commit
