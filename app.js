@@ -838,6 +838,14 @@ function formatAnswer(text) {
   // Wrap each group separately so numbered lists go into <ol>, not <ul>
   html = html.replace(/(<li class="ul-item">.*?<\/li>\n?)+/gs, m => '<ul>' + m + '</ul>');
   html = html.replace(/(<li class="ol-item">.*?<\/li>\n?)+/gs, m => '<ol>' + m + '</ol>');
+  
+  // 2b. Smart sentence boundary & jammed text separator safety net:
+  // Fix cases where AI stream outputs concatenated words like "answeringProviding" -> "answering<br><br>Providing"
+  html = html.replace(/([a-z0-9\?\.\)])([A-Z][a-z]{2,}\b)/g, '$1<br><br>$2');
+
+  // Fix strong tags jammed directly against following text
+  html = html.replace(/<\/strong>([A-Za-z0-9])/g, '</strong><br><br>$1');
+
   html = html.replace(/\n\n/g, '</p><p>');
   html = html.replace(/\n/g, '<br>');
 
@@ -1052,9 +1060,12 @@ FOR CODING PROBLEMS:
 5. AFTER code block: 1 sentence with approach + O(?) time/space. Nothing more.
 
 FOR MCQ/QUIZ:
-1. LINE 1 MUST be the exact correct option in BOLD prefixed with a green checkmark (e.g. **✅ Upload the relevant documents and ask the AI to think really hard before answering** or **✅ Option A: ...**).
-2. Insert a newline after Line 1.
-3. Provide a single punchy 1-sentence explanation below.
+You MUST format your response using this exact 2-part template:
+**✅ [Exact text of the correct option]**
+
+[1-sentence explanation why it is correct]
+
+CRITICAL: Do NOT run the correct option text into the explanation sentence. You MUST separate the correct answer and explanation with a blank line!
 
 FOR DESKTOP / FILE EXPLORER / GENERAL WINDOWS (Not a coding question or quiz):
 - Briefly describe what is visible in 1-2 short sentences. Do NOT generate random code or automation scripts unless an actual programming question is shown.
