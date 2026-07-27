@@ -13,7 +13,7 @@ const state = {
   autoScroll: true,
   lastAnswer: '',
   currentModel: 'llama-3.3-70b',
-  apiKeys: { cerebras: '', deepgram: '', gemini: '', nvidia: '' },
+  apiKeys: { cerebras: '', deepgram: '', gemini: '', nvidia: '', groq: '' },
   resume: '',
   jobDescription: '',
   activeTab: 'answers',           // 'answers' | 'transcript',
@@ -796,8 +796,8 @@ async function addQACard(question) {
     fullText: '',
   });
 
-  // Send to Cerebras via main process IPC
-  if (window.electronAPI && state.apiKeys.cerebras) {
+  // Send to AI via main process IPC (Cerebras primary → Groq fallback handled in main.js)
+  if (window.electronAPI && (state.apiKeys.cerebras || state.apiKeys.groq)) {
     window.electronAPI.streamAI(
       question,
       state.currentModel,
@@ -809,7 +809,7 @@ async function addQACard(question) {
       requestId
     );
   } else {
-    // Fallback: demo mode (no API key or not in Electron)
+    // Demo mode (no API keys at all or not in Electron)
     const answerEl = $(`answer-${requestId}`);
     answerEl.innerHTML = '<span class="cursor-blink"></span>';
     const demoAnswer = generateDemoAnswer(question);
@@ -1334,7 +1334,7 @@ function clearAnswers() {
   els.answersFeed.innerHTML = `
     <div class="welcome-card">
       <div class="welcome-icon">
-        <img src="Coco UI Logo.png" class="welcome-icon-img" alt="Logo" />
+        <img src="assets/coco_logo_nobg.png" class="welcome-icon-img" alt="Logo" />
       </div>
       <div class="welcome-text">
         <strong>CocoAI is active & listening</strong>
@@ -1534,6 +1534,7 @@ function loadSettings() {
       state.apiKeys.cerebras = state.apiKeys.cerebras || parsedKeys.cerebras || '';
       state.apiKeys.deepgram = state.apiKeys.deepgram || parsedKeys.deepgram || '';
       state.apiKeys.gemini = state.apiKeys.gemini || parsedKeys.gemini || '';
+      state.apiKeys.groq = state.apiKeys.groq || parsedKeys.groq || '';
     }
     
     // Load resume & JD
@@ -1578,12 +1579,13 @@ function saveSettings() {
     localStorage.setItem('cocoai_jd', jd);
     localStorage.setItem('cocoai_audio_mode', audioMode);
     
-    // Update active state — preserve nvidia key (it comes from .env via Electron, not the settings UI)
+    // Update active state — preserve env-loaded keys (nvidia, groq) that don't have settings UI fields
     state.apiKeys = {
       cerebras: keys.cerebras,
       deepgram: keys.deepgram,
       gemini: keys.gemini,
-      nvidia: state.apiKeys.nvidia, // keep the env-loaded key intact
+      nvidia: state.apiKeys.nvidia, // keep env-loaded key intact
+      groq: state.apiKeys.groq,     // keep env-loaded key intact
     };
     state.resume = resume;
     state.jobDescription = jd;
