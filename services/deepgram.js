@@ -229,7 +229,7 @@ class DeepgramService {
     // param name causes silent failure — Deepgram ignores all boosts.
     const TECH_KEYWORDS = [
       'REST', 'API', 'HTTP', 'HTTPS', 'SQL', 'NoSQL', 'JSON', 'XML', 'YAML',
-      'GraphQL', 'gRPC', 'TCP', 'UDP', 'OAuth', 'JWT', 'CORS', 'CRUD',
+      'GraphQL', 'gRPC', 'TCP', 'UDP', 'OAuth', 'JWT', 'CORS', 'CRUD', 'OOP', 'ACID',
       'microservices', 'Kubernetes', 'Docker', 'CI/CD', 'DevOps', 'AWS', 'Azure',
       'React', 'Angular', 'Vue', 'Node.js', 'TypeScript', 'JavaScript', 'Python',
       'Java', 'Golang', 'Rust', 'C++', 'MongoDB', 'PostgreSQL', 'Redis', 'Kafka',
@@ -240,21 +240,19 @@ class DeepgramService {
       'concurrency', 'parallelism', 'mutex', 'deadlock', 'race condition',
       'idempotent', 'stateless', 'authentication', 'authorization', 'endpoint',
       'middleware', 'load balancer', 'caching', 'CDN', 'webhook', 'pub/sub',
+      'event loop', 'closure', 'promise', 'async/await', 'garbage collection',
+      'heap', 'stack', 'thread', 'process', 'Nginx', 'Linux', 'OS', 'DOM'
     ];
-    // keywords format for nova-2: "word:boost" where boost is 0.0–10.0
-    // Default boost=1.0 (no suffix) simply adds the word to the vocabulary list
 
     const params = new URLSearchParams({
-      model: 'nova-2',              // FIX #1: nova-2 > nova-3 for technical vocabulary accuracy
-      language: 'en-US',            // en-US for optimal technical accent coverage
+      model: 'nova-2',              // nova-2 high accuracy model
+      language: 'en-US',            // en-US technical accent coverage
       smart_format: 'true',         // auto-formats numbers, dates, currency
-      punctuate: 'true',            // adds punctuation for better readability
-      interim_results: 'true',      // required for interim transcripts and VAD
-      utterance_end_ms: '2000',     // 2000ms (2.0s) silence threshold — 2.0s silence gate (Golden Layer 1)
+      punctuate: 'true',            // adds punctuation
+      interim_results: 'true',      // required for live updates and VAD
+      utterance_end_ms: '1200',     // 1200ms (1.2s) silence threshold — responsive VAD
       vad_events: 'true',           // voice activity detection events
-      endpointing: '2000',          // 2000ms (2.0s) silence threshold — prevents premature answer triggering
-      // no_delay REMOVED (Fix #3): conflicted with utterance_end_ms buffering
-      // filler_words REMOVED (Fix #4): aggressive pruning corrupts short tech words
+      endpointing: '1200',          // 1200ms (1.2s) endpointing threshold
     });
 
     // FIX #2: Append keywords as repeated params (Deepgram nova-2 requires one per key)
@@ -371,7 +369,7 @@ class DeepgramService {
 
     this.mediaRecorder = new MediaRecorder(this.mediaStream, {
       mimeType: mimeType,
-      audioBitsPerSecond: 16000,   // FIX #2: 16kbps — optimal for Deepgram STT decoding accuracy
+      audioBitsPerSecond: 64000,   // 64kbps Opus — gold standard for speech STT accuracy & sharp formants
     });
 
     this.mediaRecorder.ondataavailable = (event) => {
@@ -402,44 +400,43 @@ class DeepgramService {
           this.onTranscript(transcript.trim(), isFinal, speaker, speechFinal);
         }
 
-        // Accumulate final chunks into the pending utterance buffer (Fragment Accumulation Buffer — Golden Layer 2)
+        // Accumulate final chunks into the pending utterance buffer
         if (isFinal) {
           if (!this._pendingUtterance) this._pendingUtterance = [];
           this._pendingUtterance.push(transcript.trim());
 
-          // ── Silence Safety Timer (2500ms) ──────────────────────────────────
-          // Fires 2.5s after the last final chunk if UtteranceEnd packet is delayed.
-          // Guarantees full sentence accumulation without cutting off mid-sentence.
+          // ── Silence Safety Timer (2000ms) ──────────────────────────────────
+          // Fires 2.0s after the last final chunk if UtteranceEnd packet is delayed.
           clearTimeout(this._utteranceDebounceTimer);
           this._utteranceDebounceTimer = setTimeout(() => {
             if (this._pendingUtterance && this._pendingUtterance.length > 0) {
               const fullUtterance = this._pendingUtterance.join(' ');
+              this._pendingUtterance = []; // ALWAYS reset buffer so stale fragments never pollute future questions
               if (DeepgramService.isQuestion(fullUtterance)) {
-                this._pendingUtterance = [];
-                console.log('[Deepgram] Speech complete (2.5s silence safety net):', fullUtterance);
+                console.log('[Deepgram] Speech complete (silence safety net):', fullUtterance);
                 if (this.onUtteranceEnd) this.onUtteranceEnd(fullUtterance);
               } else {
-                console.log('[Deepgram] Incomplete fragment — waiting for full question:', fullUtterance);
+                console.log('[Deepgram] Ignored non-question / filler speech:', fullUtterance);
               }
             }
-          }, 2500);
+          }, 2000);
         }
       }
     }
 
-    // UtteranceEnd — Deepgram's primary indicator that speaker has completed their turn (2.0s silence)
+    // UtteranceEnd — Deepgram's primary indicator that speaker has completed their turn
     if (data.type === 'UtteranceEnd') {
       clearTimeout(this._utteranceDebounceTimer);
       this._utteranceDebounceTimer = null;
 
       if (this._pendingUtterance && this._pendingUtterance.length > 0) {
         const fullUtterance = this._pendingUtterance.join(' ');
+        this._pendingUtterance = []; // ALWAYS reset buffer on UtteranceEnd
         if (DeepgramService.isQuestion(fullUtterance)) {
-          this._pendingUtterance = [];
           console.log('[Deepgram] UtteranceEnd complete question:', fullUtterance);
           if (this.onUtteranceEnd) this.onUtteranceEnd(fullUtterance);
         } else {
-          console.log('[Deepgram] UtteranceEnd — incomplete fragment, accumulating further:', fullUtterance);
+          console.log('[Deepgram] UtteranceEnd — ignored non-question speech:', fullUtterance);
         }
       }
     }
@@ -477,40 +474,28 @@ class DeepgramService {
   static isQuestion(text) {
     if (!text) return false;
     const trimmed = text.trim();
+    if (trimmed.length < 4) return false; // Minimum character length guard (e.g. "hi", "ok", "um")
+
     const cleanText = trimmed.replace(/[.,?!]+$/, '');
     const words = cleanText.split(/\s+/);
 
-    // Golden Layer 1: 4-Word Minimum Anti-Rushing Guard
-    if (words.length < 4) return false;
+    // Single-word filler filter ("okay", "yeah", "thanks", "hello")
+    if (words.length === 1) {
+      const singleFiller = new Set(['ok', 'okay', 'yeah', 'yes', 'no', 'um', 'uh', 'right', 'sure', 'thanks', 'hello', 'hi', 'hey', 'cool', 'bye', 'great', 'fine']);
+      if (singleFiller.has(words[0].toLowerCase())) return false;
+    }
 
-    // Golden Layer 2: Trailing Incomplete Connector Guard
-    // Comprehensive set of words that signal an incomplete mid-sentence pause.
-    // If the speaker pauses after any of these, they haven't finished their question.
+    // Trailing incomplete connector check — ONLY for open prepositions/determiners when paused mid-sentence
+    // e.g. "Tell me about the", "What is the difference of"
     const lastWord = words[words.length - 1].toLowerCase();
-    const trailingIncompleteWords = new Set([
-      // Possessives & Personal Pronouns
-      'your', 'my', 'their', 'his', 'her', 'our', 'its', 'me', 'him', 'them',
-      // Determiners & Articles
-      'the', 'a', 'an', 'this', 'that', 'these', 'those', 'some', 'any', 'each',
-      // Prepositions (common ones that open noun phrases)
-      'of', 'to', 'in', 'for', 'with', 'on', 'at', 'by', 'from', 'as',
-      'into', 'like', 'through', 'after', 'over', 'between', 'out', 'against',
-      'during', 'without', 'before', 'under', 'around', 'among', 'within',
-      'about', 'across', 'behind', 'beyond', 'despite', 'toward', 'upon',
-      // Auxiliary Verbs (incomplete predicate — subject noun phrase is missing)
-      'is', 'are', 'was', 'were', 'be', 'been', 'being',
-      'have', 'has', 'had', 'do', 'does', 'did',
-      'will', 'would', 'could', 'should', 'might', 'must', 'shall', 'may', 'can',
-      // Conjunctions & Subordinators (open a new clause that hasn't been completed)
-      'and', 'or', 'but', 'so', 'if', 'that', 'which', 'who', 'whom', 'whose',
-      'than', 'when', 'where', 'while', 'although', 'because', 'since', 'unless',
-      'how', 'what', 'why', 'whether',
-      // Common sentence openers that signal more is coming
-      'both', 'either', 'neither', 'not', 'just', 'only', 'also', 'even',
+    const trailingIncompleteConnectors = new Set([
+      'the', 'a', 'an', 'your', 'my', 'their', 'his', 'her', 'our', 'its',
+      'of', 'to', 'in', 'for', 'with', 'on', 'at', 'by', 'from',
+      'and', 'or', 'but', 'because', 'than',
     ]);
 
-    if (trailingIncompleteWords.has(lastWord)) {
-      console.log(`[Deepgram] Layer 2 guard: sentence ends on incomplete connector "${lastWord}" — waiting for complete sentence.`);
+    if (words.length > 2 && trailingIncompleteConnectors.has(lastWord)) {
+      console.log(`[Deepgram] Sentence ends on incomplete connector "${lastWord}" — waiting for completion.`);
       return false;
     }
 
