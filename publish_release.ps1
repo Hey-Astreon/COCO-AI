@@ -2,6 +2,7 @@
 # Coco AI — 1-Click Global Auto-Release Publisher (PowerShell)
 # ═══════════════════════════════════════════════════════════════════
 $ErrorActionPreference = 'Stop'
+$env:GIT_REDIRECT_STDERR = '2>&1'
 
 Write-Host "================================================================" -ForegroundColor Cyan
 Write-Host "   COCO AI -- 1-CLICK GLOBAL RELEASE PUBLISHER" -ForegroundColor Cyan
@@ -31,7 +32,7 @@ if (-not $env:GH_TOKEN) {
 
 # 1. Fetch ALL tags from GitHub remote
 Write-Host "[1/5] Syncing tags with GitHub remote..." -ForegroundColor Cyan
-git fetch --tags --force origin | Out-Null
+git fetch --tags --force origin 2>&1 | Out-Null
 $allTags = git tag -l
 
 # Read current version from package.json
@@ -59,17 +60,13 @@ Write-Host "Target Release Version: $tag" -ForegroundColor Green
 # 2. Stage & Commit
 Write-Host ""
 Write-Host "[2/5] Staging files and creating git commit..." -ForegroundColor Cyan
-git add .
-try {
-    git commit -m "release: $tag - Global auto-update release" | Out-Null
-} catch {
-    Write-Host "No uncommitted code changes found. Proceeding with release..." -ForegroundColor Yellow
-}
+git add . 2>&1 | Out-Null
+git commit -m "release: $tag - Global auto-update release" 2>&1 | Out-Null
 
 # 3. Create Local Tag
 Write-Host ""
 Write-Host "[3/5] Tagging release $tag locally..." -ForegroundColor Cyan
-git tag -a $tag -m "Release $tag"
+git tag -a $tag -m "Release $tag" 2>&1 | Out-Null
 
 # 4. Push Main and Tag to GitHub
 Write-Host ""
