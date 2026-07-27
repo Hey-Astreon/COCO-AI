@@ -133,12 +133,13 @@ html, body {
 }
 .logo-icon { font-size: 14px; line-height: 1; }
 .logo-icon-img {
-  width: 22px;
-  height: 18px;
+  width: 26px;
+  height: 26px;
   object-fit: contain;
-  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.6));
+  filter: drop-shadow(0 0 8px rgba(199, 125, 255, 0.7));
   display: inline-block;
   vertical-align: middle;
+  border-radius: 4px;
 }
 .logo-text {
   font-family: 'Outfit', sans-serif;

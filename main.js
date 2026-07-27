@@ -75,6 +75,7 @@ function createWindow() {
     resizable: true,
     movable: true,
     type: 'toolbar',
+    icon: path.join(__dirname, 'assets', 'coco_logo.ico'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
