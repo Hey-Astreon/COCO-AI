@@ -192,8 +192,8 @@ class DeepgramService {
       language: 'en-US',            // en-US for optimal technical accent coverage
       smart_format: 'true',         // auto-formats numbers, dates, currency
       punctuate: 'true',            // adds punctuation for better readability
-      interim_results: 'true',      // live in-progress text while speaking
-      utterance_end_ms: '800',      // 800ms silence threshold for instant answer triggering
+      interim_results: 'true',      // required for interim transcripts and VAD
+      utterance_end_ms: '1000',     // 1000ms (1.0s) silence threshold — Deepgram minimum required value
       vad_events: 'true',           // voice activity detection events
       endpointing: '500',           // 500ms silence threshold — sub-second sentence completion
       no_delay: 'true',             // reduces transcript delivery latency
