@@ -446,6 +446,12 @@ app.whenReady().then(() => {
   globalShortcut.register('CommandOrControl+Shift+H', toggleOverlay);
   globalShortcut.register('CommandOrControl+Shift+P', panicHide);
 
+  // Ctrl+Shift+Q = Emergency instant quit / terminate app completely
+  globalShortcut.register('CommandOrControl+Shift+Q', () => {
+    console.log('[System] Emergency Quit shortcut triggered (Ctrl+Shift+Q)');
+    app.quit();
+  });
+
   // Ctrl+Shift+A = Fresh single-shot analyze (always clears buffer)
   globalShortcut.register('CommandOrControl+Shift+A', () => {
     if (mainWindow && mainWindow.webContents) {
