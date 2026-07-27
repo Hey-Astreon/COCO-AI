@@ -120,31 +120,13 @@ function streamCompletion(apiKey, question, options = {}) {
       'Accept': 'text/event-stream',
     },
   }, (res) => {
-    // ── Handle 429 Queue Exceeded — Exponential backoff retry or fallback model ──
+    // ── Handle 429 Queue / Rate Limit Exceeded — Instant Failover to Groq LPUs ──
     if (res.statusCode === 429) {
-      if (attempt < maxRetries && !isAborted) {
-        const delay = 600 * Math.pow(2, attempt); // 600ms, 1200ms, 2400ms
-        console.warn(`⚠️ Cerebras 429 Queue Exceeded on ${model}. Retrying in ${delay}ms (Attempt ${attempt + 1}/${maxRetries})...`);
-        setTimeout(() => {
-          if (!isAborted) {
-            streamCompletion(apiKey, question, {
-              ...options,
-              attempt: attempt + 1
-            });
-          }
-        }, delay);
-        return;
-      } else if (!isAborted) {
-        // Fallback to gemma-4-31b or qwen-3-32b if primary model is queue-clogged
-        const fallbackModel = (model === 'gemma-4-31b') ? 'qwen-3-32b' : 'gemma-4-31b';
-        console.warn(`⚠️ Cerebras ${model} queue exhausted — switching fallback model to ${fallbackModel}...`);
-        streamCompletion(apiKey, question, {
-          ...options,
-          model: fallbackModel,
-          attempt: 0
-        });
-        return;
+      if (!isAborted) {
+        console.warn(`⚡ Cerebras 429 Rate Limit on ${model} — instant failover to Groq LPUs...`);
+        onError(new Error(`Cerebras 429 Rate Limit Exceeded on ${model}`));
       }
+      return;
     }
 
     if (res.statusCode !== 200) {

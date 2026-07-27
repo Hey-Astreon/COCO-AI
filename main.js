@@ -309,34 +309,35 @@ ipcMain.on('ai-stream-request', (event, { question, model, context, requestId })
     return;
   }
 
-  // Abort any previous active request
-  if (activeAIRequest) {
+  // Only abort previous request if it has NOT started streaming yet (stuck in queue)
+  if (activeAIRequest && !activeAIRequest.hasStreamedTokens) {
     if (activeRequestId && !event.sender.isDestroyed()) {
       event.sender.send('ai-stream-aborted', { requestId: activeRequestId });
     }
-    activeAIRequest.abort();
+    try { activeAIRequest.abort(); } catch (_) {}
     activeAIRequest = null;
     activeRequestId = null;
   }
 
-  // ── Primary: Cerebras — fallback to Groq on error or >1200ms delay ────────────
+  // ── Primary: Cerebras — fallback to Groq on error or >1000ms delay ────────────
   activeRequestId = requestId;
   let receivedFirstChunk = false;
   let firstChunkTimer = setTimeout(() => {
     if (!receivedFirstChunk && activeAIRequest) {
-      console.warn('[AI] Cerebras first chunk delayed >1200ms — failing over to Groq LPUs...');
+      console.warn('[AI] Cerebras first chunk delayed >1000ms — failing over to Groq LPUs...');
       if (activeAIRequest.abort) activeAIRequest.abort();
       activeAIRequest = null;
       activeRequestId = null;
-      tryGroqFallback('Cerebras response latency > 1200ms');
+      tryGroqFallback('Cerebras response latency > 1000ms');
     }
-  }, 1200);
+  }, 1000);
 
-  activeAIRequest = cerebras.streamCompletion(cerebrasKey, question, {
+  const reqObj = cerebras.streamCompletion(cerebrasKey, question, {
     model: model || cerebras.DEFAULT_MODEL,
     context: context || {},
     onChunk: (chunk, fullText) => {
       receivedFirstChunk = true;
+      if (reqObj) reqObj.hasStreamedTokens = true;
       clearTimeout(firstChunkTimer);
       if (!event.sender.isDestroyed()) {
         event.sender.send('ai-stream-chunk', { requestId, chunk, fullText });
@@ -358,6 +359,7 @@ ipcMain.on('ai-stream-request', (event, { question, model, context, requestId })
       tryGroqFallback(err.message || 'unknown error');
     },
   });
+  activeAIRequest = reqObj;
 });
 
 ipcMain.on('ai-stream-abort', (event) => {

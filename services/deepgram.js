@@ -146,6 +146,9 @@ class DeepgramService {
               this.audioCtx = null;
             }
             this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (this.audioCtx.state === 'suspended') {
+              await this.audioCtx.resume();
+            }
             const micSource = this.audioCtx.createMediaStreamSource(micStream);
             const systemSource = this.audioCtx.createMediaStreamSource(systemStream);
             const dest = this.audioCtx.createMediaStreamDestination();
@@ -186,13 +189,13 @@ class DeepgramService {
   _connectWebSocket() {
     const params = new URLSearchParams({
       model: 'nova-3',              // Deepgram's most accurate model
-      language: 'en-US',            // was 'en' — en-US has better US accent coverage
+      language: 'en-US',            // en-US for optimal technical accent coverage
       smart_format: 'true',         // auto-formats numbers, dates, currency
       punctuate: 'true',            // adds punctuation for better readability
       interim_results: 'true',      // live in-progress text while speaking
-      utterance_end_ms: '1000',     // 1000ms (1.0s) silence threshold for rapid answer triggering
+      utterance_end_ms: '800',      // 800ms silence threshold for instant answer triggering
       vad_events: 'true',           // voice activity detection events
-      endpointing: '800',           // 800ms silence threshold — ultra-responsive sentence completion
+      endpointing: '500',           // 500ms silence threshold — sub-second sentence completion
       no_delay: 'true',             // reduces transcript delivery latency
       filler_words: 'false',        // strip "um", "uh", "like" from transcripts
     });
@@ -223,11 +226,12 @@ class DeepgramService {
       console.log('[Deepgram] WebSocket closed:', event.code, event.reason);
       this.isListening = false;
       this._stopKeepAlive();
+      this._stopRecording();
 
       // Auto-reconnect on unexpected close (not user-initiated)
       if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnects) {
         this.reconnectAttempts++;
-        const delay = Math.min(1000 * this.reconnectAttempts, 5000); // 1s, 2s, 3s... up to 5s
+        const delay = Math.min(600 * this.reconnectAttempts, 3000); // 600ms, 1.2s, 1.8s... up to 3s
         console.log(`[Deepgram] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnects})...`);
         this._setStatus('connecting');
         setTimeout(() => this._connectWebSocket(), delay);
@@ -244,15 +248,28 @@ class DeepgramService {
   }
 
   /**
+   * Stop MediaRecorder cleanly so fresh WebM headers are sent on next connection
+   */
+  _stopRecording() {
+    if (this.mediaRecorder) {
+      try {
+        if (this.mediaRecorder.state !== 'inactive') {
+          this.mediaRecorder.stop();
+        }
+      } catch (_) {}
+      this.mediaRecorder = null;
+    }
+  }
+
+  /**
    * Send a KeepAlive ping every 8 seconds to prevent Deepgram from
-   * closing the WebSocket during silences (Deepgram closes after ~10s of no audio).
+   * closing the WebSocket during silences.
    */
   _startKeepAlive() {
     this._stopKeepAlive();
     this._keepAliveTimer = setInterval(() => {
       if (this.ws?.readyState === WebSocket.OPEN) {
         this.ws.send(JSON.stringify({ type: 'KeepAlive' }));
-        console.log('[Deepgram] KeepAlive sent');
       }
     }, 8000);
   }
@@ -269,6 +286,7 @@ class DeepgramService {
    */
   _startRecording() {
     if (!this.mediaStream) return;
+    this._stopRecording();
 
     const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
       ? 'audio/webm;codecs=opus'
@@ -276,7 +294,7 @@ class DeepgramService {
 
     this.mediaRecorder = new MediaRecorder(this.mediaStream, {
       mimeType: mimeType,
-      audioBitsPerSecond: 128000,   // 128kbps — CD quality capture
+      audioBitsPerSecond: 128000,
     });
 
     this.mediaRecorder.ondataavailable = (event) => {
@@ -285,9 +303,9 @@ class DeepgramService {
       }
     };
 
-    // Send audio chunks every 200ms for smooth real-time transcription
-    this.mediaRecorder.start(200);
-    console.log('[Deepgram] MediaRecorder started at 128kbps');
+    // Send audio chunks every 150ms for ultra-responsive streaming
+    this.mediaRecorder.start(150);
+    console.log('[Deepgram] MediaRecorder started with fresh WebM headers');
   }
 
   /**
@@ -311,23 +329,32 @@ class DeepgramService {
           if (!this._pendingUtterance) this._pendingUtterance = [];
           this._pendingUtterance.push(transcript.trim());
 
-          // ── Fast Safety Debounce Net (1.8s) ──────────────────────────
-          // If UtteranceEnd is delayed by network, trigger answer after 1.8s
+          // ⚡ Instant Trigger on speech_final (0ms delay!)
+          if (speechFinal && this._pendingUtterance.length > 0) {
+            clearTimeout(this._utteranceDebounceTimer);
+            this._utteranceDebounceTimer = null;
+            const fullUtterance = this._pendingUtterance.join(' ');
+            this._pendingUtterance = [];
+            console.log('[Deepgram] Instant speech_final trigger:', fullUtterance);
+            if (this.onUtteranceEnd) this.onUtteranceEnd(fullUtterance);
+            return;
+          }
+
+          // Fast Safety Debounce Net (1.2s)
           clearTimeout(this._utteranceDebounceTimer);
           this._utteranceDebounceTimer = setTimeout(() => {
             if (this._pendingUtterance && this._pendingUtterance.length > 0) {
               const fullUtterance = this._pendingUtterance.join(' ');
               this._pendingUtterance = [];
-              console.log('[Deepgram] Debounce fired (1.8s safety net):', fullUtterance);
+              console.log('[Deepgram] Safety net trigger (1.2s):', fullUtterance);
               if (this.onUtteranceEnd) this.onUtteranceEnd(fullUtterance);
             }
-          }, 1800);
+          }, 1200);
         }
       }
     }
 
     // UtteranceEnd — primary trigger gate.
-    // Fires after speaker has been silent for 1000ms.
     if (data.type === 'UtteranceEnd') {
       clearTimeout(this._utteranceDebounceTimer);
       this._utteranceDebounceTimer = null;
@@ -335,7 +362,7 @@ class DeepgramService {
       if (this._pendingUtterance && this._pendingUtterance.length > 0) {
         const fullUtterance = this._pendingUtterance.join(' ');
         this._pendingUtterance = [];
-        console.log('[Deepgram] UtteranceEnd received. Full utterance:', fullUtterance);
+        console.log('[Deepgram] UtteranceEnd trigger:', fullUtterance);
         if (this.onUtteranceEnd) this.onUtteranceEnd(fullUtterance);
       }
     }
