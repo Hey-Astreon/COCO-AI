@@ -398,7 +398,17 @@ async function initModelSelector() {
 
   if (window.electronAPI) {
     try {
-      const models = await window.electronAPI.getCerebrasModels();
+      let models = await window.electronAPI.getCerebrasModels();
+      
+      // Ensure core models are always present so the user can select them
+      // (our Groq fallback engine will handle them if Cerebras doesn't host them for this key)
+      const CORE_MODELS = ['llama-3.3-70b', 'llama-3.1-8b', 'qwen-3-32b'];
+      CORE_MODELS.forEach(coreModel => {
+        if (!models.includes(coreModel)) {
+          models.unshift(coreModel);
+        }
+      });
+
       if (models && models.length > 0) {
         const dropdown = $('modelSelectDropdown');
         if (dropdown) {
