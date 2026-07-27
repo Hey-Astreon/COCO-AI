@@ -204,10 +204,12 @@ class DeepgramService {
    *    nova-3 general model has weak technical vocabulary weighting.
    *    nova-2 has more stable acoustic modeling for technical speech.
    *
-   * 2. Added `keyterms` parameter — injects 50+ tech vocabulary terms into
+   * 2. Added `keywords` parameter — injects 50+ tech vocabulary terms into
    *    Deepgram's beam search decoder, dramatically boosting the likelihood
    *    that acoustically ambiguous words resolve correctly to tech terms.
    *    Example: "Best API" → "REST API", "Best base" → "database"
+   *    IMPORTANT: nova-2 uses `keywords` (NOT `keyterms` which is nova-3 only).
+   *    Using the wrong parameter name causes Deepgram to silently ignore all boosts.
    *
    * 3. Removed `no_delay: true` — this parameter forced Deepgram to flush
    *    transcripts immediately, bypassing its internal phoneme-level
@@ -220,11 +222,12 @@ class DeepgramService {
    *    words as fillers during aggressive pruning. We handle cleanup in JS.
    */
   _connectWebSocket() {
-    // ── Tech Vocabulary Keyterms Boost ─────────────────────────────────────
+    // ── Tech Vocabulary Keywords Boost (nova-2 API parameter) ───────────────
     // Injected into Deepgram's decoder to boost probability of technical words
     // that are acoustically ambiguous (e.g., REST vs Best, SQL vs sequel).
-    // Deepgram uses these to re-weight beam search probabilities.
-    const TECH_KEYTERMS = [
+    // CRITICAL: nova-2 uses `keywords` param. nova-3 uses `keyterms`. Wrong
+    // param name causes silent failure — Deepgram ignores all boosts.
+    const TECH_KEYWORDS = [
       'REST', 'API', 'HTTP', 'HTTPS', 'SQL', 'NoSQL', 'JSON', 'XML', 'YAML',
       'GraphQL', 'gRPC', 'TCP', 'UDP', 'OAuth', 'JWT', 'CORS', 'CRUD',
       'microservices', 'Kubernetes', 'Docker', 'CI/CD', 'DevOps', 'AWS', 'Azure',
@@ -238,6 +241,8 @@ class DeepgramService {
       'idempotent', 'stateless', 'authentication', 'authorization', 'endpoint',
       'middleware', 'load balancer', 'caching', 'CDN', 'webhook', 'pub/sub',
     ];
+    // keywords format for nova-2: "word:boost" where boost is 0.0–10.0
+    // Default boost=1.0 (no suffix) simply adds the word to the vocabulary list
 
     const params = new URLSearchParams({
       model: 'nova-2',              // FIX #1: nova-2 > nova-3 for technical vocabulary accuracy
@@ -252,15 +257,16 @@ class DeepgramService {
       // filler_words REMOVED (Fix #4): aggressive pruning corrupts short tech words
     });
 
-    // FIX #2: Append keyterms as repeated params (Deepgram requires one per key)
-    TECH_KEYTERMS.forEach(term => params.append('keyterms', term));
+    // FIX #2: Append keywords as repeated params (Deepgram nova-2 requires one per key)
+    // Using `keywords` (NOT `keyterms`) — critical for nova-2 compatibility
+    TECH_KEYWORDS.forEach(term => params.append('keywords', term));
 
     const wsUrl = `wss://api.deepgram.com/v1/listen?${params.toString()}`;
 
     this.ws = new WebSocket(wsUrl, ['token', this.apiKey]);
 
     this.ws.onopen = () => {
-      console.log('[Deepgram] WebSocket connected (nova-2 + keyterms boost active)');
+      console.log('[Deepgram] WebSocket connected (nova-2 + keywords boost active)');
       this.isListening = true;
       this.reconnectAttempts = 0;
       this._setStatus('listening');
