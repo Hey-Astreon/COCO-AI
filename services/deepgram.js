@@ -193,9 +193,9 @@ class DeepgramService {
       smart_format: 'true',         // auto-formats numbers, dates, currency
       punctuate: 'true',            // adds punctuation for better readability
       interim_results: 'true',      // required for interim transcripts and VAD
-      utterance_end_ms: '1500',     // 1500ms (1.5s) silence threshold — patient complete sentence detection
+      utterance_end_ms: '2000',     // 2000ms (2.0s) silence threshold — 2.0s silence gate (Golden Layer 1)
       vad_events: 'true',           // voice activity detection events
-      endpointing: '1500',          // 1500ms (1.5s) silence threshold — prevents premature answer triggering
+      endpointing: '2000',          // 2000ms (2.0s) silence threshold — prevents premature answer triggering
       no_delay: 'true',             // reduces transcript delivery latency
       filler_words: 'false',        // strip "um", "uh", "like" from transcripts
     });
@@ -210,7 +210,7 @@ class DeepgramService {
       this.reconnectAttempts = 0;
       this._setStatus('listening');
       this._startRecording();
-      this._startKeepAlive();   // prevent idle disconnection
+      this._startKeepAlive();   // prevent idle disconnection (8s Heartbeat)
     };
 
     this.ws.onmessage = (event) => {
@@ -248,7 +248,7 @@ class DeepgramService {
   }
 
   /**
-   * Stop MediaRecorder cleanly so fresh WebM headers are sent on next connection
+   * Stop recording MediaStream tracks
    */
   _stopRecording() {
     if (this.mediaRecorder) {
@@ -256,7 +256,9 @@ class DeepgramService {
         if (this.mediaRecorder.state !== 'inactive') {
           this.mediaRecorder.stop();
         }
-      } catch (_) {}
+      } catch (e) {
+        console.warn('[Deepgram] Error stopping MediaRecorder:', e);
+      }
       this.mediaRecorder = null;
     }
   }
@@ -294,7 +296,7 @@ class DeepgramService {
 
     this.mediaRecorder = new MediaRecorder(this.mediaStream, {
       mimeType: mimeType,
-      audioBitsPerSecond: 128000,
+      audioBitsPerSecond: 128000,   // 128kbps HD Audio (Golden Layer 4)
     });
 
     this.mediaRecorder.ondataavailable = (event) => {
@@ -324,37 +326,45 @@ class DeepgramService {
           this.onTranscript(transcript.trim(), isFinal, speaker, speechFinal);
         }
 
-        // Accumulate final chunks into the pending utterance buffer
+        // Accumulate final chunks into the pending utterance buffer (Fragment Accumulation Buffer — Golden Layer 2)
         if (isFinal) {
           if (!this._pendingUtterance) this._pendingUtterance = [];
           this._pendingUtterance.push(transcript.trim());
 
-          // ── Silence Safety Timer (1500ms) ──────────────────────────────────
-          // Fires 1.5s after the last final chunk if UtteranceEnd packet is delayed.
+          // ── Silence Safety Timer (2500ms) ──────────────────────────────────
+          // Fires 2.5s after the last final chunk if UtteranceEnd packet is delayed.
           // Guarantees full sentence accumulation without cutting off mid-sentence.
           clearTimeout(this._utteranceDebounceTimer);
           this._utteranceDebounceTimer = setTimeout(() => {
             if (this._pendingUtterance && this._pendingUtterance.length > 0) {
               const fullUtterance = this._pendingUtterance.join(' ');
-              this._pendingUtterance = [];
-              console.log('[Deepgram] Speech complete (1.5s silence):', fullUtterance);
-              if (this.onUtteranceEnd) this.onUtteranceEnd(fullUtterance);
+              if (DeepgramService.isQuestion(fullUtterance)) {
+                this._pendingUtterance = [];
+                console.log('[Deepgram] Speech complete (2.5s silence safety net):', fullUtterance);
+                if (this.onUtteranceEnd) this.onUtteranceEnd(fullUtterance);
+              } else {
+                console.log('[Deepgram] Incomplete question (< 4 words), waiting for interviewer to finish:', fullUtterance);
+              }
             }
-          }, 1500);
+          }, 2500);
         }
       }
     }
 
-    // UtteranceEnd — Deepgram's primary indicator that speaker has completed their turn (1.0s silence)
+    // UtteranceEnd — Deepgram's primary indicator that speaker has completed their turn (2.0s silence)
     if (data.type === 'UtteranceEnd') {
       clearTimeout(this._utteranceDebounceTimer);
       this._utteranceDebounceTimer = null;
 
       if (this._pendingUtterance && this._pendingUtterance.length > 0) {
         const fullUtterance = this._pendingUtterance.join(' ');
-        this._pendingUtterance = [];
-        console.log('[Deepgram] UtteranceEnd complete question:', fullUtterance);
-        if (this.onUtteranceEnd) this.onUtteranceEnd(fullUtterance);
+        if (DeepgramService.isQuestion(fullUtterance)) {
+          this._pendingUtterance = [];
+          console.log('[Deepgram] UtteranceEnd complete question:', fullUtterance);
+          if (this.onUtteranceEnd) this.onUtteranceEnd(fullUtterance);
+        } else {
+          console.log('[Deepgram] UtteranceEnd ignored incomplete question (< 4 words):', fullUtterance);
+        }
       }
     }
   }
@@ -374,11 +384,11 @@ class DeepgramService {
     const trimmed = text.trim();
     const words = trimmed.split(/\s+/);
 
-    // Ignore single/double word filler background noise like "okay", "yeah"
-    if (words.length < 3) return false;
+    // Golden Layer 3: 4-Word Minimum Anti-Rushing Guard
+    // If an interviewer pauses mid-sentence after just 2-3 words (e.g., "Can you explain..."),
+    // refuse to trigger, knowing the question is incomplete.
+    if (words.length < 4) return false;
 
-    // In a live technical interview, ANY utterance > 2 words spoken by the interviewer
-    // is a question, follow-up, or instruction that needs an AI answer.
     return true;
   }
 
