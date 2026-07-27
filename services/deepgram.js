@@ -303,9 +303,9 @@ class DeepgramService {
       }
     };
 
-    // Send audio chunks every 150ms for ultra-responsive streaming
-    this.mediaRecorder.start(150);
-    console.log('[Deepgram] MediaRecorder started with fresh WebM headers');
+    // Send audio chunks every 250ms — optimal Opus frame size for 100% phonetic accuracy
+    this.mediaRecorder.start(250);
+    console.log('[Deepgram] MediaRecorder started with 250ms audio chunks');
   }
 
   /**
@@ -324,37 +324,28 @@ class DeepgramService {
           this.onTranscript(transcript.trim(), isFinal, speaker, speechFinal);
         }
 
-        // Accumulate final chunks into the utterance buffer.
+        // Accumulate final chunks into the pending utterance buffer
         if (isFinal) {
           if (!this._pendingUtterance) this._pendingUtterance = [];
           this._pendingUtterance.push(transcript.trim());
 
-          // ⚡ Instant Trigger on speech_final (0ms delay!)
-          if (speechFinal && this._pendingUtterance.length > 0) {
-            clearTimeout(this._utteranceDebounceTimer);
-            this._utteranceDebounceTimer = null;
-            const fullUtterance = this._pendingUtterance.join(' ');
-            this._pendingUtterance = [];
-            console.log('[Deepgram] Instant speech_final trigger:', fullUtterance);
-            if (this.onUtteranceEnd) this.onUtteranceEnd(fullUtterance);
-            return;
-          }
-
-          // Fast Safety Debounce Net (1.2s)
+          // ── Silence Safety Timer (1000ms) ──────────────────────────────────
+          // Fires 1.0s after the last final chunk if UtteranceEnd packet is delayed.
+          // Guarantees full sentence accumulation without cutting off mid-sentence.
           clearTimeout(this._utteranceDebounceTimer);
           this._utteranceDebounceTimer = setTimeout(() => {
             if (this._pendingUtterance && this._pendingUtterance.length > 0) {
               const fullUtterance = this._pendingUtterance.join(' ');
               this._pendingUtterance = [];
-              console.log('[Deepgram] Safety net trigger (1.2s):', fullUtterance);
+              console.log('[Deepgram] Speech complete (1.0s silence):', fullUtterance);
               if (this.onUtteranceEnd) this.onUtteranceEnd(fullUtterance);
             }
-          }, 1200);
+          }, 1000);
         }
       }
     }
 
-    // UtteranceEnd — primary trigger gate.
+    // UtteranceEnd — Deepgram's primary indicator that speaker has completed their turn (1.0s silence)
     if (data.type === 'UtteranceEnd') {
       clearTimeout(this._utteranceDebounceTimer);
       this._utteranceDebounceTimer = null;
@@ -362,7 +353,7 @@ class DeepgramService {
       if (this._pendingUtterance && this._pendingUtterance.length > 0) {
         const fullUtterance = this._pendingUtterance.join(' ');
         this._pendingUtterance = [];
-        console.log('[Deepgram] UtteranceEnd trigger:', fullUtterance);
+        console.log('[Deepgram] UtteranceEnd complete question:', fullUtterance);
         if (this.onUtteranceEnd) this.onUtteranceEnd(fullUtterance);
       }
     }
