@@ -48,6 +48,7 @@ class DeepgramService {
     // Utterance accumulation
     this._pendingUtterance = [];
     this._utteranceDebounceTimer = null;
+    this._stalePurgeTimer = null;  // Hard safety purge timer for incomplete mid-sentence fragments
     this._keepAliveTimer = null;
   }
 
@@ -250,9 +251,13 @@ class DeepgramService {
       smart_format: 'true',         // auto-formats numbers, dates, currency
       punctuate: 'true',            // adds punctuation
       interim_results: 'true',      // required for live updates and VAD
-      utterance_end_ms: '2500',     // 2500ms (2.5s) natural pause threshold
+      utterance_end_ms: '2500',     // 2500ms (2.5s) utterance completion threshold (full sentence)
       vad_events: 'true',           // voice activity detection events
-      endpointing: '2500',          // 2500ms (2.5s) endpointing threshold
+      endpointing: '300',           // 300ms endpointing: fast per-word-group is_final chunks
+      // CRITICAL: endpointing MUST be low (300ms) so is_final chunks arrive quickly during speech.
+      // utterance_end_ms handles the FULL sentence completion (2.5s silence).
+      // Setting both to 2500ms causes audio loss: no is_final arrives during speech,
+      // and any WS hiccup at the 2.5s mark drops the entire question.
     });
 
     // FIX #2: Append keywords as repeated params (Deepgram nova-2 requires one per key)
@@ -407,6 +412,10 @@ class DeepgramService {
           if (!this._pendingUtterance) this._pendingUtterance = [];
           this._pendingUtterance.push(transcript.trim());
 
+          // Cancel stale purge timer — new speech arrived, buffer is actively growing
+          clearTimeout(this._stalePurgeTimer);
+          this._stalePurgeTimer = null;
+
           // ── If Deepgram emits speech_final (syntactic clause completion) ──
           if (speechFinal) {
             this._flushPendingUtterance('speech_final');
@@ -443,6 +452,8 @@ class DeepgramService {
     if (DeepgramService.isQuestion(fullUtterance)) {
       // Question is complete! Clear buffer & fire AI
       this._pendingUtterance = [];
+      clearTimeout(this._stalePurgeTimer);  // Cancel any pending stale purge
+      this._stalePurgeTimer = null;
       console.log(`[Deepgram] Complete question triggered via ${source}:`, fullUtterance);
       if (this.onUtteranceEnd) this.onUtteranceEnd(fullUtterance);
     } else {
@@ -561,6 +572,8 @@ class DeepgramService {
     this._stopAudioLevelAnalyzer();
     clearTimeout(this._utteranceDebounceTimer);
     this._utteranceDebounceTimer = null;
+    clearTimeout(this._stalePurgeTimer);
+    this._stalePurgeTimer = null;
     this._pendingUtterance = [];
 
     if (this.mediaRecorder) {
