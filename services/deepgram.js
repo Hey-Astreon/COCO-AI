@@ -368,25 +368,30 @@ class DeepgramService {
     if (!this.mediaStream) return;
     this._stopRecording();
 
-    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-      ? 'audio/webm;codecs=opus'
-      : 'audio/webm';
+    try {
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : 'audio/webm';
 
-    this.mediaRecorder = new MediaRecorder(this.mediaStream, {
-      mimeType: mimeType,
-      audioBitsPerSecond: 64000,   // 64kbps Opus — gold standard for speech STT accuracy & sharp formants
-    });
+      this.mediaRecorder = new MediaRecorder(this.mediaStream, {
+        mimeType: mimeType,
+        audioBitsPerSecond: 64000,   // 64kbps Opus — gold standard for speech STT accuracy & sharp formants
+      });
 
-    this.mediaRecorder.ondataavailable = (event) => {
-      if (event.data.size > 0 && this.ws?.readyState === WebSocket.OPEN) {
-        this.ws.send(event.data);
-      }
-    };
+      this.mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0 && this.ws?.readyState === WebSocket.OPEN) {
+          this.ws.send(event.data);
+        }
+      };
 
-    // FIX #5: 100ms chunk interval for sub-phoneme boundary accuracy
-    // Phonemes average 80-120ms duration — 100ms prevents mid-phoneme fragmentation
-    this.mediaRecorder.start(100);
-    console.log('[Deepgram] MediaRecorder started: 100ms chunks @ 16kbps Opus');
+      // FIX #5: 100ms chunk interval for sub-phoneme boundary accuracy
+      // Phonemes average 80-120ms duration — 100ms prevents mid-phoneme fragmentation
+      this.mediaRecorder.start(100);
+      console.log('[Deepgram] MediaRecorder started: 100ms chunks @ 64kbps Opus');
+    } catch (e) {
+      console.error('[Deepgram] Failed to start MediaRecorder:', e);
+      if (this.onError) this.onError(e);
+    }
   }
 
   /**
@@ -439,10 +444,6 @@ class DeepgramService {
     }
   }
 
-  /**
-   * Flush pending utterance to AI if question is complete.
-   * If question is incomplete (mid-sentence pause), PRESERVE buffer for next speech chunk!
-   */
   /**
    * Flush pending utterance to AI if question is complete.
    * Universal Guarantee: If speaker stops talking (UtteranceEnd, silence_timer, or 4s timeout),
