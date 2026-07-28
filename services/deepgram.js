@@ -237,9 +237,7 @@ class DeepgramService {
    *    words as fillers during aggressive pruning. We handle cleanup in JS.
    */
   _connectWebSocket() {
-    // ── Tech Vocabulary Keywords Boost (nova-2 API parameter) ───────────────
-    // Cleaned static list: excludes ambiguous generic words (like "abstraction",
-    // "process", "thread", "stack", "heap") that cause incorrect speech replacements.
+    // Clean static technical terms. No generic short words like "DOM" or "OS" that distort normal speech.
     const TECH_KEYWORDS = [
       'REST', 'API', 'HTTP', 'HTTPS', 'SQL', 'NoSQL', 'JSON', 'XML', 'YAML',
       'GraphQL', 'gRPC', 'TCP', 'UDP', 'OAuth', 'JWT', 'CORS', 'CRUD', 'OOP', 'ACID',
@@ -247,7 +245,7 @@ class DeepgramService {
       'React', 'Angular', 'Vue', 'Node.js', 'TypeScript', 'JavaScript', 'Python',
       'Java', 'Golang', 'Rust', 'C++', 'MongoDB', 'PostgreSQL', 'Redis', 'Kafka',
       'WebSocket', 'polymorphism', 'encapsulation', 'inheritance', 'SOLID', 'DRY',
-      'FastAPI', 'ChromaDB', 'Tree-Sitter', 'Nginx', 'Linux', 'DOM'
+      'FastAPI', 'ChromaDB', 'Tree-Sitter', 'Nginx', 'Linux'
     ];
 
     const params = new URLSearchParams({
@@ -263,10 +261,29 @@ class DeepgramService {
 
     const finalKeywords = new Set();
 
-    // 1. Add static technical acronyms (boost weight 1)
-    TECH_KEYWORDS.forEach(term => finalKeywords.add(`${term}:1`));
+    // Helper to safely add keywords based on length to prevent phonetic black holes
+    const addSafeKeyword = (keyword) => {
+      const trimmed = keyword.trim();
+      if (!trimmed) return;
 
-    // 2. Dynamically extract project names and proper nouns from candidate's Resume/JD (boost weight 2)
+      // Extract raw word to check length (removing any legacy weight if present)
+      const cleanWord = trimmed.replace(/:[0-9]+$/, '');
+      
+      // If it contains space (multi-word phrase like "Astra Vision") or is a long technical word (>= 5 chars):
+      // Boost with weight 2 for high accuracy.
+      // Otherwise (short words/acronyms like AST, DOM, Vue, JWT, API):
+      // Keep weight at 1 to prevent generic audio distortion.
+      if (cleanWord.includes(' ') || cleanWord.length >= 5) {
+        finalKeywords.add(`${cleanWord}:2`);
+      } else {
+        finalKeywords.add(`${cleanWord}:1`);
+      }
+    };
+
+    // 1. Add static technical acronyms/terms
+    TECH_KEYWORDS.forEach(term => addSafeKeyword(term));
+
+    // 2. Dynamically extract project names and proper nouns from candidate's Resume/JD
     const textToScan = `${this.resume || ''} ${this.jobDescription || ''}`;
     if (textToScan.trim()) {
       // Extract consecutive Capitalized Word Phrases (2-3 words, e.g. "Astra Vision", "Alyra Lock", "IDBI FinSync")
@@ -274,9 +291,8 @@ class DeepgramService {
       let match;
       while ((match = phraseRegex.exec(textToScan)) !== null) {
         const phrase = match[0].trim();
-        // Skip generic phrases and filter length
         if (phrase.length > 3 && phrase.length < 35) {
-          finalKeywords.add(`${phrase}:2`);
+          addSafeKeyword(phrase);
         }
       }
 
@@ -286,7 +302,7 @@ class DeepgramService {
         const word = match[0].trim();
         const stopWords = new Set(['The', 'And', 'But', 'For', 'With', 'You', 'Your', 'This', 'That', 'These', 'Those', 'From', 'About', 'Into', 'Project', 'Resume', 'Experience', 'Company', 'Role']);
         if (word.length > 2 && word.length < 25 && !stopWords.has(word)) {
-          finalKeywords.add(`${word}:2`);
+          addSafeKeyword(word);
         }
       }
     }
