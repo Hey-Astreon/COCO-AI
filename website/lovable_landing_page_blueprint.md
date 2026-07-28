@@ -29,8 +29,9 @@ Use the following real application screenshots and feature graphics to explain t
 - **Core Feature 1 (AI Answers):** `website/assets/cocoai_answers.png` (Real QA feed showing structured solutions, code blocks, and retry buttons).
 - **Core Feature 2 (Live Transcript):** `website/assets/cocoai_transcript.png` (Real-time speaker detection and audio waveform).
 - **Core Feature 3 (Stealth & Context):** `website/assets/cocoai_settings.png` (Settings drawer with PDF resume context matching).
-- **Feature 4 (Stealth Proof / Eye Button):** `website/assets/cocoai_stealth_comparison.png` (Split comparison showing what you see vs what screen share sees).
-- **Feature 5 (Session Exporting):** `website/assets/cocoai_export_md.png` (Visual representation of saving the interview logs as Markdown, JSON, or TXT).
+- Feature 4 (Stealth Proof / Eye Button): `assets/cocoai_stealth_comparison.png` (Split comparison showing what you see vs what screen share sees).
+- Feature 5 (Session Exporting): `assets/cocoai_export_md.png` (Visual representation of saving the interview logs as Markdown, JSON, or TXT).
+- Feature 6 (Screen & Multi-Screenshot Analysis): `assets/cocoai_screen_analysis.png` (Visual showing coding problems analyzed from single or scroll-stitched multi-monitor screenshots).
 
 ---
 
@@ -75,6 +76,9 @@ Include these exact pages/sections on the landing page:
 - Feature 4: "Multi-Format Session Exporting"
   * Description: "Never lose a valuable interview question or solution. At any point, click the toolbar Export button to download the entire session transcript and generated code answers as clean Markdown (`.md`), plain Text (`.txt`), or structural JSON (`.json`) files for offline study or replay mode."
   * Screenshot Example: Showcase the interactive export graphic `assets/cocoai_export_md.png` highlighting the '.md' exporting panel and download confirmation.
+- Feature 5: "Screen Analysis & Multi-Screenshot Scroll Stitching"
+  * Description: "Struggling with long coding prompts or complex diagrams? Press Ctrl+Shift+A to capture and solve code from any window or monitor. For long-scrolling pages, use Ctrl+Shift+S to stitch multiple page blocks together into a single, cohesive prompt that Gemini analyzes in one go."
+  * Screenshot Example: Showcase the visual flow graphic `assets/cocoai_screen_analysis.png` demonstrating page capturing and multi-screenshot stitching.
 
 4. PRICING SECTION:
 - Header: "Simple, Transparent Pricing"
