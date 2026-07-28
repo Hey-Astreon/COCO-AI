@@ -1,72 +1,54 @@
-# 🎨 Coco AI Landing Page — Premium Redesign & Brand Alignment Plan
+# 🚀 Coco AI Landing Page — Minimalist Premium Developer Tool Upgrade
 
-After visiting the live preview at `https://coco-ai-copilot.lovable.app/`, I have identified the design details that make it look common and misaligned with the brand, along with solutions to transform it into a professional, state-of-the-art SaaS site.
-
----
-
-## 🔍 Key Findings & Visual Adjustments
-
-### 1. Brand Color Harmony (Sync with the soft Purple/Pink/Lavender Infinity Logo)
-* **The Issue:** The page currently uses flat **Electric Purple** (`#8A2BE2`) and **Neon Mint** (`#00FA9A`) accents. Neon Mint clashes heavily with the pink/lavender tones of the infinity logo, making it feel like a generic "hacker theme" rather than a premium, modern copilot.
-* **The Solution:** 
-  * Replace the clashing **Neon Mint** entirely with a vibrant **Rose Pink** (`#FF2E93`) or **Soft Lavender** (`#C084FC`).
-  * Replace flat primary colors with a unified **Soft Gradient** matching the infinity logo: Purple to Pink to Lavender (`linear-gradient(to right, #8B5CF6, #EC4899, #F43F5E)`).
-  * Use this brand gradient for text headings, CTA button backgrounds, hover states, and glowing cards.
-
-### 2. Interactive Feature Showcase (Fixing the long alternating scrolling lists)
-* **The Issue:** The 5 feature rows scroll on and on, which is a common layout that causes user fatigue.
-* **The Solution:** 
-  * Replace the 5 alternating rows with an **interactive sidebar tab dashboard** (similar to Stripe or Vercel).
-  * Left side: A clean list of 5 clickable tabs showing feature names:
-    1. **🎙️ Live Transcript & VAD**
-    2. **📄 Resume & JD Matching**
-    3. **👁️ Invisible Stealth Overlay**
-    4. **💾 Multi-Format Session Export**
-    5. **📸 Scroll-Stitch Screen Analysis**
-  * Right side: Dynamically shows the corresponding feature screenshot (`lovable/cocoai_transcript.png`, etc.) inside a floating browser mockup with a matching ambient gradient shadow.
-
-### 3. Hero Visual Depth & Glassmorphism
-* **The Issue:** The hero mock-up sits flat on the page.
-* **The Solution:**
-  * Add a smooth **3D hover tilt effect** to the main mockup (`lovable/real_cocoai_ui_preview.png`).
-  * Introduce subtle, floating **radial gradient background blur orbs** in purple and pink that float slowly behind the hero and features text.
-  * Use glassmorphic card stylings with thin, semi-transparent borders (`1px solid rgba(255, 255, 255, 0.08)`) and high backdrop-blur values (`backdrop-blur-md`).
+To transition the landing page from a "generic neon AI template website" to a **premium, world-class developer tool** (matching the clean aesthetic of sites like **Linear, Vercel, and Raycast**), we need to replace the loud neon elements with a sleek, minimalist, high-contrast obsidian-slate design.
 
 ---
 
-# 🤖 The Lovable Fine-Tuning Prompt
+## 🎨 The "Minimalist Developer Tool" Design System
 
-*Copy and paste the prompt below directly into Lovable to apply these premium enhancements in one go:*
+### 1. Typography & Spacing
+* **Text Contrast:** Headings in sharp pure white (`#FFFFFF`). Body copy in a clean, readable zinc/slate gray (`#A1A1AA`). Avoid loud neon text colors.
+* **Negative Space:** Increase padding and margins between sections to let the design breathe. Premium landing pages feel spacious and light.
+* **Headers:** Section labels should be small, simple text in uppercase with wide tracking (e.g., `features` or `pricing`), styled in zinc-500. Avoid glowing badges.
+
+### 2. Color Palette (Obsidian & Steel Slate)
+* **Backgrounds:** Pure deep slate/black (`#09090B` or `#030712`).
+* **Card Backing:** Dark zinc gray (`#18181B`) with very thin, razor-sharp outlines (`#27272A` / `1px solid rgba(255, 255, 255, 0.05)`).
+* **Accent Usage (Understated Brand Integration):**
+  * Keep the purple-pink-lavender tones **strictly limited** to micro-details (e.g., a 1px border on the active sidebar tab, a faint ambient backlight behind the main mockup, or a thin focus outline on active inputs).
+  * Absolutely no large neon buttons, heavy gradients, or glowing text halos.
+
+### 3. High-Contrast CTAs
+* **Primary Button:** Crisp solid white with black text (highly popular in modern SaaS).
+* **Secondary Buttons:** Dark charcoal/glass button with a thin border.
+
+---
+
+# 🤖 The Lovable Redesign Prompt
+
+*Copy and paste the prompt below directly into Lovable to execute this premium, clean-slate redesign:*
 
 ```text
-Let's upgrade the design of the landing page to look 10x more unique, premium, and unified with the soft purple/pink/lavender gradient logo. Please apply the following changes:
+Let's completely rebuild the visual aesthetic of the page to match a high-end, clean developer tool like Linear or Vercel, removing the "neon AI template" look. Apply these strict rules:
 
-1. BRAND COLOR UPDATE (Sync with Logo):
-- Replace all Neon Mint (#00FA9A) colors on the site (including borders, text highlights, and badge icons) with a vibrant Rose Pink (#FF2E93) or Soft Lavender (#C084FC).
-- Replace flat primary color backgrounds on buttons and cards with a soft brand gradient: transitioning from Violet (#8B5CF6) to Pink (#EC4899) to Rose (#F43F5E).
-- Use this Violet-to-Pink-to-Rose gradient for primary CTA buttons, highlighted borders, text-gradients on headings, and active state indicators.
-- Set the page background to a deep obsidian black (#0B0C10) with subtle, floating background radial glow blobs in purple and pink.
+1. MINIMALIST SLATE COLOR SYSTEM:
+- Set the background to deep obsidian black (#09090B).
+- Style all cards (pricing, features dashboard, giveaway, forms) with a dark zinc-900 backing (#18181B), a very subtle 1px border outline in zinc-800 (#27272A), and a standard flat layout. Remove all large colorful glow rings and drop shadows.
+- Headings must be solid, clean white (#FFFFFF) in a modern Outfit font.
+- Body paragraphs and description texts must be muted gray (#A1A1AA) in clean Inter font.
+- Highlight the brand's purple-pink-lavender gradient ONLY as an understated accent: (1) a thin 1px border on the active feature tab, (2) a faint, highly-blurred purple-pink ambient backlight glow (opacity: 10%, blur-2xl) behind the main hero mockup, and (3) as a subtle gradient highlight on the word "Invisibly." in the hero.
 
-2. INTERACTIVE FEATURE DASHBOARD LAYOUT:
-- Instead of the 5 alternating vertical rows in the Features section, combine them into a single, interactive features dashboard layout:
-  * Left side: A vertical sidebar showing a tab list with clean typography and icons for:
-    1. 🎙️ Live Transcript & VAD
-    2. 📄 Resume & JD Matching
-    3. 👁️ Invisible Stealth Overlay
-    4. 💾 Multi-Format Session Export
-    5. 📸 Scroll-Stitch Screen Analysis
-  * Right side: Clicking a tab dynamically updates the image shown on the right side.
-  * Render the image inside a floating, dark glass-bordered browser-chrome mockup box with a subtle 3D hover tilt effect and a soft ambient brand gradient glow behind it.
-  * Map the corresponding uploaded images correctly to each tab:
-    - Tab 1 -> lovable/cocoai_transcript.png
-    - Tab 2 -> lovable/cocoai_settings.png
-    - Tab 3 -> lovable/cocoai_stealth_comparison.png
-    - Tab 4 -> lovable/cocoai_export_md.png
-    - Tab 5 -> lovable/cocoai_screen_analysis.png
+2. HIGH-CONTRAST MODERN CTAs:
+- Make the primary CTA button ("Download CocoAI Pro for Windows") solid white with black text, bold, with no background gradients or shadows. On hover, apply a slight scale (scale-102) and a thin purple focus outline.
+- Make secondary buttons (GitHub, Releases, and pricing triggers) a sleek charcoal color (#18181B) with a thin zinc-800 border and clean white text.
 
-3. PREMIUM DESIGN SHARPENING:
-- Update all section headers (Features, Pricing, Giveaway, Contributors) to have a small, sleek tag above them (e.g., "✨ FEATURES" or "🎁 LAUNCH OFFER") styled with letter-spacing (tracking-widest) and uppercase font-semibold.
-- Make the Pricing card and Giveaway card glassmorphic: semi-transparent background, high backdrop-blur, thin borders (border-white/10), and glowing colored borders.
-- Style the Contributor Form fields with dark glassmorphic input styling: transparent dark backgrounds, thin borders that glow purple-pink when active/focused, and smooth floating label animations.
-- Ensure all transitions (hover lifts, button scales, and fade-ins) are extremely smooth and use transitions with "cubic-bezier(0.16, 1, 0.3, 1)".
+3. CLEAN TABS DASHBOARD SHOWCASE:
+- For the Features tab dashboard:
+  * Style the left sidebar with a very clean, thin vertical line. Active tabs should have a simple 1px left-border indicator in soft lavender/purple and crisp white text. Inactive tabs should be muted gray with no hover cards or background blurs.
+  * Render the screenshot mockups on the right inside a sharp, flat browser mockup container with 1px zinc-800 borders. The 3D hover tilt should be extremely subtle (max 2 degrees) or flat.
+
+4. MICRO-SHARPENING DETAILS:
+- Replace the glowing tags above headers with a simple, small, unbordered text label: uppercase zinc-500 text with wide letter-spacing (e.g., "FEATURES", "PRICING", "CONTRIBUTIONS").
+- Style the Contributor Form fields with clean dark gray inputs (#09090B), a thin zinc-800 border, and a subtle lavender outline that appears ONLY on active input focus. The labels should be simple and positioned cleanly above the input fields.
+- Make checkmark icons in the pricing section a clean, solid soft lavender color.
 ```
