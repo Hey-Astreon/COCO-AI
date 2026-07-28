@@ -48,7 +48,8 @@ class DeepgramService {
     // Utterance accumulation
     this._pendingUtterance = [];
     this._utteranceDebounceTimer = null;
-    this._stalePurgeTimer = null;  // Hard safety purge timer for incomplete mid-sentence fragments
+    this._stalePurgeTimer = null;     // Force-flush safety timer for stale mid-sentence fragments
+    this._utteranceEndDebounceTimer = null; // Debounce UtteranceEnd to absorb inter-clause pauses
     this._keepAliveTimer = null;
   }
 
@@ -413,30 +414,43 @@ class DeepgramService {
           if (!this._pendingUtterance) this._pendingUtterance = [];
           this._pendingUtterance.push(transcript.trim());
 
-          // Cancel stale purge timer — new speech arrived, buffer is actively growing
+          // New speech arrived — cancel ALL pending flush timers.
+          // The speaker is still talking; don't answer yet!
           clearTimeout(this._stalePurgeTimer);
           this._stalePurgeTimer = null;
+          clearTimeout(this._utteranceEndDebounceTimer);
+          this._utteranceEndDebounceTimer = null;
 
-          // ── If Deepgram emits speech_final (syntactic clause completion) ──
-          if (speechFinal) {
-            this._flushPendingUtterance('speech_final');
-            return;
-          }
+          // ── speech_final fires at CLAUSE boundaries, NOT full-question boundaries ──
+          // A long question like: "Walk me through Alyra Lock, [speech_final fires here]
+          // explain the architecture choices, [speech_final fires here] and describe the
+          // data model [speech_final fires here]" fires 3 times for 1 question!
+          // DO NOT flush on speech_final — keep accumulating until UtteranceEnd.
 
-          // ── Silence Safety Timer (3000ms) ──
+          // ── Long Silence Safety Timer (6000ms) ──
+          // Only triggers if UtteranceEnd somehow never fires (rare edge case).
+          // 6s is long enough that TTS inter-clause pauses (~1-3s) don't trigger it.
           clearTimeout(this._utteranceDebounceTimer);
           this._utteranceDebounceTimer = setTimeout(() => {
             this._flushPendingUtterance('silence_timer');
-          }, 3000);
+          }, 6000);
         }
       }
     }
 
-    // UtteranceEnd — Deepgram's VAD signal when speaker pauses (2.5s)
+    // UtteranceEnd — Deepgram VAD: 2.5s silence detected since last audio.
+    // DEBOUNCE: Wait 1500ms before flushing. If new speech arrives in that window
+    // (interviewer paused between clauses), cancel and keep accumulating.
+    // This is what prevents long multi-clause questions from being split into fragments.
     if (data.type === 'UtteranceEnd') {
       clearTimeout(this._utteranceDebounceTimer);
       this._utteranceDebounceTimer = null;
-      this._flushPendingUtterance('UtteranceEnd');
+
+      clearTimeout(this._utteranceEndDebounceTimer);
+      this._utteranceEndDebounceTimer = setTimeout(() => {
+        this._utteranceEndDebounceTimer = null;
+        this._flushPendingUtterance('UtteranceEnd');
+      }, 1500);
     }
   }
 
@@ -572,6 +586,8 @@ class DeepgramService {
     this._stopAudioLevelAnalyzer();
     clearTimeout(this._utteranceDebounceTimer);
     this._utteranceDebounceTimer = null;
+    clearTimeout(this._utteranceEndDebounceTimer);
+    this._utteranceEndDebounceTimer = null;
     clearTimeout(this._stalePurgeTimer);
     this._stalePurgeTimer = null;
     this._pendingUtterance = [];
