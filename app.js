@@ -171,6 +171,7 @@ function initDeepgram() {
   }
 
   state.deepgramService = new DeepgramService(state.apiKeys.deepgram);
+  state.deepgramService.setContext(state.resume, state.jobDescription);
 
   // Handle transcription results — add to transcript feed & accumulate utterance
   state.deepgramService.onTranscript = (text, isFinal, speaker, speechFinal) => {
@@ -1606,8 +1607,12 @@ function saveSettings() {
     toggleSettings();
     
     // Re-initialize Deepgram if key changed and not already running
-    if (keys.deepgram && !state.deepgramService) {
-      initDeepgram();
+    if (keys.deepgram) {
+      if (!state.deepgramService) {
+        initDeepgram();
+      } else {
+        state.deepgramService.setContext(state.resume, state.jobDescription);
+      }
     }
   } catch (e) {
     showToast('❌ Failed to save configuration', 'error');
@@ -1985,6 +1990,10 @@ function processResumeFile(file) {
       }
       state.resume = text;
       localStorage.setItem('cocoai_resume', text);
+
+      if (state.deepgramService) {
+        state.deepgramService.setContext(state.resume, state.jobDescription);
+      }
       
       // Update drop zone success state
       const wordCount = text.split(/\s+/).filter(Boolean).length;

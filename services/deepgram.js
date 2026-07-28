@@ -51,6 +51,19 @@ class DeepgramService {
     this._stalePurgeTimer = null;     // Force-flush safety timer for stale mid-sentence fragments
     this._utteranceEndDebounceTimer = null; // Debounce UtteranceEnd to absorb inter-clause pauses
     this._keepAliveTimer = null;
+
+    // Dynamic Context for custom vocabulary boosting
+    this.resume = '';
+    this.jobDescription = '';
+  }
+
+  /**
+   * Update active interview context to extract personalized keywords
+   */
+  setContext(resume, jobDescription) {
+    this.resume = resume || '';
+    this.jobDescription = jobDescription || '';
+    console.log('[Deepgram] Active context updated. Custom keywords will be compiled on WebSocket connection.');
   }
 
   /**
@@ -225,25 +238,16 @@ class DeepgramService {
    */
   _connectWebSocket() {
     // ── Tech Vocabulary Keywords Boost (nova-2 API parameter) ───────────────
-    // Injected into Deepgram's decoder to boost probability of technical words
-    // that are acoustically ambiguous (e.g., REST vs Best, SQL vs sequel).
-    // CRITICAL: nova-2 uses `keywords` param. nova-3 uses `keyterms`. Wrong
-    // param name causes silent failure — Deepgram ignores all boosts.
+    // Cleaned static list: excludes ambiguous generic words (like "abstraction",
+    // "process", "thread", "stack", "heap") that cause incorrect speech replacements.
     const TECH_KEYWORDS = [
       'REST', 'API', 'HTTP', 'HTTPS', 'SQL', 'NoSQL', 'JSON', 'XML', 'YAML',
       'GraphQL', 'gRPC', 'TCP', 'UDP', 'OAuth', 'JWT', 'CORS', 'CRUD', 'OOP', 'ACID',
       'microservices', 'Kubernetes', 'Docker', 'CI/CD', 'DevOps', 'AWS', 'Azure',
       'React', 'Angular', 'Vue', 'Node.js', 'TypeScript', 'JavaScript', 'Python',
       'Java', 'Golang', 'Rust', 'C++', 'MongoDB', 'PostgreSQL', 'Redis', 'Kafka',
-      'WebSocket', 'asynchronous', 'synchronous', 'polymorphism', 'encapsulation',
-      'inheritance', 'abstraction', 'SOLID', 'DRY', 'object-oriented', 'functional',
-      'recursion', 'Big O', 'binary tree', 'linked list', 'hash map', 'hash table',
-      'binary search', 'quicksort', 'mergesort', 'dynamic programming', 'memoization',
-      'concurrency', 'parallelism', 'mutex', 'deadlock', 'race condition',
-      'idempotent', 'stateless', 'authentication', 'authorization', 'endpoint',
-      'middleware', 'load balancer', 'caching', 'CDN', 'webhook', 'pub/sub',
-      'event loop', 'closure', 'promise', 'async/await', 'garbage collection',
-      'heap', 'stack', 'thread', 'process', 'Nginx', 'Linux', 'OS', 'DOM'
+      'WebSocket', 'polymorphism', 'encapsulation', 'inheritance', 'SOLID', 'DRY',
+      'FastAPI', 'ChromaDB', 'Tree-Sitter', 'Nginx', 'Linux', 'DOM'
     ];
 
     const params = new URLSearchParams({
@@ -255,15 +259,40 @@ class DeepgramService {
       utterance_end_ms: '2500',     // 2500ms (2.5s) utterance completion threshold (full sentence)
       vad_events: 'true',           // voice activity detection events
       endpointing: '300',           // 300ms endpointing: fast per-word-group is_final chunks
-      // CRITICAL: endpointing MUST be low (300ms) so is_final chunks arrive quickly during speech.
-      // utterance_end_ms handles the FULL sentence completion (2.5s silence).
-      // Setting both to 2500ms causes audio loss: no is_final arrives during speech,
-      // and any WS hiccup at the 2.5s mark drops the entire question.
     });
 
-    // FIX #2: Append keywords as repeated params (Deepgram nova-2 requires one per key)
-    // Using `keywords` (NOT `keyterms`) — critical for nova-2 compatibility
-    TECH_KEYWORDS.forEach(term => params.append('keywords', term));
+    const finalKeywords = new Set();
+
+    // 1. Add static technical acronyms (boost weight 1)
+    TECH_KEYWORDS.forEach(term => finalKeywords.add(`${term}:1`));
+
+    // 2. Dynamically extract project names and proper nouns from candidate's Resume/JD (boost weight 2)
+    const textToScan = `${this.resume || ''} ${this.jobDescription || ''}`;
+    if (textToScan.trim()) {
+      // Extract consecutive Capitalized Word Phrases (2-3 words, e.g. "Astra Vision", "Alyra Lock", "IDBI FinSync")
+      const phraseRegex = /\b[A-Z][a-zA-Z0-9-']+(?:\s+[A-Z][a-zA-Z0-9-']+){1,2}\b/g;
+      let match;
+      while ((match = phraseRegex.exec(textToScan)) !== null) {
+        const phrase = match[0].trim();
+        // Skip generic phrases and filter length
+        if (phrase.length > 3 && phrase.length < 35) {
+          finalKeywords.add(`${phrase}:2`);
+        }
+      }
+
+      // Extract single capitalized terms (e.g. "FastAPI", "ChromaDB")
+      const wordRegex = /\b[A-Z][a-zA-Z0-9-']+\b/g;
+      while ((match = wordRegex.exec(textToScan)) !== null) {
+        const word = match[0].trim();
+        const stopWords = new Set(['The', 'And', 'But', 'For', 'With', 'You', 'Your', 'This', 'That', 'These', 'Those', 'From', 'About', 'Into', 'Project', 'Resume', 'Experience', 'Company', 'Role']);
+        if (word.length > 2 && word.length < 25 && !stopWords.has(word)) {
+          finalKeywords.add(`${word}:2`);
+        }
+      }
+    }
+
+    // Append all static & dynamic keywords to query params
+    finalKeywords.forEach(keyword => params.append('keywords', keyword));
 
     const wsUrl = `wss://api.deepgram.com/v1/listen?${params.toString()}`;
 
