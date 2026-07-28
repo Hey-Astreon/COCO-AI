@@ -443,32 +443,52 @@ class DeepgramService {
    * Flush pending utterance to AI if question is complete.
    * If question is incomplete (mid-sentence pause), PRESERVE buffer for next speech chunk!
    */
+  /**
+   * Flush pending utterance to AI if question is complete.
+   * Universal Guarantee: If speaker stops talking (UtteranceEnd, silence_timer, or 4s timeout),
+   * ANY spoken text is immediately flushed to AI. NO WORDS ARE EVER DISCARDED!
+   */
   _flushPendingUtterance(source) {
     if (!this._pendingUtterance || this._pendingUtterance.length === 0) return;
 
-    const fullUtterance = this._pendingUtterance.join(' ').trim();
+    // Clean and join pending chunks into full utterance
+    const rawChunks = this._pendingUtterance.map(c => c.trim()).filter(Boolean);
+    if (rawChunks.length === 0) return;
+
+    const fullUtterance = rawChunks.join(' ').replace(/\s+/g, ' ').trim();
     if (!fullUtterance) return;
 
-    if (DeepgramService.isQuestion(fullUtterance)) {
-      // Question is complete! Clear buffer & fire AI
+    // Universal Question Check — when speaker stops talking, ALL utterances pass
+    const isComplete = DeepgramService.isQuestion(fullUtterance, source);
+
+    if (isComplete) {
+      // Question ready! Clear buffer & trigger AI answer
       this._pendingUtterance = [];
-      clearTimeout(this._stalePurgeTimer);  // Cancel any pending stale purge
+      clearTimeout(this._stalePurgeTimer);
       this._stalePurgeTimer = null;
-      console.log(`[Deepgram] Complete question triggered via ${source}:`, fullUtterance);
+      clearTimeout(this._utteranceDebounceTimer);
+      this._utteranceDebounceTimer = null;
+
+      console.log(`[Deepgram] Universal Question Triggered via ${source}:`, fullUtterance);
       if (this.onUtteranceEnd) this.onUtteranceEnd(fullUtterance);
     } else {
-      // Sentence is still incomplete (e.g. ended on "the", "how", "handle")
-      // Do NOT clear _pendingUtterance! Keep accumulating so incoming chunks append cleanly!
-      console.log(`[Deepgram] Mid-sentence pause (${source}) — preserving buffer for next chunk:`, fullUtterance);
+      // Mid-sentence pause during active speech — hold buffer for next word
+      console.log(`[Deepgram] Mid-sentence pause (${source}) — holding buffer:`, fullUtterance);
 
-      // Hard safety purge timer (5.0s): if speaker completely stops speaking for >5s on an incomplete fragment, purge buffer
+      // Force-flush safety timer (4.0s): If speaker stops speaking for 4s, FORCE FLUSH to AI!
+      // NEVER DISCARD SPOKEN WORDS!
       clearTimeout(this._stalePurgeTimer);
       this._stalePurgeTimer = setTimeout(() => {
         if (this._pendingUtterance && this._pendingUtterance.length > 0) {
-          console.log('[Deepgram] 5s stale buffer purge:', this._pendingUtterance.join(' '));
+          const forceText = this._pendingUtterance.join(' ').replace(/\s+/g, ' ').trim();
           this._pendingUtterance = [];
+          this._stalePurgeTimer = null;
+          console.log('[Deepgram] 4s force-flush (never purge!):', forceText);
+          if (forceText && DeepgramService.isQuestion(forceText, 'force_flush')) {
+            if (this.onUtteranceEnd) this.onUtteranceEnd(forceText);
+          }
         }
-      }, 5000);
+      }, 4000);
     }
   }
 
@@ -480,31 +500,18 @@ class DeepgramService {
   }
 
   /**
-   * Check if a transcript line is an interview question/prompt worth answering.
+   * Check if a transcript line is an interview prompt worth answering.
    *
-   * Multi-layer gate — ALL layers must pass before the AI is triggered:
-   *
-   * Layer 1 (Golden): 4-Word Minimum Anti-Rushing Guard
-   *   Rejects fragments like "Tell me" or "What is"
-   *
-   * Layer 2 (Golden): Trailing Incomplete Connector Guard
-   *   Rejects sentences that end on a preposition, possessive, determiner,
-   *   auxiliary verb, or conjunction — indicating the speaker paused mid-sentence.
-   *   Examples blocked:
-   *     "Tell me how was your"     (ends on possessive "your")
-   *     "What is the definition of" (ends on preposition "of")
-   *     "Can you explain how"      (ends on conjunction "how")
-   *     "Talk to me about the"     (ends on determiner "the")
-   *
-   * NOTE: This function is called ONLY inside _handleTranscript (in this file).
-   * It is also exported as a static method for external use, but the onUtteranceEnd
-   * callback in app.js must NOT call isQuestion() again — the utterance is already
-   * pre-filtered before it reaches that callback.
+   * Universal Guarantee Rule:
+   * 1. If speaker finished talking (source is UtteranceEnd, silence_timer, or force_flush),
+   *    ANY spoken prompt (2+ words or non-filler) IS valid — trigger AI immediately!
+   * 2. If speaker is in the middle of active speech (speech_final), only pause if
+   *    sentence ends on an open article or conjunction.
    */
-  static isQuestion(text) {
+  static isQuestion(text, source = 'manual') {
     if (!text) return false;
     const trimmed = text.trim();
-    if (trimmed.length < 4) return false; // Minimum character length guard (e.g. "hi", "ok", "um")
+    if (trimmed.length < 3) return false; // Minimum character length guard
 
     const cleanText = trimmed.replace(/[.,?!]+$/, '');
     const words = cleanText.split(/\s+/);
@@ -515,55 +522,23 @@ class DeepgramService {
       if (singleFiller.has(words[0].toLowerCase())) return false;
     }
 
-    // Trailing STRUCTURAL incomplete word guard.
-    //
-    // A sentence ending on one of these words is ALWAYS mid-thought — the speaker
-    // has paused but hasn't finished their sentence. We hold the buffer and wait
-    // for the rest to arrive.
-    //
-    // ── What IS in this list ──────────────────────────────────────────────────
-    //   Articles:      "the", "a", "an"   (always need a noun after)
-    //   Prepositions:  "of", "to", "in"…  (always need an object after)
-    //   Conjunctions:  "and", "but", "because"… (clause must continue)
-    //   Possessives:   "your", "my"…      (need a noun after)
-    //   Question words at end: "how", "what", "why", "which"
-    //                  e.g. "Can you tell me how" → still needs the predicate
-    //
-    // ── What is NOT in this list (removed from old version) ──────────────────
-    //   Auxiliary verbs: "is", "are", "was", "were", "do", "does", "have", etc.
-    //     → These CAN end valid complete questions:
-    //       "Can you explain what polymorphism is?"   ✅
-    //       "What would you do?"                       ✅
-    //       "Tell me what you know about databases"   ✅
-    //
-    //   Transitive verbs: "handle", "use", "implement", "create", "build"
-    //     → These CAN end valid complete questions:
-    //       "How would you handle this?"               ✅
-    //       "How would you implement this?"            ✅
-    //       "What approach would you use?"             ✅
-    //
+    // ── Universal Completion Guarantee ──
+    // When the speaker pauses or stops talking (UtteranceEnd / silence / force_flush),
+    // WHATEVER was spoken is treated as complete!
+    if (source === 'UtteranceEnd' || source === 'silence_timer' || source === 'force_flush' || source === 'manual') {
+      return true;
+    }
+
+    // Mid-stream check (only while speech is actively ongoing):
+    // Hold buffer only if sentence ends on an open article or conjunction
     const lastWord = words[words.length - 1].toLowerCase();
-    const trailingIncompleteConnectors = new Set([
-      // Articles & Determiners (always need a noun after them)
-      'the', 'a', 'an', 'this', 'that', 'these', 'those', 'some', 'any', 'each',
-      // Possessives (always need a noun after them)
-      'your', 'my', 'their', 'his', 'her', 'our', 'its',
-      // Object pronouns that signal incomplete predicate
-      'me', 'him', 'them', 'us',
-      // Prepositions (always need an object after them)
-      'of', 'to', 'in', 'for', 'with', 'on', 'at', 'by', 'from', 'as', 'into',
-      'like', 'through', 'after', 'over', 'between', 'out', 'against', 'during',
-      'without', 'before', 'under', 'around', 'among', 'within', 'about', 'across',
-      // Conjunctions (clause must continue after these)
-      'and', 'or', 'but', 'so', 'if', 'because', 'than', 'when', 'where', 'while',
-      'although', 'since', 'unless', 'whether',
-      // Bare question-words at sentence end = clause still needs its predicate
-      // e.g. "Tell me how", "Explain what", "Describe why"
-      'how', 'what', 'why', 'which',
+    const midSpeechIncompleteConnectors = new Set([
+      'the', 'a', 'an',
+      'and', 'or', 'but', 'so', 'because'
     ]);
 
-    if (words.length >= 2 && trailingIncompleteConnectors.has(lastWord)) {
-      console.log(`[Deepgram] Mid-sentence pause detected — ends on "${lastWord}" — holding buffer.`);
+    if (words.length >= 2 && midSpeechIncompleteConnectors.has(lastWord)) {
+      console.log(`[Deepgram] Mid-speech pause on "${lastWord}" — holding buffer for next word.`);
       return false;
     }
 
