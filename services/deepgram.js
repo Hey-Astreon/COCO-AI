@@ -515,33 +515,61 @@ class DeepgramService {
       if (singleFiller.has(words[0].toLowerCase())) return false;
     }
 
-    // Trailing incomplete connector check — ONLY for open prepositions/determiners when paused mid-sentence
-    // e.g. "Tell me about the", "What is the difference of", "How do you handle"
+    // Trailing STRUCTURAL incomplete word guard.
+    //
+    // A sentence ending on one of these words is ALWAYS mid-thought — the speaker
+    // has paused but hasn't finished their sentence. We hold the buffer and wait
+    // for the rest to arrive.
+    //
+    // ── What IS in this list ──────────────────────────────────────────────────
+    //   Articles:      "the", "a", "an"   (always need a noun after)
+    //   Prepositions:  "of", "to", "in"…  (always need an object after)
+    //   Conjunctions:  "and", "but", "because"… (clause must continue)
+    //   Possessives:   "your", "my"…      (need a noun after)
+    //   Question words at end: "how", "what", "why", "which"
+    //                  e.g. "Can you tell me how" → still needs the predicate
+    //
+    // ── What is NOT in this list (removed from old version) ──────────────────
+    //   Auxiliary verbs: "is", "are", "was", "were", "do", "does", "have", etc.
+    //     → These CAN end valid complete questions:
+    //       "Can you explain what polymorphism is?"   ✅
+    //       "What would you do?"                       ✅
+    //       "Tell me what you know about databases"   ✅
+    //
+    //   Transitive verbs: "handle", "use", "implement", "create", "build"
+    //     → These CAN end valid complete questions:
+    //       "How would you handle this?"               ✅
+    //       "How would you implement this?"            ✅
+    //       "What approach would you use?"             ✅
+    //
     const lastWord = words[words.length - 1].toLowerCase();
     const trailingIncompleteConnectors = new Set([
-      // Articles & Determiners
+      // Articles & Determiners (always need a noun after them)
       'the', 'a', 'an', 'this', 'that', 'these', 'those', 'some', 'any', 'each',
-      // Possessives & Pronouns
-      'your', 'my', 'their', 'his', 'her', 'our', 'its', 'me', 'him', 'them', 'us',
-      // Prepositions
+      // Possessives (always need a noun after them)
+      'your', 'my', 'their', 'his', 'her', 'our', 'its',
+      // Object pronouns that signal incomplete predicate
+      'me', 'him', 'them', 'us',
+      // Prepositions (always need an object after them)
       'of', 'to', 'in', 'for', 'with', 'on', 'at', 'by', 'from', 'as', 'into',
       'like', 'through', 'after', 'over', 'between', 'out', 'against', 'during',
       'without', 'before', 'under', 'around', 'among', 'within', 'about', 'across',
-      // Conjunctions & Subordinators
+      // Conjunctions (clause must continue after these)
       'and', 'or', 'but', 'so', 'if', 'because', 'than', 'when', 'where', 'while',
-      'although', 'since', 'unless', 'how', 'what', 'why', 'whether', 'which',
-      // Incomplete transitive verbs / clauses
-      'handle', 'use', 'create', 'build', 'implement', 'do', 'does', 'did',
-      'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had'
+      'although', 'since', 'unless', 'whether',
+      // Bare question-words at sentence end = clause still needs its predicate
+      // e.g. "Tell me how", "Explain what", "Describe why"
+      'how', 'what', 'why', 'which',
     ]);
 
-    if (words.length > 2 && trailingIncompleteConnectors.has(lastWord)) {
-      console.log(`[Deepgram] Sentence ends on incomplete connector "${lastWord}" — waiting for completion.`);
+    if (words.length >= 2 && trailingIncompleteConnectors.has(lastWord)) {
+      console.log(`[Deepgram] Mid-sentence pause detected — ends on "${lastWord}" — holding buffer.`);
       return false;
     }
 
     return true;
   }
+
 
   /**
    * Update status and notify listener
