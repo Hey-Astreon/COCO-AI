@@ -266,14 +266,28 @@ class DeepgramService {
       const trimmed = keyword.trim();
       if (!trimmed) return;
 
+      // Deepgram legacy keywords parameter only supports single words.
+      // If the keyword contains spaces (e.g. "Alyra Lock"), split it into single words.
+      if (trimmed.includes(' ')) {
+        const individualWords = trimmed.split(/\s+/);
+        individualWords.forEach(word => addSafeKeyword(word));
+        return;
+      }
+
       // Extract raw word to check length (removing any legacy weight if present)
       const cleanWord = trimmed.replace(/:[0-9]+$/, '');
+      if (cleanWord.length <= 2) return; // Skip tiny 1-2 char noises
       
-      // If it contains space (multi-word phrase like "Astra Vision") or is a long technical word (>= 5 chars):
-      // Boost with weight 2 for high accuracy.
-      // Otherwise (short words/acronyms like AST, DOM, Vue, JWT, API):
-      // Keep weight at 1 to prevent generic audio distortion.
-      if (cleanWord.includes(' ') || cleanWord.length >= 5) {
+      // ── Word Length Rules to Prevent Phonetic Distortions ──
+      // 1. Long tech/proper nouns (>= 5 chars, e.g. "FastAPI", "Alyra", "FinSync"):
+      //    Boost with weight 4 for high-precision matching.
+      // 2. Medium proper nouns (4 chars, e.g. "IDBI"):
+      //    Boost with weight 2 for medium precision.
+      // 3. Short acronyms/words (< 4 chars, e.g. "Vue", "JWT", "API", "SQL"):
+      //    Keep weight at 1 to prevent them from acting as acoustic black holes.
+      if (cleanWord.length >= 5) {
+        finalKeywords.add(`${cleanWord}:4`);
+      } else if (cleanWord.length === 4) {
         finalKeywords.add(`${cleanWord}:2`);
       } else {
         finalKeywords.add(`${cleanWord}:1`);
