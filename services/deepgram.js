@@ -350,19 +350,15 @@ class DeepgramService {
   /**
    * Start MediaRecorder to capture and send audio chunks
    *
-   * BUG FIX v2.2:
-   * ─────────────
-   * audioBitsPerSecond: 128000 → 16000 (Fix #2)
-   *   Deepgram's acoustic models are trained primarily on 8–16kHz narrowband
-   *   speech data. Sending 128kbps Opus applies aggressive perceptual compression
-   *   that distorts formant frequencies at high bitrates, causing phoneme boundary
-   *   errors (e.g. 'R' → 'B' substitution in "REST API").
-   *   16kbps Opus preserves the exact spectral envelope that Deepgram expects.
+   * Audio Configuration:
+   * ────────────────────
+   * audioBitsPerSecond: 64000 (64kbps Opus)
+   *   64kbps Opus mono provides the optimal balance of spectral fidelity, crisp formants,
+   *   and low network payload for Deepgram's STT decoder.
    *
-   * Chunk interval: 250ms → 100ms (Fix #5)
-   *   Smaller chunks give Deepgram finer-grained acoustic context per update.
-   *   At 250ms chunks, syllable boundaries are frequently cut mid-frame.
-   *   100ms aligns with typical phoneme duration (~80-120ms) for cleaner framing.
+   * Chunk interval: 100ms
+   *   At 100ms frames, chunks closely match natural phoneme durations (~80-120ms),
+   *   preventing mid-syllable boundary fragmentation.
    */
   _startRecording() {
     if (!this.mediaStream) return;
