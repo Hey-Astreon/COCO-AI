@@ -22,16 +22,16 @@ To ensure the landing page looks like a premium, state-of-the-art SaaS product:
 
 ---
 
-## 📸 Real UI & Feature Image References (Included in Assets)
+## 📸 Real UI & Feature Image References (Included in lovable Folder)
 
 Use the following real application screenshots and feature graphics to explain the features in the landing page:
-- **Hero / Main Preview:** `website/assets/real_cocoai_ui_preview.png` (Full desktop dashboard mockup).
-- **Core Feature 1 (AI Answers):** `website/assets/cocoai_answers.png` (Real QA feed showing structured solutions, code blocks, and retry buttons).
-- **Core Feature 2 (Live Transcript):** `website/assets/cocoai_transcript.png` (Real-time speaker detection and audio waveform).
-- **Core Feature 3 (Stealth & Context):** `website/assets/cocoai_settings.png` (Settings drawer with PDF resume context matching).
-- Feature 4 (Stealth Proof / Eye Button): `assets/cocoai_stealth_comparison.png` (Split comparison showing what you see vs what screen share sees).
-- Feature 5 (Session Exporting): `assets/cocoai_export_md.png` (Visual representation of saving the interview logs as Markdown, JSON, or TXT).
-- Feature 6 (Screen & Multi-Screenshot Analysis): `assets/cocoai_screen_analysis.png` (Visual showing coding problems analyzed from single or scroll-stitched multi-monitor screenshots).
+- **Hero / Main Preview:** `website/lovable/real_cocoai_ui_preview.png` (Full desktop dashboard mockup).
+- **Core Feature 1 (AI Answers):** `website/lovable/cocoai_answers.png` (Real QA feed showing structured solutions, code blocks, and retry buttons).
+- **Core Feature 2 (Live Transcript):** `website/lovable/cocoai_transcript.png` (Real-time speaker detection and audio waveform).
+- **Core Feature 3 (Stealth & Context):** `website/lovable/cocoai_settings.png` (Settings drawer with PDF resume context matching).
+- **Feature 4 (Stealth Proof / Eye Button):** `website/lovable/cocoai_stealth_comparison.png` (Split comparison showing what you see vs what screen share sees).
+- **Feature 5 (Session Exporting):** `website/lovable/cocoai_export_md.png` (Visual representation of saving the interview logs as Markdown, JSON, or TXT).
+- **Feature 6 (Screen & Multi-Screenshot Analysis):** `website/lovable/cocoai_screen_analysis.png` (Visual showing coding problems analyzed from single or scroll-stitched multi-monitor screenshots).
 
 ---
 
@@ -50,7 +50,7 @@ Colors & Fonts:
 Include these exact pages/sections on the landing page:
 
 1. NAVBAR:
-- Logo pill on the left: CocoAI logo image (assets/coco_logo_nobg.png) and text "CocoAI".
+- Logo pill on the left: CocoAI logo image (lovable/coco_logo_nobg.png) and text "CocoAI".
 - Navigation links: Features, Pricing, Giveaway, Contributors.
 - Right CTA Button: "Get Early Access" (glowing gradient button).
 
@@ -61,24 +61,24 @@ Include these exact pages/sections on the landing page:
   * "Download CocoAI Pro for Windows" (Link: `https://github.com/Hey-Astreon/COCO-AI/releases/download/v1.0.38/CocoAI_Installer_v1.0.38.exe`)
   * "Star on GitHub" (Link: `https://github.com/Hey-Astreon/COCO-AI`)
   * "View Releases" (Link: `https://github.com/Hey-Astreon/COCO-AI/releases/latest`)
-- Display a large, high-resolution browser mockup container showcasing the main UI screenshot (`assets/real_cocoai_ui_preview.png`) with a clean shadow.
+- Display a large, high-resolution browser mockup container showcasing the main UI screenshot (`lovable/real_cocoai_ui_preview.png`) with a clean shadow.
 
 3. DYNAMIC FEATURE HIGHLIGHTS (Two-column responsive grid alternating images & text with exact screenshot callouts):
 - Feature 1: "Real-Time Speech-to-Text, Speaker Detection & VAD"
   * Description: "Listens directly to the interviewer, groups sentences using advanced Voice Activity Detection (VAD), and filters pauses. The Live Transcript feed displays real-time speech bubbles with speaker tags (INTERVIEWER / CANDIDATE) and instant '⚡ ANSWER' triggers next to every question."
-  * Screenshot Example: Showcase `assets/cocoai_transcript.png`.
+  * Screenshot Example: Showcase `lovable/cocoai_transcript.png`.
 - Feature 2: "Deep Resume & JD Context Ingestion"
   * Description: "Drag and drop your PDF resume and paste the job description directly into the Settings drawer. CocoAI uses this context to automatically align answers to your project history (e.g. Alyra Lock, Astra Vision) and specific technical stack (React, TypeScript, Express, MongoDB, FastAPI)."
-  * Screenshot Example: Showcase `assets/cocoai_settings.png` focusing on the Context Input forms.
+  * Screenshot Example: Showcase `lovable/cocoai_settings.png` focusing on the Context Input forms.
 - Feature 3: "Invisible Stealth Overlay & Screen Share Protection (Eye Button)"
   * Description: "Built to be completely invisible on screen sharing (Zoom, Teams, Google Meet). Control overlay modes via globally-registered hotkeys: Ctrl+Shift+H (Hide Window), Ctrl+Shift+A (Analyze Screen), Ctrl+Shift+S (Add Page), and Ctrl+Shift+G (Cycle Stealth). Toggle stealth states with the Eye icon button and slide opacity from 35% to 100%."
-  * Screenshot Example: Showcase the split-screen comparison graphic `assets/cocoai_stealth_comparison.png` demonstrating what you see vs. what screen sharing sees.
+  * Screenshot Example: Showcase the split-screen comparison graphic `lovable/cocoai_stealth_comparison.png` demonstrating what you see vs. what screen sharing sees.
 - Feature 4: "Multi-Format Session Exporting"
   * Description: "Never lose a valuable interview question or solution. At any point, click the toolbar Export button to download the entire session transcript and generated code answers as clean Markdown (`.md`), plain Text (`.txt`), or structural JSON (`.json`) files for offline study or replay mode."
-  * Screenshot Example: Showcase the interactive export graphic `assets/cocoai_export_md.png` highlighting the '.md' exporting panel and download confirmation.
+  * Screenshot Example: Showcase the interactive export graphic `lovable/cocoai_export_md.png` highlighting the '.md' exporting panel and download confirmation.
 - Feature 5: "Screen Analysis & Multi-Screenshot Scroll Stitching"
   * Description: "Struggling with long coding prompts or complex diagrams? Press Ctrl+Shift+A to capture and solve code from any window or monitor. For long-scrolling pages, use Ctrl+Shift+S to stitch multiple page blocks together into a single, cohesive prompt that Gemini analyzes in one go."
-  * Screenshot Example: Showcase the visual flow graphic `assets/cocoai_screen_analysis.png` demonstrating page capturing and multi-screenshot stitching.
+  * Screenshot Example: Showcase the visual flow graphic `lovable/cocoai_screen_analysis.png` demonstrating page capturing and multi-screenshot stitching.
 
 4. PRICING SECTION:
 - Header: "Simple, Transparent Pricing"
