@@ -14,6 +14,7 @@ const GeminiService = {
 
   MAX_RETRIES: 2,
   BASE_DELAY_MS: 500,
+  REQUEST_TIMEOUT_MS: 30000, // 30s timeout per model for vision processing (was 6s, too short)
 
   async analyzeImage(apiKey, base64Images, prompt, onChunk, onStatus) {
     if (!prompt) {
@@ -63,7 +64,7 @@ const GeminiService = {
           }
 
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 6000); // 6s timeout per model
+          const timeoutId = setTimeout(() => controller.abort(), this.REQUEST_TIMEOUT_MS);
 
           let response;
           try {
