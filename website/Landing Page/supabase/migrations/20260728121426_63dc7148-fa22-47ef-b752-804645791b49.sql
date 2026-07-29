@@ -1,0 +1,1 @@
+DELETE FROM public.contributor_applications WHERE email = 'design-verify@example.com';
