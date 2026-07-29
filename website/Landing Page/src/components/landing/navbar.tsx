@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogOut, User } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import logo from "@/assets/coco_logo_nobg.png";
 import { ThemeToggle } from "./theme-toggle";
+import { useAuth } from "@/lib/auth-context";
 
 const NAV_LINKS = [
   { label: "Features", href: "#features", id: "features" },
@@ -11,8 +13,10 @@ const NAV_LINKS = [
 ];
 
 export function Navbar() {
+  const { user, profile, loading, signOut } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [progress, setProgress] = useState(0);
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -46,6 +50,30 @@ export function Navbar() {
     targets.forEach((target) => observer.observe(target));
     return () => observer.disconnect();
   }, []);
+
+  // Close user menu on outside click
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const handleClick = () => setUserMenuOpen(false);
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [userMenuOpen]);
+
+  const tierLabel = profile?.subscription_tier === "developer"
+    ? "Developer"
+    : profile?.subscription_tier === "pro"
+      ? "Pro"
+      : profile?.subscription_tier === "standard"
+        ? "Standard"
+        : "Free";
+
+  const tierColor = profile?.subscription_tier === "developer"
+    ? "text-amber-400"
+    : profile?.subscription_tier === "pro"
+      ? "text-pink-400"
+      : profile?.subscription_tier === "standard"
+        ? "text-violet-400"
+        : "text-muted-foreground";
 
   return (
     <header
@@ -89,6 +117,69 @@ export function Navbar() {
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
+
+          {/* Auth Buttons */}
+          {!loading && !user && (
+            <div className="hidden items-center gap-2 md:flex">
+              <Link
+                to="/login"
+                className="rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors duration-200 hover:bg-accent hover:text-foreground"
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/signup"
+                className="rounded-full bg-gradient-to-r from-violet-600 to-pink-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-violet-500/20 transition-all duration-200 hover:shadow-violet-500/40"
+              >
+                Get Started
+              </Link>
+            </div>
+          )}
+
+          {/* Signed-in User Avatar & Menu */}
+          {!loading && user && (
+            <div className="relative hidden md:block">
+              <button
+                onClick={(e) => { e.stopPropagation(); setUserMenuOpen((v) => !v); }}
+                className="flex items-center gap-2 rounded-full border border-border/40 bg-background/60 py-1.5 pl-1.5 pr-3 transition-colors hover:bg-accent"
+              >
+                {profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt="Avatar"
+                    className="h-7 w-7 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-pink-600">
+                    <User className="h-3.5 w-3.5 text-white" />
+                  </div>
+                )}
+                <span className="max-w-[120px] truncate text-sm font-medium text-foreground">
+                  {profile?.display_name || user.email?.split("@")[0]}
+                </span>
+              </button>
+
+              {/* Dropdown */}
+              {userMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-60 rounded-xl border border-border/60 bg-background/95 p-2 shadow-2xl backdrop-blur-xl">
+                  <div className="border-b border-border/40 px-3 py-2">
+                    <p className="truncate text-sm font-medium text-foreground">{user.email}</p>
+                    <p className={`mt-0.5 text-xs font-semibold ${tierColor}`}>
+                      {tierLabel} Plan
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => { signOut(); setUserMenuOpen(false); }}
+                    className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           <button
             type="button"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
@@ -120,6 +211,54 @@ export function Navbar() {
                 </a>
               );
             })}
+
+            {/* Mobile auth buttons */}
+            {!loading && !user && (
+              <>
+                <div className="my-2 h-px bg-border/40" />
+                <Link
+                  to="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="rounded-lg px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/signup"
+                  onClick={() => setMenuOpen(false)}
+                  className="rounded-lg bg-gradient-to-r from-violet-600 to-pink-600 px-4 py-3 text-center text-sm font-semibold text-white"
+                >
+                  Get Started
+                </Link>
+              </>
+            )}
+
+            {/* Mobile signed-in info */}
+            {!loading && user && (
+              <>
+                <div className="my-2 h-px bg-border/40" />
+                <div className="flex items-center gap-3 px-4 py-2">
+                  {profile?.avatar_url ? (
+                    <img src={profile.avatar_url} alt="Avatar" className="h-8 w-8 rounded-full object-cover" />
+                  ) : (
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-pink-600">
+                      <User className="h-4 w-4 text-white" />
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{profile?.display_name || user.email?.split("@")[0]}</p>
+                    <p className={`text-xs font-semibold ${tierColor}`}>{tierLabel} Plan</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => { signOut(); setMenuOpen(false); }}
+                  className="flex items-center gap-2 rounded-lg px-4 py-3 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}

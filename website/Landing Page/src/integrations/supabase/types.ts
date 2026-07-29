@@ -14,6 +14,102 @@ export type Database = {
   }
   public: {
     Tables: {
+      user_profiles: {
+        Row: {
+          id: string
+          email: string
+          display_name: string | null
+          avatar_url: string | null
+          subscription_tier: "free" | "standard" | "pro" | "developer"
+          subscription_started_at: string | null
+          subscription_expires_at: string | null
+          tokens_remaining: number
+          tokens_limit: number
+          audio_minutes_remaining: number
+          audio_minutes_limit: number
+          quota_reset_at: string | null
+          razorpay_customer_id: string | null
+          razorpay_subscription_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          email: string
+          display_name?: string | null
+          avatar_url?: string | null
+          subscription_tier?: "free" | "standard" | "pro" | "developer"
+          subscription_started_at?: string | null
+          subscription_expires_at?: string | null
+          tokens_remaining?: number
+          tokens_limit?: number
+          audio_minutes_remaining?: number
+          audio_minutes_limit?: number
+          quota_reset_at?: string | null
+          razorpay_customer_id?: string | null
+          razorpay_subscription_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          display_name?: string | null
+          avatar_url?: string | null
+          subscription_tier?: "free" | "standard" | "pro" | "developer"
+          subscription_started_at?: string | null
+          subscription_expires_at?: string | null
+          tokens_remaining?: number
+          tokens_limit?: number
+          audio_minutes_remaining?: number
+          audio_minutes_limit?: number
+          quota_reset_at?: string | null
+          razorpay_customer_id?: string | null
+          razorpay_subscription_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      payment_history: {
+        Row: {
+          id: string
+          user_id: string
+          razorpay_payment_id: string
+          razorpay_order_id: string | null
+          razorpay_signature: string | null
+          amount_paise: number
+          currency: string
+          plan: "standard" | "pro"
+          status: "created" | "captured" | "failed" | "refunded"
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          razorpay_payment_id: string
+          razorpay_order_id?: string | null
+          razorpay_signature?: string | null
+          amount_paise: number
+          currency?: string
+          plan: "standard" | "pro"
+          status?: "created" | "captured" | "failed" | "refunded"
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          razorpay_payment_id?: string
+          razorpay_order_id?: string | null
+          razorpay_signature?: string | null
+          amount_paise?: number
+          currency?: string
+          plan?: "standard" | "pro"
+          status?: "created" | "captured" | "failed" | "refunded"
+          created_at?: string
+        }
+        Relationships: []
+      }
       contributor_applications: {
         Row: {
           created_at: string

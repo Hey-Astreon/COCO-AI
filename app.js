@@ -65,6 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadSettings();
   initDeepgram();
   initDragAndDrop();
+  updateDesktopAccountUI();
 });
 
 // ─── Electron Bridge ──────────────────────────────────────────
@@ -1639,6 +1640,7 @@ function toggleSettings() {
     syncCustomSelect('modelSelectWrapper', state.currentModel || 'llama-3.3-70b');
     
     updateResumeDropZoneState();
+    updateDesktopAccountUI();
     
     drawer.classList.add('open');
     overlay.style.display = 'block';
@@ -2055,3 +2057,104 @@ function updateResumeDropZoneState() {
     dropZoneText.textContent = 'Drag & drop PDF Resume or click to upload';
   }
 }
+
+// ─── Account & Auth Bridge ─────────────────────────────────────
+
+function updateDesktopAccountUI() {
+  const emailEl = $('userAccountEmail');
+  const badgeEl = $('userPlanBadge');
+  const tokensEl = $('userTokensVal');
+  const audioEl = $('userAudioVal');
+  const authBtn = $('accountAuthBtn');
+  const avatarBadge = $('userAvatarBadge');
+  const avatarImg = $('userAvatarImg');
+
+  if (!emailEl || !badgeEl || !authBtn) return;
+
+  const rawSession = localStorage.getItem('cocoai_user_session');
+  let session = null;
+  try {
+    session = rawSession ? JSON.parse(rawSession) : null;
+  } catch (e) {
+    session = null;
+  }
+
+  if (session && session.user) {
+    const user = session.user;
+    const profile = session.profile || {};
+    const email = user.email || 'User';
+    const tier = profile.subscription_tier || 'free';
+
+    emailEl.textContent = email;
+
+    // Avatar
+    if (profile.avatar_url && avatarImg) {
+      avatarImg.src = profile.avatar_url;
+      avatarImg.style.display = 'block';
+      if (avatarBadge) avatarBadge.style.display = 'none';
+    } else if (avatarBadge) {
+      avatarBadge.textContent = (email[0] || '👤').toUpperCase();
+      avatarBadge.style.display = 'block';
+      if (avatarImg) avatarImg.style.display = 'none';
+    }
+
+    // Badge
+    if (tier === 'developer') {
+      badgeEl.textContent = '👑 Developer (Founder)';
+      badgeEl.className = 'account-badge developer';
+      if (tokensEl) tokensEl.textContent = '∞ Unlimited Tokens';
+      if (audioEl) audioEl.textContent = '∞ Unlimited Minutes';
+    } else if (tier === 'pro') {
+      badgeEl.textContent = '⚡ Pro Plan';
+      badgeEl.className = 'account-badge pro';
+      if (tokensEl) tokensEl.textContent = `${(profile.tokens_remaining || 0).toLocaleString()} / ${(profile.tokens_limit || 2000000).toLocaleString()}`;
+      if (audioEl) audioEl.textContent = `${(profile.audio_minutes_remaining || 0).toFixed(1)} / ${(profile.audio_minutes_limit || 500).toFixed(1)} mins`;
+    } else if (tier === 'standard') {
+      badgeEl.textContent = '🚀 Standard Plan';
+      badgeEl.className = 'account-badge standard';
+      if (tokensEl) tokensEl.textContent = `${(profile.tokens_remaining || 0).toLocaleString()} / ${(profile.tokens_limit || 500000).toLocaleString()}`;
+      if (audioEl) audioEl.textContent = `${(profile.audio_minutes_remaining || 0).toFixed(1)} / ${(profile.audio_minutes_limit || 120).toFixed(1)} mins`;
+    } else {
+      badgeEl.textContent = 'Free Tier';
+      badgeEl.className = 'account-badge free';
+      if (tokensEl) tokensEl.textContent = `${(profile.tokens_remaining || 50000).toLocaleString()} / 50,000`;
+      if (audioEl) audioEl.textContent = `${(profile.audio_minutes_remaining || 30.0).toFixed(1)} / 30.0 mins`;
+    }
+
+    authBtn.textContent = '🚪 Sign Out';
+    authBtn.onclick = () => handleDesktopAuthAction('logout');
+  } else {
+    emailEl.textContent = 'Not Signed In';
+    badgeEl.textContent = 'Free Tier';
+    badgeEl.className = 'account-badge free';
+
+    if (avatarBadge) {
+      avatarBadge.textContent = '👤';
+      avatarBadge.style.display = 'block';
+    }
+    if (avatarImg) avatarImg.style.display = 'none';
+
+    if (tokensEl) tokensEl.textContent = '50,000 / 50,000';
+    if (audioEl) audioEl.textContent = '30.0 / 30.0 mins';
+
+    authBtn.textContent = '🔑 Sign In with Website';
+    authBtn.onclick = () => handleDesktopAuthAction('login');
+  }
+}
+
+function handleDesktopAuthAction(action) {
+  if (action === 'logout') {
+    localStorage.removeItem('cocoai_user_session');
+    updateDesktopAccountUI();
+    showToast('Signed out of CocoAI', 'info');
+  } else {
+    const loginUrl = 'https://coco-ai.vercel.app/login';
+    if (window.electronAPI && window.electronAPI.openExternal) {
+      window.electronAPI.openExternal(loginUrl);
+    } else {
+      window.open(loginUrl, '_blank');
+    }
+    showToast('Opening login page in browser...', 'info');
+  }
+}
+

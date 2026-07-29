@@ -6,7 +6,7 @@
 // Load environment variables FIRST
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
-const { app, BrowserWindow, globalShortcut, ipcMain, screen, desktopCapturer } = require('electron');
+const { app, BrowserWindow, globalShortcut, ipcMain, screen, desktopCapturer, shell } = require('electron');
 const path = require('path');
 
 // ─── Auto-Updater (only in packaged builds) ──────────────────
@@ -213,6 +213,12 @@ ipcMain.handle('get-api-keys', () => {
     nvidia:   process.env.BUILD_NVIDIA_API_KEY || '',
     groq:     process.env.GROQ_API_KEY     || '',
   };
+});
+
+ipcMain.on('open-external', (event, url) => {
+  if (url && typeof url === 'string') {
+    shell.openExternal(url);
+  }
 });
 
 ipcMain.handle('capture-screen', async () => {

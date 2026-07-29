@@ -319,6 +319,36 @@
     </div>
     
     <div class="drawer-body">
+      <!-- Account & Subscription Section -->
+      <div class="settings-section account-section" id="accountSettingsSection">
+        <h3 class="section-title">Account & Subscription</h3>
+        <div class="account-card" id="accountCard">
+          <div class="account-header">
+            <div class="account-avatar-wrapper">
+              <img id="userAvatarImg" src="assets/coco_logo_nobg.png" class="account-avatar-img" style="display:none;" />
+              <div id="userAvatarBadge" class="account-avatar-badge">👤</div>
+            </div>
+            <div class="account-info">
+              <div class="account-email" id="userAccountEmail">Not Signed In</div>
+              <div class="account-badge" id="userPlanBadge">Free Tier</div>
+            </div>
+          </div>
+          <div class="account-stats" id="accountStats">
+            <div class="stat-item">
+              <span class="stat-label">AI Tokens:</span>
+              <span class="stat-value" id="userTokensVal">50,000 / 50,000</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Audio Minutes:</span>
+              <span class="stat-value" id="userAudioVal">30.0 / 30.0 mins</span>
+            </div>
+          </div>
+          <div class="account-actions">
+            <button class="btn btn-action-primary" id="accountAuthBtn" onclick="handleDesktopAuthAction()">🔑 Sign In with Website</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Appearance Settings Section -->
       <div class="settings-section">
         <h3 class="section-title">Appearance & Model</h3>
