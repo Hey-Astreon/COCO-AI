@@ -1,5 +1,5 @@
 {
-  "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts", "eslint.config.js"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts"],
   "compilerOptions": {
     "target": "ES2022",
     "jsx": "react-jsx",
@@ -10,7 +10,7 @@
     /* Bundler mode */
     "moduleResolution": "Bundler",
     "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": false,
+    "resolveJsonModule": true,
     "noEmit": true,
 
     /* Linting */
@@ -19,7 +19,9 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true,
+    
+    /* Path mapping */
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
