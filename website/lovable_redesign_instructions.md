@@ -1,47 +1,51 @@
-# 🍱 CocoAI Landing Page — Bento Grid Layout Redesign
+# 🎬 CocoAI Landing Page — Spacious Storyboard Layout Redesign
 
-To resolve the critical UI/UX flaws in the features section (where the image is compressed too small to be readable, and hiding features behind tabs prevents scanning), we will replace the tab layout with a **Premium Bento Grid** system (similar to Vercel, Linear, and Apple).
+You are completely right. I apologize. Squeezing complex application screenshots containing text, code, and live transcripts into a multi-column Bento Grid would still choke their width (forcing them into 40% or 60% splits) and make readability even worse. 
+
+To ensure the actual interview questions, transcripts, and code answers are **perfectly readable to the human eye without clicking or squinting**, we must use a **Spacious Storyboard Layout** (similar to how companies like Tailwind CSS or Raycast show their core features).
 
 ---
 
-## 📐 The Bento Grid Layout Strategy
+## 🎨 The "Storyboard" Layout Strategy
 
-Instead of a cramped 3-column layout or hiding features behind clicks, we will lay out the 5 features in a dynamic, high-contrast grid:
-* **Row 1:** 
-  * **Card 1 (60% width):** *🎙️ Live Speech-to-Text & VAD* — showcases the live transcript screenshot (`lovable/cocoai_transcript.png`) in a wide card.
-  * **Card 2 (40% width):** *📄 Resume & JD Matching* — showcases the settings drag-and-drop context uploader (`lovable/cocoai_settings.png`).
-* **Row 2 (100% width):**
-  * **Card 3 (Full width):** *👁️ Invisible Stealth Screen Protection* — showcases the split comparison visual (`lovable/cocoai_stealth_comparison.png`) side-by-side with massive visual readability.
-* **Row 3:**
-  * **Card 4 (40% width):** *💾 Session Exporting* — showcases the Markdown export panel graphic (`lovable/cocoai_export_md.png`).
-  * **Card 5 (60% width):** *📸 Screen Solver & Screenshot Stitching* — showcases the screen analysis flow graphic (`lovable/cocoai_screen_analysis.png`).
+Instead of columns, tabs, or grids:
+* We stack the 5 core features vertically in a spacious, single-column flow.
+* Each feature card occupies the **full width of the page container** (`max-w-5xl` or `max-w-6xl`).
+* **Visual Structure of Each Feature Section:**
+  1. **Text Header (Top):** A clean text block containing a subtle label (e.g. `01 / LIVE TRANSCRIPTION`), a bold title, and a simple 2-line explanation.
+  2. **Hero-Sized Mockup (Bottom):** A large, high-resolution desktop mockup container enclosing the screenshot. The image occupies the full width of the container, ensuring all text, transcripts, and code snippets are fully readable as the user scrolls naturally.
 
 ---
 
 # 🤖 The Lovable Redesign Prompt
 
-*Copy and paste the prompt below directly into Lovable to apply the Bento Grid update:*
+*Copy and paste the prompt below directly into Lovable to apply the Storyboard Layout update:*
 
 ```text
-Let's completely scrap the interactive tabs dashboard in the Features section and replace it with a modern, highly-scannable "Bento Grid" layout. This ensures all features are visible at once without clicking and images are large enough to be fully readable.
+Let's completely redesign the Features section. Scrap all side-by-side grids, sidebars, and tab layouts. Instead, build a spacious, single-column "Storyboard" layout where each feature is displayed with a large, highly-readable full-width screenshot mockup.
 
-1. BENTO GRID STRUCTURE:
-- Create a 3-row responsive grid container for the 5 features:
-  * ROW 1 (Two Columns on Desktop):
-    - Left Card (60% width): "Real-Time Audio Transcript & VAD". Display the title, a short description, and the screenshot `lovable/cocoai_transcript.png` scaled up to show the speech bubbles clearly.
-    - Right Card (40% width): "Resume & JD Matching". Display the title, a short description, and the uploader/settings screenshot `lovable/cocoai_settings.png`.
-  * ROW 2 (One Column - 100% width):
-    - Full-Width Card: "Invisible Stealth Overlay & Screen Share Protection". Display the title, a short description, and the side-by-side comparison screenshot `lovable/cocoai_stealth_comparison.png` at maximum size to show the "what you see vs what they see" comparison clearly.
-  * ROW 3 (Two Columns on Desktop):
-    - Left Card (40% width): "Multi-Format Session Export". Display the title, a short description, and the export UI graphic `lovable/cocoai_export_md.png`.
-    - Right Card (60% width): "Scroll-Stitch Screen Solver". Display the title, a short description, and the screen capture graphic `lovable/cocoai_screen_analysis.png`.
+1. STORYBOARD LAYOUT STRUCTURE:
+- Stack the 5 core features vertically with generous spacing (e.g., py-16 or py-20 between features) so the page feels clean and premium.
+- For each of the 5 features, use this exact stacked layout:
+  * TEXT HEADER (Top - Left Aligned or Centered):
+    - A clean, small category tracker text in lavender: "MODULE 01", "MODULE 02", etc.
+    - A bold, high-contrast white title (#FFFFFF) in Outfit font (e.g., text-3xl).
+    - A simple, highly-readable description paragraph in zinc-400 (#A1A1AA) explaining the benefit.
+  * FULL-WIDTH SCREENSHOT MOCKUP (Bottom):
+    - Display the screenshot inside a spacious, dark-slate browser mockup frame.
+    - The frame must occupy the full content container width (w-full max-w-5xl) so that all UI details, code blocks, and transcription text are large, clear, and perfectly readable.
+    - Map the corresponding screenshots to each section:
+      1. Live Transcript & VAD -> lovable/cocoai_transcript.png
+      2. Resume & JD Matching -> lovable/cocoai_settings.png
+      3. Invisible Stealth Overlay -> lovable/cocoai_stealth_comparison.png
+      4. Multi-Format Session Export -> lovable/cocoai_export_md.png
+      5. Scroll-Stitch Screen Solver -> lovable/cocoai_screen_analysis.png
 
-2. BENTO CARD STYLING:
-- Style each card as a clean, glassmorphic container: dark zinc-900 backing (#18181B), a very subtle 1px border outline in zinc-800 (#27272A), and generous inner padding (p-6 or p-8).
-- Display the screenshot images *under* the text on each card. Give the screenshots a clean, flat 1px border, rounded corners (rounded-lg), and a subtle inner shadow. 
-- Remove any tilt effects or heavy glow shadows from the screenshots to keep the text crisp and easily readable.
-- On hover, cards should lift slightly (translate-y-[-4px]) with a smooth transition (transition-all duration-300 ease-out).
+2. MOCKUP CONTAINER STYLING:
+- Style the mockup frames with a clean, dark-slate background, rounded corners (rounded-xl), and a thin, razor-sharp 1px border in zinc-800 (#27272A).
+- Add a very subtle, soft purple-pink ambient backlight glow (opacity: 10%, blur-xl) behind each mockup container to separate it from the obsidian background.
+- Do not apply any 3D tilt or rotation effects to these mockup frames. They must remain flat, clean, and perfectly aligned for optimal readability.
 
-3. MOBILE RESPONSIVENESS:
-- On mobile devices (screen width < 768px), collapse all cards in the Bento Grid into a single vertical column (each card 100% width) for a clean scrolling layout.
+3. MOBILE ADAPTABILITY:
+- Ensure the mockup frames scale down responsively on mobile devices while maintaining their aspect ratio.
 ```
