@@ -187,7 +187,7 @@ export function AuthPage({ onClose, defaultMode = "login" }: AuthPageProps) {
           }}
         >
           <p className="text-sm italic" style={{ color: "hsl(240 5% 60%)" }}>
-            "CocoAI helped me land my dream role at a FAANG company. The real-time hints were a game changer."
+            "CocoAI helped me stay calm and land my offer. Having real-time hints when I got stuck made all the difference."
           </p>
           <p className="mt-3 text-xs font-semibold" style={{ color: "hsl(262 83% 72%)" }}>
             — Software Engineer, Google

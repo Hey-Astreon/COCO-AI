@@ -61,7 +61,7 @@ export function Footer() {
               rel="noopener noreferrer"
               className="font-medium text-foreground underline-offset-4 transition-colors duration-300 ease-premium hover:underline"
             >
-              Roushan (Hey-Astreon)
+              Hey-Astreon
             </a>{" "}
             &amp;{" "}
             <a
@@ -70,7 +70,7 @@ export function Footer() {
               rel="noopener noreferrer"
               className="font-medium text-foreground underline-offset-4 transition-colors duration-300 ease-premium hover:underline"
             >
-              Ayushi (Silenttears-cloud)
+              Silenttears-cloud
             </a>
             .
           </p>

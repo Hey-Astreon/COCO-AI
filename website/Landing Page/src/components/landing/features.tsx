@@ -35,7 +35,7 @@ const MODULES: FeatureModule[] = [
     eyebrow: "Personalization",
     title: "Deep Resume & JD Context Ingestion",
     description:
-      "Drag and drop your PDF resume and paste the job description directly into the Settings drawer. CocoAI uses this context to automatically align answers to your project history (e.g. Alyra Lock, Astra Vision) and specific technical stack (React, TypeScript, Express, MongoDB, FastAPI).",
+      "Drag and drop your PDF resume and paste the job description directly into the Settings drawer. CocoAI uses this context to automatically align answers to your project history and specific technical stack (React, TypeScript, Express, MongoDB, FastAPI).",
     chips: ["PDF Resume Upload", "JD Matching", "Stack-Aware Answers"],
     image: settingsImg,
     imageAlt:

@@ -138,7 +138,7 @@ export function AboutPage() {
             The Team
           </h2>
           <p className="mt-2 text-sm" style={{ color: "hsl(240 5% 50%)" }}>
-            Two developers. One vision. Zero compromise.
+            Built by engineers who care about performance and privacy.
           </p>
         </div>
 
