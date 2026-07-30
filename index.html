@@ -82,8 +82,16 @@
         </svg>
       </button>
 
+      <!-- Profile Button -->
+      <button class="btn btn-icon-only btn-profile" id="profileBtn" onclick="toggleProfileDrawer()" title="User Profile & Subscription">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </button>
+
       <!-- Settings Button -->
-      <button class="btn btn-icon-only btn-settings" id="settingsBtn" onclick="toggleSettings()">
+      <button class="btn btn-icon-only btn-settings" id="settingsBtn" onclick="toggleSettings()" title="Settings & Models">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <circle cx="12" cy="12" r="3"></circle>
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -468,8 +476,12 @@
           <textarea id="settingJd" placeholder="Paste the job description or role requirements here to align your answers..." class="form-textarea"></textarea>
         </div>
 
-        <div style="text-align: center; padding: 16px 0 4px; font-size: 11px; color: var(--text-muted); opacity: 0.85;">
-          Built with 💜 by <strong>Hey-Astreon</strong> &amp; <strong>Silenttears-cloud</strong>
+        <div style="text-align: center; padding: 16px 0 8px; font-size: 11px; color: var(--text-muted); opacity: 0.85; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #a29bfe; font-weight: 600; background: rgba(162, 155, 254, 0.1); padding: 4px 12px; border-radius: 12px; border: 1px solid rgba(162, 155, 254, 0.25); display: inline-flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #2ed573;"></span>
+            CocoAI v1.0.38 (Windows)
+          </div>
+          <span>Built with 💜 by <strong>Hey-Astreon</strong> &amp; <strong>Silenttears-cloud</strong></span>
         </div>
       </div>
     </div>
@@ -480,6 +492,66 @@
     </div>
   </div>
   <div class="drawer-overlay" id="drawerOverlay" onclick="toggleSettings()"></div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!--  PROFILE DRAWER                                             -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="settings-drawer profile-drawer" id="profileDrawer">
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        User Profile &amp; Subscription
+      </div>
+      <button class="drawer-close" onclick="toggleProfileDrawer()">✕</button>
+    </div>
+
+    <div class="drawer-body">
+      <div class="settings-section account-section">
+        <div class="account-card" id="userModalCard">
+          <div class="account-header" style="align-items: center; gap: 12px;">
+            <div class="account-avatar-wrapper">
+              <img id="userModalAvatarImg" src="assets/coco_logo_nobg.png" class="account-avatar-img" style="display:none;" />
+              <div id="userModalAvatarBadge" class="account-avatar-badge">👤</div>
+            </div>
+            <div class="account-info">
+              <div class="account-email" id="userModalDisplayName" style="font-weight: 700; font-size: 14px;">Guest User</div>
+              <div class="account-email" id="userModalEmail" style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Not Signed In</div>
+              <div class="account-badge" id="userModalPlanBadge">Free Tier</div>
+            </div>
+          </div>
+
+          <div class="account-stats" style="margin-top: 14px;">
+            <div class="stat-item">
+              <span class="stat-label">AI Tokens:</span>
+              <span class="stat-value" id="userModalTokensVal">50,000 / 50,000</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Audio Minutes:</span>
+              <span class="stat-value" id="userModalAudioVal">30.0 / 30.0 mins</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 14px; padding: 10px 12px; background: rgba(139, 92, 246, 0.12); border: 1px solid rgba(139, 92, 246, 0.25); border-radius: 8px; text-align: center;">
+            <a href="#" onclick="openWebsitePricing(event)" style="font-size: 12px; font-weight: 600; color: #c77dff; text-decoration: underline; cursor: pointer;">
+              Upgrade your Tier to gain Higher Limits. ↗
+            </a>
+          </div>
+
+          <div class="account-actions" style="margin-top: 14px;">
+            <button class="btn btn-action-primary" id="userModalAuthBtn" onclick="handleDesktopAuthAction()">🔑 Sign In with Website</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-footer">
+      <button class="btn btn-cancel" onclick="toggleProfileDrawer()">Close</button>
+    </div>
+  </div>
+  <div class="drawer-overlay" id="profileDrawerOverlay" onclick="toggleProfileDrawer()"></div>
 
   <div class="toast" id="toast"></div>
 

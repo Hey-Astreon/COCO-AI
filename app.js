@@ -2098,16 +2098,43 @@ function getUserTierAndProfile() {
   return { session, profile, tier };
 }
 
-function updateDesktopAccountUI() {
-  const emailEl = $('userAccountEmail');
-  const badgeEl = $('userPlanBadge');
-  const tokensEl = $('userTokensVal');
-  const audioEl = $('userAudioVal');
-  const authBtn = $('accountAuthBtn');
-  const avatarBadge = $('userAvatarBadge');
-  const avatarImg = $('userAvatarImg');
+function toggleProfileDrawer() {
+  const drawer = $('profileDrawer');
+  const overlay = $('profileDrawerOverlay');
+  if (!drawer || !overlay) return;
 
-  if (!emailEl || !badgeEl || !authBtn) return;
+  if (drawer.classList.contains('open')) {
+    drawer.classList.remove('open');
+    overlay.classList.remove('open');
+    overlay.style.display = 'none';
+  } else {
+    updateDesktopAccountUI();
+    drawer.classList.add('open');
+    overlay.classList.add('open');
+    overlay.style.display = 'block';
+  }
+}
+
+function openWebsitePricing(e) {
+  if (e) e.preventDefault();
+  const pricingUrl = 'https://coco-ai-cyan.vercel.app/#pricing';
+  if (window.electronAPI && window.electronAPI.openExternal) {
+    window.electronAPI.openExternal(pricingUrl);
+  } else {
+    window.open(pricingUrl, '_blank');
+  }
+  showToast('Opening Pricing & Upgrade page...', 'info');
+}
+
+function updateDesktopAccountUI() {
+  const setTxt = (id, text) => {
+    const el = $(id);
+    if (el) el.textContent = text;
+  };
+  const setCls = (id, cls) => {
+    const el = $(id);
+    if (el) el.className = cls;
+  };
 
   const rawSession = localStorage.getItem('cocoai_user_session');
   let session = null;
@@ -2121,62 +2148,103 @@ function updateDesktopAccountUI() {
     const user = session.user;
     const profile = session.profile || {};
     const email = user.email || 'User';
+    const displayName = profile.display_name || user.user_metadata?.full_name || email.split('@')[0];
     const tier = profile.subscription_tier || 'free';
 
-    emailEl.textContent = email;
+    setTxt('userAccountEmail', email);
+    setTxt('userModalEmail', email);
+    setTxt('userModalDisplayName', displayName);
 
     // Avatar
-    if (profile.avatar_url && avatarImg) {
-      avatarImg.src = profile.avatar_url;
-      avatarImg.style.display = 'block';
-      if (avatarBadge) avatarBadge.style.display = 'none';
-    } else if (avatarBadge) {
-      avatarBadge.textContent = (email[0] || '👤').toUpperCase();
-      avatarBadge.style.display = 'block';
-      if (avatarImg) avatarImg.style.display = 'none';
-    }
+    const avatarImg1 = $('userAvatarImg');
+    const avatarBadge1 = $('userAvatarBadge');
+    const avatarImg2 = $('userModalAvatarImg');
+    const avatarBadge2 = $('userModalAvatarBadge');
 
-    // Badge
-    if (tier === 'developer') {
-      badgeEl.textContent = '👑 Developer (Founder)';
-      badgeEl.className = 'account-badge developer';
-      if (tokensEl) tokensEl.textContent = '∞ Unlimited Tokens';
-      if (audioEl) audioEl.textContent = '∞ Unlimited Minutes';
-    } else if (tier === 'pro') {
-      badgeEl.textContent = '⚡ Pro Plan';
-      badgeEl.className = 'account-badge pro';
-      if (tokensEl) tokensEl.textContent = `${(profile.tokens_remaining || 0).toLocaleString()} / ${(profile.tokens_limit || 2000000).toLocaleString()}`;
-      if (audioEl) audioEl.textContent = `${(profile.audio_minutes_remaining || 0).toFixed(1)} / ${(profile.audio_minutes_limit || 500).toFixed(1)} mins`;
-    } else if (tier === 'standard') {
-      badgeEl.textContent = '🚀 Standard Plan';
-      badgeEl.className = 'account-badge standard';
-      if (tokensEl) tokensEl.textContent = `${(profile.tokens_remaining || 0).toLocaleString()} / ${(profile.tokens_limit || 500000).toLocaleString()}`;
-      if (audioEl) audioEl.textContent = `${(profile.audio_minutes_remaining || 0).toFixed(1)} / ${(profile.audio_minutes_limit || 120).toFixed(1)} mins`;
+    if (profile.avatar_url) {
+      if (avatarImg1) { avatarImg1.src = profile.avatar_url; avatarImg1.style.display = 'block'; }
+      if (avatarBadge1) avatarBadge1.style.display = 'none';
+      if (avatarImg2) { avatarImg2.src = profile.avatar_url; avatarImg2.style.display = 'block'; }
+      if (avatarBadge2) avatarBadge2.style.display = 'none';
     } else {
-      badgeEl.textContent = 'Free Tier';
-      badgeEl.className = 'account-badge free';
-      if (tokensEl) tokensEl.textContent = `${(profile.tokens_remaining || 50000).toLocaleString()} / 50,000`;
-      if (audioEl) audioEl.textContent = `${(profile.audio_minutes_remaining || 30.0).toFixed(1)} / 30.0 mins`;
+      const initial = (email[0] || '👤').toUpperCase();
+      if (avatarBadge1) { avatarBadge1.textContent = initial; avatarBadge1.style.display = 'block'; }
+      if (avatarImg1) avatarImg1.style.display = 'none';
+      if (avatarBadge2) { avatarBadge2.textContent = initial; avatarBadge2.style.display = 'block'; }
+      if (avatarImg2) avatarImg2.style.display = 'none';
     }
 
-    authBtn.textContent = '🚪 Sign Out';
-    authBtn.onclick = () => handleDesktopAuthAction('logout');
+    // Badge & Limits
+    let badgeText = 'Free Tier';
+    let badgeCls = 'account-badge free';
+    let tokensStr = `${(profile.tokens_remaining || 50000).toLocaleString()} / 50,000`;
+    let audioStr = `${(profile.audio_minutes_remaining || 30.0).toFixed(1)} / 30.0 mins`;
+
+    if (tier === 'developer') {
+      badgeText = '👑 Developer (Founder)';
+      badgeCls = 'account-badge developer';
+      tokensStr = `${(profile.tokens_remaining || 1500000).toLocaleString()} / ${(profile.tokens_limit || 1500000).toLocaleString()}`;
+      audioStr = `${(profile.audio_minutes_remaining || 2000).toFixed(1)} / ${(profile.audio_minutes_limit || 2000).toFixed(1)} mins`;
+    } else if (tier === 'pro') {
+      badgeText = '⚡ Pro Plan';
+      badgeCls = 'account-badge pro';
+      tokensStr = `${(profile.tokens_remaining || 0).toLocaleString()} / ${(profile.tokens_limit || 500000).toLocaleString()}`;
+      audioStr = `${(profile.audio_minutes_remaining || 0).toFixed(1)} / ${(profile.audio_minutes_limit || 300).toFixed(1)} mins`;
+    } else if (tier === 'standard') {
+      badgeText = '🚀 Standard Plan';
+      badgeCls = 'account-badge standard';
+      tokensStr = `${(profile.tokens_remaining || 0).toLocaleString()} / ${(profile.tokens_limit || 150000).toLocaleString()}`;
+      audioStr = `${(profile.audio_minutes_remaining || 0).toFixed(1)} / ${(profile.audio_minutes_limit || 120).toFixed(1)} mins`;
+    }
+
+    setTxt('userPlanBadge', badgeText);
+    setCls('userPlanBadge', badgeCls);
+    setTxt('userModalPlanBadge', badgeText);
+    setCls('userModalPlanBadge', badgeCls);
+
+    setTxt('userTokensVal', tokensStr);
+    setTxt('userModalTokensVal', tokensStr);
+    setTxt('userAudioVal', audioStr);
+    setTxt('userModalAudioVal', audioStr);
+
+    const btnText = '🚪 Sign Out';
+    const authHandler = () => handleDesktopAuthAction('logout');
+    const authBtn1 = $('accountAuthBtn');
+    const authBtn2 = $('userModalAuthBtn');
+    if (authBtn1) { authBtn1.textContent = btnText; authBtn1.onclick = authHandler; }
+    if (authBtn2) { authBtn2.textContent = btnText; authBtn2.onclick = authHandler; }
+
   } else {
-    emailEl.textContent = 'Not Signed In';
-    badgeEl.textContent = 'Free Tier';
-    badgeEl.className = 'account-badge free';
+    setTxt('userAccountEmail', 'Not Signed In');
+    setTxt('userModalEmail', 'Not Signed In');
+    setTxt('userModalDisplayName', 'Guest User');
 
-    if (avatarBadge) {
-      avatarBadge.textContent = '👤';
-      avatarBadge.style.display = 'block';
-    }
-    if (avatarImg) avatarImg.style.display = 'none';
+    const avatarBadge1 = $('userAvatarBadge');
+    const avatarImg1 = $('userAvatarImg');
+    const avatarBadge2 = $('userModalAvatarBadge');
+    const avatarImg2 = $('userModalAvatarImg');
 
-    if (tokensEl) tokensEl.textContent = '50,000 / 50,000';
-    if (audioEl) audioEl.textContent = '30.0 / 30.0 mins';
+    if (avatarBadge1) { avatarBadge1.textContent = '👤'; avatarBadge1.style.display = 'block'; }
+    if (avatarImg1) avatarImg1.style.display = 'none';
+    if (avatarBadge2) { avatarBadge2.textContent = '👤'; avatarBadge2.style.display = 'block'; }
+    if (avatarImg2) avatarImg2.style.display = 'none';
 
-    authBtn.textContent = '🔑 Sign In with Website';
-    authBtn.onclick = () => handleDesktopAuthAction('login');
+    setTxt('userPlanBadge', 'Free Tier');
+    setCls('userPlanBadge', 'account-badge free');
+    setTxt('userModalPlanBadge', 'Free Tier');
+    setCls('userModalPlanBadge', 'account-badge free');
+
+    setTxt('userTokensVal', '50,000 / 50,000');
+    setTxt('userModalTokensVal', '50,000 / 50,000');
+    setTxt('userAudioVal', '30.0 / 30.0 mins');
+    setTxt('userModalAudioVal', '30.0 / 30.0 mins');
+
+    const btnText = '🔑 Sign In with Website';
+    const authHandler = () => handleDesktopAuthAction('login');
+    const authBtn1 = $('accountAuthBtn');
+    const authBtn2 = $('userModalAuthBtn');
+    if (authBtn1) { authBtn1.textContent = btnText; authBtn1.onclick = authHandler; }
+    if (authBtn2) { authBtn2.textContent = btnText; authBtn2.onclick = authHandler; }
   }
 }
 
@@ -2186,7 +2254,7 @@ function handleDesktopAuthAction(action) {
     updateDesktopAccountUI();
     showToast('Signed out of CocoAI', 'info');
   } else {
-    const loginUrl = 'https://coco-ai.vercel.app/login';
+    const loginUrl = 'https://coco-ai-cyan.vercel.app/login';
     if (window.electronAPI && window.electronAPI.openExternal) {
       window.electronAPI.openExternal(loginUrl);
     } else {
