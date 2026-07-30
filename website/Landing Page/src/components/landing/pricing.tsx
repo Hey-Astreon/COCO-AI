@@ -3,6 +3,22 @@ import { useNavigation } from "@/lib/navigation";
 import { Reveal } from "./reveal";
 import { SectionTag } from "./section-tag";
 import { useAuth } from "@/lib/auth-context";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    if ((window as any).Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
 
 interface PlanProps {
   name: string;
@@ -102,16 +118,76 @@ const PRO_FEATURES = [
 
 export function Pricing() {
   const { navigate } = useNavigation();
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
 
-  const handleSubscribe = (plan: string) => {
+  const handleSubscribe = async (plan: string) => {
     if (!user) {
       // Not signed in — send to signup first
       navigate("/signup");
       return;
     }
-    // Already signed in — will wire to Razorpay checkout later
-    console.log(`Subscribe to ${plan} — user: ${user.email}`);
+
+    if (plan === "free") {
+      toast.info("You are already on the Free tier.");
+      return;
+    }
+
+    const price = plan === "standard" ? 299 : 499;
+    toast.loading("Opening checkout secure screen...", { id: "checkout" });
+
+    // Load Razorpay script dynamically
+    const scriptLoaded = await loadRazorpayScript();
+    if (!scriptLoaded) {
+      toast.error("Failed to load secure Razorpay gateway. Please check your internet connection.", { id: "checkout" });
+      return;
+    }
+
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_TJRsQ4Cs8JqQhu",
+      amount: price * 100, // in paise
+      currency: "INR",
+      name: "CocoAI",
+      description: `CocoAI ${plan.charAt(0).toUpperCase() + plan.slice(1)} Subscription Plan`,
+      image: "https://coco-ai-cyan.vercel.app/favicon.png",
+      handler: async function (response: any) {
+        toast.loading("Verifying transaction status...", { id: "checkout" });
+        try {
+          const { error: updateError } = await supabase
+            .from("user_profiles")
+            .update({
+              subscription_tier: plan as any,
+              tokens_limit: plan === "pro" ? 500000 : 150000,
+              tokens_remaining: plan === "pro" ? 500000 : 150000,
+            })
+            .eq("id", user.id);
+
+          if (updateError) {
+            console.error("Subscription update failed:", updateError.message);
+            toast.error("Payment received, but failed to update profile. Please contact support.", { id: "checkout" });
+          } else {
+            await refreshProfile();
+            toast.success(`Welcome to CocoAI ${plan.charAt(0).toUpperCase() + plan.slice(1)}! Subscription activated. 🚀`, { id: "checkout", duration: 5000 });
+          }
+        } catch (e) {
+          toast.error("An error occurred during sync. Please contact support.", { id: "checkout" });
+        }
+      },
+      prefill: {
+        email: user.email || "",
+      },
+      theme: {
+        color: "#8b5cf6",
+      },
+      modal: {
+        ondismiss: function () {
+          toast.dismiss("checkout");
+        }
+      }
+    };
+
+    toast.dismiss("checkout");
+    const rzp = new (window as any).Razorpay(options);
+    rzp.open();
   };
 
   return (
