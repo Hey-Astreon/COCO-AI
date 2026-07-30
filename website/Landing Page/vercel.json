@@ -1,3 +1,9 @@
 {
-  "buildCommand": "npm run build && npx nitro build --preset vercel"
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
