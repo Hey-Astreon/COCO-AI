@@ -2226,27 +2226,27 @@ function updateDesktopAccountUI() {
       badgeText = '👑 Developer (Founder)';
       badgeCls = 'account-badge developer';
       const remT = (typeof profile.tokens_remaining === 'number' && profile.tokens_remaining <= 1500000) ? profile.tokens_remaining : 1500000;
-      const limT = profile.tokens_limit || 1500000;
+      const limT = 1500000;
       const remA = (typeof profile.audio_minutes_remaining === 'number' && profile.audio_minutes_remaining <= 2000) ? profile.audio_minutes_remaining : 2000;
-      const limA = profile.audio_minutes_limit || 2000;
+      const limA = 2000;
       tokensStr = `${remT.toLocaleString()} / ${limT.toLocaleString()}`;
       audioStr = `${remA.toFixed(1)} / ${limA.toFixed(1)} mins`;
     } else if (tier === 'pro') {
       badgeText = '⚡ Pro Plan';
       badgeCls = 'account-badge pro';
-      const remT = typeof profile.tokens_remaining === 'number' ? profile.tokens_remaining : 500000;
-      const limT = profile.tokens_limit || 500000;
-      const remA = typeof profile.audio_minutes_remaining === 'number' ? profile.audio_minutes_remaining : 300;
-      const limA = profile.audio_minutes_limit || 300;
+      const remT = (typeof profile.tokens_remaining === 'number' && profile.tokens_remaining <= 500000) ? profile.tokens_remaining : 500000;
+      const limT = 500000;
+      const remA = (typeof profile.audio_minutes_remaining === 'number' && profile.audio_minutes_remaining <= 300) ? profile.audio_minutes_remaining : 300;
+      const limA = 300;
       tokensStr = `${remT.toLocaleString()} / ${limT.toLocaleString()}`;
       audioStr = `${remA.toFixed(1)} / ${limA.toFixed(1)} mins`;
     } else if (tier === 'standard') {
       badgeText = '🚀 Standard Plan';
       badgeCls = 'account-badge standard';
-      const remT = typeof profile.tokens_remaining === 'number' ? profile.tokens_remaining : 150000;
-      const limT = profile.tokens_limit || 150000;
-      const remA = typeof profile.audio_minutes_remaining === 'number' ? profile.audio_minutes_remaining : 120;
-      const limA = profile.audio_minutes_limit || 120;
+      const remT = (typeof profile.tokens_remaining === 'number' && profile.tokens_remaining <= 150000) ? profile.tokens_remaining : 150000;
+      const limT = 150000;
+      const remA = (typeof profile.audio_minutes_remaining === 'number' && profile.audio_minutes_remaining <= 120) ? profile.audio_minutes_remaining : 120;
+      const limA = 120;
       tokensStr = `${remT.toLocaleString()} / ${limT.toLocaleString()}`;
       audioStr = `${remA.toFixed(1)} / ${limA.toFixed(1)} mins`;
     }
