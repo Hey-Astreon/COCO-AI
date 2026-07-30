@@ -11,6 +11,8 @@ import { Giveaway } from "@/components/landing/giveaway";
 import { ContributorForm } from "@/components/landing/contributor-form";
 import { Footer } from "@/components/landing/footer";
 import { AuthPage } from "@/components/auth/auth-page";
+import { AboutPage } from "@/components/landing/about-page";
+import { ContactPage } from "@/components/landing/contact-page";
 import { NavigationContext } from "@/lib/navigation";
 import { DownloadModal } from "@/components/landing/download-modal";
 
@@ -91,11 +93,19 @@ export function App() {
               <Background />
               <Navbar />
               <main>
-                <Hero onDownloadClick={() => setDownloadModalOpen(true)} />
-                <Features />
-                <Pricing />
-                <Giveaway />
-                <ContributorForm />
+                {path === "/about" ? (
+                  <AboutPage />
+                ) : path === "/contact" ? (
+                  <ContactPage />
+                ) : (
+                  <>
+                    <Hero onDownloadClick={() => setDownloadModalOpen(true)} />
+                    <Features />
+                    <Pricing />
+                    <Giveaway />
+                    <ContributorForm />
+                  </>
+                )}
               </main>
               <Footer />
 

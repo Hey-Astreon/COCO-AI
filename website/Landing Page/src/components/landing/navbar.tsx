@@ -6,10 +6,12 @@ import { ThemeToggle } from "./theme-toggle";
 import { useAuth } from "@/lib/auth-context";
 
 const NAV_LINKS = [
-  { label: "Features", href: "#features", id: "features" },
-  { label: "Pricing", href: "#pricing", id: "pricing" },
-  { label: "Giveaway", href: "#giveaway", id: "giveaway" },
-  { label: "Contributors", href: "#contributors", id: "contributors" },
+  { label: "Features", href: "#features", id: "features", page: false },
+  { label: "Pricing", href: "#pricing", id: "pricing", page: false },
+  { label: "Giveaway", href: "#giveaway", id: "giveaway", page: false },
+  { label: "Contributors", href: "#contributors", id: "contributors", page: false },
+  { label: "About Us", href: "/about", id: "about", page: true },
+  { label: "Contact Us", href: "/contact", id: "contact", page: true },
 ];
 
 export function Navbar() {
@@ -104,6 +106,18 @@ export function Navbar() {
               <a
                 key={link.href}
                 href={link.href}
+                onClick={(e) => {
+                  if (link.page) {
+                    e.preventDefault();
+                    navigate(link.href);
+                  } else {
+                    const currentPath = window.location.pathname;
+                    if (currentPath !== "/") {
+                      e.preventDefault();
+                      navigate("/" + link.href);
+                    }
+                  }
+                }}
                 className={`rounded-full px-4 py-2 text-sm font-medium transition-colors duration-300 ease-premium ${
                   isActive
                     ? "bg-accent text-foreground"
@@ -245,7 +259,19 @@ export function Navbar() {
                 <a
                   key={link.href}
                   href={link.href}
-                  onClick={() => setMenuOpen(false)}
+                  onClick={(e) => {
+                    setMenuOpen(false);
+                    if (link.page) {
+                      e.preventDefault();
+                      navigate(link.href);
+                    } else {
+                      const currentPath = window.location.pathname;
+                      if (currentPath !== "/") {
+                        e.preventDefault();
+                        navigate("/" + link.href);
+                      }
+                    }
+                  }}
                   className={`rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
                     isActive
                       ? "bg-accent text-foreground"
