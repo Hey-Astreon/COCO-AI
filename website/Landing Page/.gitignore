@@ -21,6 +21,8 @@ dist-ssr
 .env.local
 .env.production
 .env.*.local
+.vercel
+
 
 # Wrangler / Cloudflare
 .wrangler/
