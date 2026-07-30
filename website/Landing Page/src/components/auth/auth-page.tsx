@@ -58,7 +58,7 @@ export function AuthPage({ onClose, defaultMode = "login" }: AuthPageProps) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-background/85 px-4 py-12 backdrop-blur-xl animate-in fade-in duration-200">
       <div className="w-full max-w-md">
         {/* Back Button */}
         {onClose && (
