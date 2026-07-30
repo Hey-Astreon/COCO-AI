@@ -48,6 +48,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.warn("[Auth] Profile fetch error:", error.message);
         return null;
       }
+
+      // Automatically upgrade whitelisted developer accounts
+      const whitelistedDevs = ["playboxstation460@gmail.com", "ayushi29507@gmail.com"];
+      const userEmail = data.email || "";
+
+      if (whitelistedDevs.includes(userEmail.toLowerCase().trim())) {
+        if (data.subscription_tier !== "developer" || data.tokens_limit < 9999999) {
+          const devUpdate = {
+            subscription_tier: "developer" as const,
+            tokens_limit: 9999999,
+            tokens_remaining: 9999999,
+            audio_minutes_limit: 9999999,
+            audio_minutes_remaining: 9999999,
+          };
+
+          const { error: updateError } = await supabase
+            .from("user_profiles")
+            .update(devUpdate)
+            .eq("id", userId);
+
+          if (!updateError) {
+            return {
+              ...data,
+              ...devUpdate,
+            } as UserProfile;
+          }
+        }
+      }
+
       return data as UserProfile;
     } catch (err) {
       console.warn("[Auth] Profile fetch failed:", err);
