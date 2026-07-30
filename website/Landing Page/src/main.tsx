@@ -6,8 +6,10 @@ import { getRouter } from "./router";
 const router = getRouter();
 
 const rootElement = document.getElementById("root");
-if (rootElement && !rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement);
+if (rootElement) {
+  // Always create root and mount RouterProvider
+  const root = (rootElement as any)._reactRoot || ReactDOM.createRoot(rootElement);
+  (rootElement as any)._reactRoot = root;
   root.render(
     <React.StrictMode>
       <RouterProvider router={router} />
