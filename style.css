@@ -1085,7 +1085,9 @@ body.tab-transcript .panel-answers { display: none; }
   opacity: 1;
 }
 .toast.success { border-color: rgba(0,212,170,0.4); color: var(--accent-secondary); }
-.toast.error { border-color: rgba(255,71,87,0.4); color: #FF6B6B; }
+.toast.warning { border-color: rgba(255,200,0,0.4); color: #FFD700; }
+.toast.error   { border-color: rgba(255,71,87,0.4);  color: #FF6B6B; }
+.toast.info    { border-color: rgba(108,99,255,0.4); color: var(--accent-primary); }
 
 /* ═══════════════════════════════════════════════════════════════════
    SCROLLBAR FOR FEEDS

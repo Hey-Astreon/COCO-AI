@@ -52,10 +52,21 @@ const els = {
   modelSelect: $('modelSelect'),
   stealthBtn: $('stealthBtn'),
   stealthLabel: $('stealthLabel'),
+  // Cached audio wave bar refs — queried once to avoid 60x/sec DOM lookups
+  waveBar1: null,
+  waveBar2: null,
+  waveBar3: null,
+  audioLevelVisualizer: null,
 };
 
 // ─── Initialization ────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
+  // Cache audio wave bar refs once — these are queried on every audio frame
+  els.waveBar1 = $('waveBar1');
+  els.waveBar2 = $('waveBar2');
+  els.waveBar3 = $('waveBar3');
+  els.audioLevelVisualizer = $('audioLevelVisualizer');
+
   initOpacitySlider();
   initHotkeys();
   initAutoScroll();
@@ -293,11 +304,12 @@ function updateStatus(type, text) {
 }
 
 // ─── Live Audio Level Visualizer Meter ─────────────────────────
+// Uses cached refs (els.waveBar1/2/3) — avoids DOM lookup 60x/sec
 function updateAudioLevelMeter(level) {
-  const container = $('audioLevelVisualizer');
-  const bar1 = $('waveBar1');
-  const bar2 = $('waveBar2');
-  const bar3 = $('waveBar3');
+  const container = els.audioLevelVisualizer;
+  const bar1 = els.waveBar1;
+  const bar2 = els.waveBar2;
+  const bar3 = els.waveBar3;
 
   if (!container || !bar1 || !bar2 || !bar3) return;
 
@@ -713,7 +725,7 @@ function toggleMic() {
 
   if (state.micActive) {
     state.deepgramService.pause();
-    showToast('🔇 Audio capture paused');
+    showToast('🔇 Audio capture paused', 'success');
   } else {
     if (state.deepgramService.isListening) {
       state.deepgramService.resume();
@@ -896,7 +908,7 @@ function handleAIError({ requestId, error }) {
     </div>
   `;
   activeCards.delete(requestId);
-  showToast('❌ AI Error: ' + error);
+  showToast('❌ AI Error: ' + error, 'error');
 }
 
 function handleAIAborted({ requestId }) {
@@ -1350,7 +1362,7 @@ function copyAnswer(btn) {
 
 function copyLastAnswer() {
   if (!state.lastAnswer) {
-    showToast('No answers yet');
+    showToast('No answers yet', 'warning');
     return;
   }
   navigator.clipboard.writeText(state.lastAnswer).then(() => showToast('📋 Last answer copied!', 'success'));
@@ -1380,7 +1392,7 @@ function clearAnswers() {
       </div>
     </div>
   `;
-  showToast('🗑 Answers cleared');
+  showToast('🗑 Answers cleared', 'success');
 }
 
 function endSession() {
@@ -1490,10 +1502,12 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// Regex-based HTML escaper — avoids creating a DOM node on every call.
+// Called thousands of times per AI streaming session, so this matters.
+const _ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 function escHtml(str) {
-  const d = document.createElement('div');
-  d.textContent = str;
-  return d.innerHTML;
+  if (typeof str !== 'string') return '';
+  return str.replace(/[&<>"']/g, c => _ESC_MAP[c]);
 }
 
 function escAttr(str) {
@@ -1905,7 +1919,7 @@ function handleSessionReplayUpload(event) {
       showToast('📂 Session replay loaded!', 'success');
 
     } catch (err) {
-      console.error(err);
+      console.error('Session replay load failed:', err);
       showToast('❌ Failed to load replay: ' + err.message, 'error');
     }
   };
@@ -2028,7 +2042,7 @@ function processResumeFile(file) {
       showToast(`✅ PDF resume parsed & activated (${wordCount} words)!`, 'success');
 
     } catch (err) {
-      console.error(err);
+      console.error('PDF parse failed:', err);
       dropZone.className = 'drop-zone error';
       dropZoneText.textContent = `❌ Error: ${err.message}`;
       showToast('Failed to parse PDF: ' + err.message, 'error');
