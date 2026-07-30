@@ -540,8 +540,9 @@
             </a>
           </div>
 
-          <div class="account-actions" style="margin-top: 14px;">
+          <div class="account-actions" style="margin-top: 14px; display: flex; flex-direction: column; gap: 8px;">
             <button class="btn btn-action-primary" id="userModalAuthBtn" onclick="handleDesktopAuthAction()">🔑 Sign In with Website</button>
+            <button class="btn btn-action-secondary" id="userModalPasteBtn" onclick="pasteAuthKeyFromClipboard()">📋 Paste Desktop Auth Key</button>
           </div>
         </div>
       </div>

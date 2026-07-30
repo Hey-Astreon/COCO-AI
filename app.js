@@ -2098,6 +2098,48 @@ function getUserTierAndProfile() {
   return { session, profile, tier };
 }
 
+if (window.electronAPI && window.electronAPI.onAuthSynced) {
+  window.electronAPI.onAuthSynced((sessionData) => {
+    try {
+      localStorage.setItem('cocoai_user_session', JSON.stringify(sessionData));
+      updateDesktopAccountUI();
+      showToast('🎉 Logged in to CocoAI Desktop!', 'success');
+    } catch (e) {
+      console.error('Failed to save synced auth session:', e);
+    }
+  });
+}
+
+async function pasteAuthKeyFromClipboard() {
+  try {
+    const text = await navigator.clipboard.readText();
+    if (!text || !text.trim()) {
+      showToast('Clipboard is empty', 'error');
+      return;
+    }
+    let data = null;
+    try {
+      data = JSON.parse(text.trim());
+    } catch (e) {
+      try {
+        data = JSON.parse(atob(text.trim()));
+      } catch (err) {
+        data = null;
+      }
+    }
+    if (data && (data.user || data.session?.user || data.profile)) {
+      const sessionObj = data.session || data;
+      localStorage.setItem('cocoai_user_session', JSON.stringify(sessionObj));
+      updateDesktopAccountUI();
+      showToast('🎉 Account linked to CocoAI Desktop!', 'success');
+    } else {
+      showToast('❌ Invalid Auth Key in clipboard', 'error');
+    }
+  } catch (err) {
+    showToast('Failed to read clipboard: ' + err.message, 'error');
+  }
+}
+
 function toggleProfileDrawer() {
   const drawer = $('profileDrawer');
   const overlay = $('profileDrawerOverlay');

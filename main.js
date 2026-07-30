@@ -36,12 +36,43 @@ try {
   console.warn('⚠️ Groq service failed to load — fallback AI will be disabled.', e.message);
 }
 
+// ─── Custom Protocol Registration (cocoai://) ────────────────────
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient('cocoai', process.execPath, [path.resolve(process.argv[1])]);
+  }
+} else {
+  app.setAsDefaultProtocolClient('cocoai');
+}
+
+function handleDeepLinkUrl(urlStr) {
+  if (!urlStr || typeof urlStr !== 'string') return;
+  try {
+    if (urlStr.startsWith('cocoai://')) {
+      const parsedUrl = new URL(urlStr);
+      const sessionParam = parsedUrl.searchParams.get('session');
+      if (sessionParam) {
+        const decoded = JSON.parse(decodeURIComponent(sessionParam));
+        if (mainWindow && mainWindow.webContents) {
+          mainWindow.webContents.send('auth-session-synced', decoded);
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to parse deep link url:', e);
+  }
+}
+
 // ─── Single Instance Lock ──────────────────────────────────────
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
   app.quit();
 } else {
-  app.on('second-instance', () => {
+  app.on('second-instance', (event, commandLine) => {
+    const urlArg = Array.isArray(commandLine) ? commandLine.find(arg => arg && arg.startsWith('cocoai://')) : null;
+    if (urlArg) {
+      handleDeepLinkUrl(urlArg);
+    }
     if (mainWindow) {
       if (!isOverlayVisible) {
         mainWindow.show();
@@ -52,6 +83,11 @@ if (!gotTheLock) {
     }
   });
 }
+
+app.on('open-url', (event, urlStr) => {
+  event.preventDefault();
+  handleDeepLinkUrl(urlStr);
+});
 
 // ─── Stealth Layer 0: Process Title Disguise ────────────────────
 app.setName('System Host Service');

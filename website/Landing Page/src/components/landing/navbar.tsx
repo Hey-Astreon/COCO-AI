@@ -164,16 +164,38 @@ export function Navbar() {
 
               {/* Dropdown */}
               {userMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-60 rounded-xl border border-border/60 bg-background/95 p-2 shadow-2xl backdrop-blur-xl">
+                <div className="absolute right-0 top-full mt-2 w-64 rounded-xl border border-border/60 bg-background/95 p-2 shadow-2xl backdrop-blur-xl">
                   <div className="border-b border-border/40 px-3 py-2">
                     <p className="truncate text-sm font-medium text-foreground">{user.email}</p>
                     <p className={`mt-0.5 text-xs font-semibold ${tierColor}`}>
                       {tierLabel} Plan
                     </p>
                   </div>
+
+                  <button
+                    onClick={async () => {
+                      setUserMenuOpen(false);
+                      const payload = {
+                        user: { id: user.id, email: user.email },
+                        profile: profile || { subscription_tier: "free" },
+                      };
+                      const jsonStr = JSON.stringify(payload);
+                      try {
+                        await navigator.clipboard.writeText(jsonStr);
+                      } catch (err) {
+                        console.error(err);
+                      }
+                      window.location.href = `cocoai://auth?session=${encodeURIComponent(jsonStr)}`;
+                      alert("🚀 Desktop Auth Key copied! Open CocoAI Desktop and click 'Paste Desktop Auth Key' or check if CocoAI automatically logged you in.");
+                    }}
+                    className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-violet-400 transition-colors hover:bg-accent hover:text-violet-300"
+                  >
+                    🚀 Sync with Desktop App
+                  </button>
+
                   <button
                     onClick={() => { signOut(); setUserMenuOpen(false); }}
-                    className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                    className="mt-0.5 flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                   >
                     <LogOut className="h-4 w-4" />
                     Sign Out

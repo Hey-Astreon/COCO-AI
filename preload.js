@@ -74,6 +74,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   installUpdateNow: () => ipcRenderer.send('install-update-now'),
 
+  // ─── Auth Sync ────────────────────────────────────────────────
+  onAuthSynced: (callback) => {
+    ipcRenderer.on('auth-session-synced', (event, sessionData) => callback(sessionData));
+  },
+
   // ─── Identify ─────────────────────────────────────────────────
   isElectron: true,
 });
