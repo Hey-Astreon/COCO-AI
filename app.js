@@ -1041,12 +1041,7 @@ async function analyzeScreen(freshMode = true) {
   // ── Subscription Tier & Feature Guards ──
   const { profile, tier } = getUserTierAndProfile();
 
-  if (tier === 'free') {
-    showToast('⚠️ Screen Capture is a Premium feature. Please sign in & upgrade on website.', 'error', 4000);
-    return;
-  }
-
-  if (tier === 'standard' && !freshMode) {
+  if ((tier === 'free' || tier === 'standard') && !freshMode) {
     showToast('⚠️ Multi-screenshot analysis is a Pro feature. Upgrade to Pro for multi-captures.', 'warning', 4000);
     return;
   }

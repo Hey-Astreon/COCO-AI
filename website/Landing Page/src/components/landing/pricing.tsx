@@ -88,16 +88,18 @@ function PlanCard({ name, price, period, tagline, badge, features, highlighted, 
 }
 
 const FREE_FEATURES = [
-  "50,000 AI tokens / month",
+  "50,000 AI tokens / month (Monthly Reset)",
   "30 minutes live audio transcription",
+  "Basic Screen Capture (30 Screenshots / month)",
   "Cerebras + Groq LLM streaming",
   "Basic stealth overlay",
   "Community support",
 ];
 
 const STANDARD_FEATURES = [
-  "5,00,000 AI tokens / month",
+  "150,000 AI tokens / month",
   "120 minutes live audio transcription",
+  "Basic Screen Capture (120 Screenshots / month)",
   "Cerebras + Groq + Gemini Vision",
   "Full stealth suite (ghost mode, opacity)",
   "Resume context injection",
@@ -106,10 +108,10 @@ const STANDARD_FEATURES = [
 ];
 
 const PRO_FEATURES = [
-  "20,00,000 AI tokens / month",
-  "500 minutes live audio transcription",
-  "All AI engines (Cerebras, Groq, Gemini, NVIDIA)",
+  "500,000 AI tokens / month",
+  "300 minutes live audio transcription",
   "Multi-screenshot screen analysis",
+  "All AI engines (Cerebras, Groq, Gemini, NVIDIA)",
   "Priority model routing (fastest response)",
   "Custom keyword boosting",
   "Priority support (Discord DM)",
