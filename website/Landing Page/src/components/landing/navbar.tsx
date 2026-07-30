@@ -186,11 +186,31 @@ export function Navbar() {
                         console.error(err);
                       }
                       window.location.href = `cocoai://auth?session=${encodeURIComponent(jsonStr)}`;
-                      alert("🚀 Desktop Auth Key copied! Open CocoAI Desktop and click 'Paste Desktop Auth Key' or check if CocoAI automatically logged you in.");
+                      alert("🚀 Opening CocoAI Desktop App! Check your CocoAI desktop window.");
                     }}
                     className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-violet-400 transition-colors hover:bg-accent hover:text-violet-300"
                   >
-                    🚀 Sync with Desktop App
+                    🚀 Open &amp; Sync Desktop App
+                  </button>
+
+                  <button
+                    onClick={async () => {
+                      setUserMenuOpen(false);
+                      const payload = {
+                        user: { id: user.id, email: user.email },
+                        profile: profile || { subscription_tier: "free" },
+                      };
+                      const jsonStr = JSON.stringify(payload);
+                      try {
+                        await navigator.clipboard.writeText(jsonStr);
+                        alert("🔑 Desktop Auth Key copied to your clipboard! Open CocoAI Desktop App and click 'Paste Desktop Auth Key'.");
+                      } catch (err) {
+                        alert("Failed to copy key: " + (err as any).message);
+                      }
+                    }}
+                    className="mt-0.5 flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-pink-400 transition-colors hover:bg-accent hover:text-pink-300"
+                  >
+                    🔑 Copy Desktop Auth Key
                   </button>
 
                   <button
