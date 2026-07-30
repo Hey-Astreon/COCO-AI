@@ -12,6 +12,7 @@ import { ContributorForm } from "@/components/landing/contributor-form";
 import { Footer } from "@/components/landing/footer";
 import { AuthPage } from "@/components/auth/auth-page";
 import { NavigationContext } from "@/lib/navigation";
+import { DownloadModal } from "@/components/landing/download-modal";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +67,7 @@ export function App() {
   const [path, setPath] = useState(() =>
     typeof window !== "undefined" ? window.location.pathname : "/"
   );
+  const [downloadModalOpen, setDownloadModalOpen] = useState(false);
 
   useEffect(() => {
     const onPopState = () => setPath(window.location.pathname);
@@ -89,13 +91,20 @@ export function App() {
               <Background />
               <Navbar />
               <main>
-                <Hero />
+                <Hero onDownloadClick={() => setDownloadModalOpen(true)} />
                 <Features />
                 <Pricing />
                 <Giveaway />
                 <ContributorForm />
               </main>
               <Footer />
+
+              {/* Onboarding / Setup Modal */}
+              <DownloadModal
+                isOpen={downloadModalOpen}
+                onClose={() => setDownloadModalOpen(false)}
+                onNavigateToLogin={() => navigate("/login")}
+              />
 
               {/* Auth Modals */}
               {path === "/login" && (

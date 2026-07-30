@@ -5,7 +5,11 @@ import { Reveal } from "./reveal";
 
 const HERO_BADGES = ["100% Local & Private", "Invisible on Screen Share", "v1.0.38 for Windows"];
 
-export function Hero() {
+interface HeroProps {
+  onDownloadClick: () => void;
+}
+
+export function Hero({ onDownloadClick }: HeroProps) {
   return (
     <section id="top" className="relative px-4 pt-32 pb-16 sm:px-6 sm:pt-40">
       <div className="mx-auto max-w-6xl text-center">
@@ -31,15 +35,13 @@ export function Hero() {
 
         <Reveal delay={300}>
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
-            <a
-              href={COCOAI_DOWNLOAD_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary-glow inline-flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-7 py-3.5 text-sm font-bold text-background sm:w-auto"
+            <button
+              onClick={onDownloadClick}
+              className="btn-primary-glow inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-foreground px-7 py-3.5 text-sm font-bold text-background sm:w-auto"
             >
               <Download className="h-4 w-4" />
               Download CocoAI for Windows
-            </a>
+            </button>
             <a
               href={COCOAI_REPO_URL}
               target="_blank"
