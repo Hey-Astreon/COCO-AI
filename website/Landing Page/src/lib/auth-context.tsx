@@ -92,11 +92,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
+    // Track whether a session already existed when the page first loaded.
+    // If it did, any subsequent SIGNED_IN event is just a token refresh — NOT a new login.
+    let hadSessionOnInit = false;
 
     async function initAuth() {
       try {
         const { data } = await supabase.auth.getSession();
         if (!mounted) return;
+        // Remember if we already have a session at startup
+        hadSessionOnInit = !!data.session;
         setSession(data.session);
         setUser(data.session?.user ?? null);
         if (data.session?.user) {
@@ -122,8 +127,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const p = await fetchProfile(s.user.id);
           if (mounted) setProfile(p);
 
-          // Auto-sync with CocoAI Desktop App seamlessly on sign-in
-          if (_event === "SIGNED_IN" && typeof window !== "undefined") {
+          // Auto-sync with CocoAI Desktop App — ONLY on a genuine new sign-in.
+          // Supabase fires SIGNED_IN on every page load/refresh for token refresh too.
+          // We guard against that by checking if a session already existed at startup.
+          const isGenuineNewSignIn = _event === "SIGNED_IN" && !hadSessionOnInit;
+          if (isGenuineNewSignIn && typeof window !== "undefined") {
+            // Mark that we've now processed this sign-in so subsequent refreshes are ignored
+            hadSessionOnInit = true;
             try {
               const payload = {
                 user: { id: s.user.id, email: s.user.email },
@@ -140,6 +150,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         } else {
           setProfile(null);
+          // Reset so the next sign-in will be treated as genuine
+          hadSessionOnInit = false;
         }
       }
     );
