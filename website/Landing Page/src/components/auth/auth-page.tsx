@@ -53,8 +53,18 @@ export function AuthPage({ onClose, defaultMode = "login" }: AuthPageProps) {
 
   async function handleGoogleSignIn() {
     setError(null);
-    const { error: err } = await signInWithGoogle();
-    if (err) setError(err.message);
+    try {
+      const { error: err } = await signInWithGoogle();
+      if (err) {
+        if (err.message?.includes("provider is not enabled") || err.message?.includes("validation_failed")) {
+          setError("Google Sign-In is not enabled yet in your Supabase Dashboard. Please use Email/Password or enable Google under Auth -> Providers in Supabase.");
+        } else {
+          setError(err.message);
+        }
+      }
+    } catch (e: any) {
+      setError("Google Sign-In error: " + (e.message || "Please enable Google Auth in Supabase Dashboard."));
+    }
   }
 
   return (
