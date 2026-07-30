@@ -63,31 +63,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
-      setSession(s);
-      setUser(s?.user ?? null);
-      if (s?.user) {
-        fetchProfile(s.user.id).then(setProfile);
+    let mounted = true;
+
+    async function initAuth() {
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (!mounted) return;
+        setSession(data.session);
+        setUser(data.session?.user ?? null);
+        if (data.session?.user) {
+          const p = await fetchProfile(data.session.user.id);
+          if (mounted) setProfile(p);
+        }
+      } catch (err) {
+        console.warn("[Auth] Initial session fetch error:", err);
+      } finally {
+        if (mounted) setLoading(false);
       }
-      setLoading(false);
-    });
+    }
+
+    initAuth();
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, s) => {
+        if (!mounted) return;
         setSession(s);
         setUser(s?.user ?? null);
         if (s?.user) {
           const p = await fetchProfile(s.user.id);
-          setProfile(p);
+          if (mounted) setProfile(p);
         } else {
           setProfile(null);
         }
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   async function signUp(email: string, password: string, fullName?: string) {

@@ -5,12 +5,8 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
-  HeadContent,
-  Scripts,
 } from "@tanstack/react-router";
-import { type ReactNode } from "react";
-
-import appCss from "../styles.css?url";
+import { useState, type ReactNode } from "react";
 
 function NotFoundComponent() {
   return (
@@ -35,7 +31,7 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error);
+  console.error("[Router Error]", error);
   const router = useRouter();
 
   return (
@@ -45,7 +41,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           This page didn't load
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+          {error?.message || "Something went wrong on our end."}
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -70,44 +66,6 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "CocoAI — Invisible Real-Time Interview Copilot" },
-      {
-        name: "description",
-        content:
-          "Ace your technical interviews invisibly. Real-time question detection, personalized answers based on your resume, and a fully customizable stealth overlay. Running locally, safely, and securely.",
-      },
-      { name: "author", content: "CocoAI" },
-      { property: "og:title", content: "CocoAI — Invisible Real-Time Interview Copilot" },
-      {
-        property: "og:description",
-        content:
-          "Ace your technical interviews invisibly. Real-time question detection, personalized answers based on your resume, and a fully customizable stealth overlay. Running locally, safely, and securely.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "CocoAI — Invisible Real-Time Interview Copilot" },
-      { name: "twitter:description", content: "Ace your technical interviews invisibly. Real-time question detection, personalized answers based on your resume, and a fully customizable stealth overlay. Running locally, safely, and securely." },
-      { property: "og:image", content: "/favicon.png" },
-      { name: "twitter:image", content: "/favicon.png" },
-    ],
-    links: [
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;500;600;700;800&display=swap",
-      },
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-      { rel: "icon", href: "/favicon.png", type: "image/png" },
-    ],
-  }),
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
@@ -118,13 +76,21 @@ function RootShell({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+const defaultQueryClient = new QueryClient();
+
 function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
+  const [queryClient] = useState(() => {
+    try {
+      const ctx = Route.useRouteContext();
+      return ctx?.queryClient || defaultQueryClient;
+    } catch {
+      return defaultQueryClient;
+    }
+  });
 
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
       </AuthProvider>
     </QueryClientProvider>
