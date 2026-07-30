@@ -13,6 +13,9 @@ import { Footer } from "@/components/landing/footer";
 import { AuthPage } from "@/components/auth/auth-page";
 import { AboutPage } from "@/components/landing/about-page";
 import { ContactPage } from "@/components/landing/contact-page";
+import { Platforms } from "@/components/landing/platforms";
+import { Comparison } from "@/components/landing/comparison";
+import { Faq } from "@/components/landing/faq";
 import { NavigationContext } from "@/lib/navigation";
 import { DownloadModal } from "@/components/landing/download-modal";
 
@@ -100,8 +103,11 @@ export function App() {
                 ) : (
                   <>
                     <Hero onDownloadClick={() => setDownloadModalOpen(true)} />
+                    <Platforms />
                     <Features />
+                    <Comparison />
                     <Pricing />
+                    <Faq />
                     <Giveaway />
                     <ContributorForm />
                   </>

@@ -6,10 +6,11 @@ import { ThemeToggle } from "./theme-toggle";
 import { useAuth } from "@/lib/auth-context";
 
 const NAV_LINKS = [
+  { label: "Platforms", href: "#platforms", id: "platforms", page: false },
   { label: "Features", href: "#features", id: "features", page: false },
+  { label: "Comparison", href: "#comparison", id: "comparison", page: false },
   { label: "Pricing", href: "#pricing", id: "pricing", page: false },
-  { label: "Giveaway", href: "#giveaway", id: "giveaway", page: false },
-  { label: "Contributors", href: "#contributors", id: "contributors", page: false },
+  { label: "FAQ", href: "#faq", id: "faq", page: false },
   { label: "About Us", href: "/about", id: "about", page: true },
   { label: "Contact Us", href: "/contact", id: "contact", page: true },
 ];
