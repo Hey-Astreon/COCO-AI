@@ -1,5 +1,5 @@
 import { Check, Zap, Crown, Sparkles } from "lucide-react";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigation } from "@/lib/navigation";
 import { Reveal } from "./reveal";
 import { SectionTag } from "./section-tag";
 import { useAuth } from "@/lib/auth-context";
@@ -101,13 +101,13 @@ const PRO_FEATURES = [
 ];
 
 export function Pricing() {
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
   const { user } = useAuth();
 
   const handleSubscribe = (plan: string) => {
     if (!user) {
       // Not signed in — send to signup first
-      navigate({ to: "/signup" });
+      navigate("/signup");
       return;
     }
     // Already signed in — will wire to Razorpay checkout later

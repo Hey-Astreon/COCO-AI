@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Menu, X, LogOut, User } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { useNavigation } from "@/lib/navigation";
 import logo from "@/assets/coco_logo_nobg.png";
 import { ThemeToggle } from "./theme-toggle";
 import { useAuth } from "@/lib/auth-context";
@@ -14,6 +14,7 @@ const NAV_LINKS = [
 
 export function Navbar() {
   const { user, profile, loading, signOut } = useAuth();
+  const { navigate } = useNavigation();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -121,18 +122,20 @@ export function Navbar() {
           {/* Auth Buttons */}
           {!loading && !user && (
             <div className="hidden items-center gap-2 md:flex">
-              <Link
-                to="/login"
+              <a
+                href="/login"
+                onClick={(e) => { e.preventDefault(); navigate("/login"); }}
                 className="rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors duration-200 hover:bg-accent hover:text-foreground"
               >
                 Sign In
-              </Link>
-              <Link
-                to="/signup"
+              </a>
+              <a
+                href="/signup"
+                onClick={(e) => { e.preventDefault(); navigate("/signup"); }}
                 className="rounded-full bg-gradient-to-r from-violet-600 to-pink-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-violet-500/20 transition-all duration-200 hover:shadow-violet-500/40"
               >
                 Get Started
-              </Link>
+              </a>
             </div>
           )}
 
@@ -216,20 +219,20 @@ export function Navbar() {
             {!loading && !user && (
               <>
                 <div className="my-2 h-px bg-border/40" />
-                <Link
-                  to="/login"
-                  onClick={() => setMenuOpen(false)}
+                <a
+                  href="/login"
+                  onClick={(e) => { e.preventDefault(); setMenuOpen(false); navigate("/login"); }}
                   className="rounded-lg px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                 >
                   Sign In
-                </Link>
-                <Link
-                  to="/signup"
-                  onClick={() => setMenuOpen(false)}
+                </a>
+                <a
+                  href="/signup"
+                  onClick={(e) => { e.preventDefault(); setMenuOpen(false); navigate("/signup"); }}
                   className="rounded-lg bg-gradient-to-r from-violet-600 to-pink-600 px-4 py-3 text-center text-sm font-semibold text-white"
                 >
                   Get Started
-                </Link>
+                </a>
               </>
             )}
 
