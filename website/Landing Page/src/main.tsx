@@ -1,10 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { RouterProvider } from "@tanstack/react-router";
-import { getRouter } from "./router";
+import { App } from "./App";
 import "./styles.css";
-
-const router = getRouter();
 
 const rootElement = document.getElementById("root");
 if (rootElement) {
@@ -12,7 +9,7 @@ if (rootElement) {
   (rootElement as any)._reactRoot = root;
   root.render(
     <React.StrictMode>
-      <RouterProvider router={router} />
+      <App />
     </React.StrictMode>
   );
 }
