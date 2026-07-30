@@ -54,13 +54,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userEmail = data.email || "";
 
       if (whitelistedDevs.includes(userEmail.toLowerCase().trim())) {
-        if (data.subscription_tier !== "developer" || data.tokens_limit < 1500000) {
+        if (data.subscription_tier !== "developer" || data.tokens_limit < 1500000 || data.audio_minutes_limit < 2000) {
           const devUpdate = {
             subscription_tier: "developer" as const,
             tokens_limit: 1500000,
             tokens_remaining: 1500000,
-            audio_minutes_limit: 1000,
-            audio_minutes_remaining: 1000,
+            audio_minutes_limit: 2000,
+            audio_minutes_remaining: 2000,
           };
 
           const { error: updateError } = await supabase
