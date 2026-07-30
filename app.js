@@ -2219,24 +2219,36 @@ function updateDesktopAccountUI() {
     // Badge & Limits
     let badgeText = 'Free Tier';
     let badgeCls = 'account-badge free';
-    let tokensStr = `${(profile.tokens_remaining || 50000).toLocaleString()} / 50,000`;
-    let audioStr = `${(profile.audio_minutes_remaining || 30.0).toFixed(1)} / 30.0 mins`;
+    let tokensStr = `${(typeof profile.tokens_remaining === 'number' ? profile.tokens_remaining : 50000).toLocaleString()} / 50,000`;
+    let audioStr = `${(typeof profile.audio_minutes_remaining === 'number' ? profile.audio_minutes_remaining : 30.0).toFixed(1)} / 30.0 mins`;
 
     if (tier === 'developer') {
       badgeText = '👑 Developer (Founder)';
       badgeCls = 'account-badge developer';
-      tokensStr = `${(profile.tokens_remaining || 1500000).toLocaleString()} / ${(profile.tokens_limit || 1500000).toLocaleString()}`;
-      audioStr = `${(profile.audio_minutes_remaining || 2000).toFixed(1)} / ${(profile.audio_minutes_limit || 2000).toFixed(1)} mins`;
+      const remT = (typeof profile.tokens_remaining === 'number' && profile.tokens_remaining <= 1500000) ? profile.tokens_remaining : 1500000;
+      const limT = profile.tokens_limit || 1500000;
+      const remA = (typeof profile.audio_minutes_remaining === 'number' && profile.audio_minutes_remaining <= 2000) ? profile.audio_minutes_remaining : 2000;
+      const limA = profile.audio_minutes_limit || 2000;
+      tokensStr = `${remT.toLocaleString()} / ${limT.toLocaleString()}`;
+      audioStr = `${remA.toFixed(1)} / ${limA.toFixed(1)} mins`;
     } else if (tier === 'pro') {
       badgeText = '⚡ Pro Plan';
       badgeCls = 'account-badge pro';
-      tokensStr = `${(profile.tokens_remaining || 0).toLocaleString()} / ${(profile.tokens_limit || 500000).toLocaleString()}`;
-      audioStr = `${(profile.audio_minutes_remaining || 0).toFixed(1)} / ${(profile.audio_minutes_limit || 300).toFixed(1)} mins`;
+      const remT = typeof profile.tokens_remaining === 'number' ? profile.tokens_remaining : 500000;
+      const limT = profile.tokens_limit || 500000;
+      const remA = typeof profile.audio_minutes_remaining === 'number' ? profile.audio_minutes_remaining : 300;
+      const limA = profile.audio_minutes_limit || 300;
+      tokensStr = `${remT.toLocaleString()} / ${limT.toLocaleString()}`;
+      audioStr = `${remA.toFixed(1)} / ${limA.toFixed(1)} mins`;
     } else if (tier === 'standard') {
       badgeText = '🚀 Standard Plan';
       badgeCls = 'account-badge standard';
-      tokensStr = `${(profile.tokens_remaining || 0).toLocaleString()} / ${(profile.tokens_limit || 150000).toLocaleString()}`;
-      audioStr = `${(profile.audio_minutes_remaining || 0).toFixed(1)} / ${(profile.audio_minutes_limit || 120).toFixed(1)} mins`;
+      const remT = typeof profile.tokens_remaining === 'number' ? profile.tokens_remaining : 150000;
+      const limT = profile.tokens_limit || 150000;
+      const remA = typeof profile.audio_minutes_remaining === 'number' ? profile.audio_minutes_remaining : 120;
+      const limA = profile.audio_minutes_limit || 120;
+      tokensStr = `${remT.toLocaleString()} / ${limT.toLocaleString()}`;
+      audioStr = `${remA.toFixed(1)} / ${limA.toFixed(1)} mins`;
     }
 
     setTxt('userPlanBadge', badgeText);

@@ -52,30 +52,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Automatically upgrade whitelisted developer accounts
       const whitelistedDevs = ["playboxstation460@gmail.com", "ayushi29507@gmail.com"];
-      const userEmail = data.email || "";
+      const userEmail = (data.email || "").toLowerCase().trim();
 
-      if (whitelistedDevs.includes(userEmail.toLowerCase().trim())) {
-        if (data.subscription_tier !== "developer" || data.tokens_limit < 1500000 || data.audio_minutes_limit < 2000) {
-          const devUpdate = {
-            subscription_tier: "developer" as const,
-            tokens_limit: 1500000,
-            tokens_remaining: 1500000,
-            audio_minutes_limit: 2000,
-            audio_minutes_remaining: 2000,
-          };
+      if (whitelistedDevs.includes(userEmail)) {
+        const devUpdate = {
+          subscription_tier: "developer" as const,
+          tokens_limit: 1500000,
+          tokens_remaining: typeof data.tokens_remaining === "number" && data.tokens_remaining <= 1500000 ? data.tokens_remaining : 1500000,
+          audio_minutes_limit: 2000,
+          audio_minutes_remaining: typeof data.audio_minutes_remaining === "number" && data.audio_minutes_remaining <= 2000 ? data.audio_minutes_remaining : 2000,
+        };
 
-          const { error: updateError } = await supabase
+        if (data.subscription_tier !== "developer" || data.tokens_limit !== 1500000 || data.audio_minutes_limit !== 2000) {
+          await supabase
             .from("user_profiles")
             .update(devUpdate)
             .eq("id", userId);
-
-          if (!updateError) {
-            return {
-              ...data,
-              ...devUpdate,
-            } as UserProfile;
-          }
         }
+
+        return {
+          ...data,
+          ...devUpdate,
+        } as UserProfile;
       }
 
       return data as UserProfile;
