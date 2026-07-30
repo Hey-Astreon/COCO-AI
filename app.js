@@ -700,6 +700,12 @@ function updateStealthButton(mode) {
 
 // ─── Mic Toggle ────────────────────────────────────────────────
 function toggleMic() {
+  const { profile, tier } = getUserTierAndProfile();
+  if (tier !== 'developer' && profile.audio_minutes_remaining !== undefined && profile.audio_minutes_remaining <= 0) {
+    showToast('⚠️ Audio transcription limit reached. Please upgrade your plan on website.', 'error', 4000);
+    return;
+  }
+
   if (!state.deepgramService) {
     showToast('🎙 Audio service not initialized. Check API key.', 'error');
     return;
@@ -735,6 +741,12 @@ function handleAskKey(e) {
 
 // ─── Submit Question ───────────────────────────────────────────
 function submitQuestion() {
+  const { profile, tier } = getUserTierAndProfile();
+  if (tier !== 'developer' && profile.tokens_remaining !== undefined && profile.tokens_remaining <= 0) {
+    showToast('⚠️ Monthly token limit reached. Please upgrade your plan on website.', 'error', 4000);
+    return;
+  }
+
   const question = els.askInput.value.trim();
   if (!question) return;
   els.askInput.value = '';
@@ -1026,6 +1038,24 @@ function generateDemoAnswer(question) {
 // freshMode = true  → Ctrl+Shift+A: always a clean single-shot solve
 // freshMode = false → Ctrl+Shift+S: add screenshot to current problem buffer
 async function analyzeScreen(freshMode = true) {
+  // ── Subscription Tier & Feature Guards ──
+  const { profile, tier } = getUserTierAndProfile();
+
+  if (tier === 'free') {
+    showToast('⚠️ Screen Capture is a Premium feature. Please sign in & upgrade on website.', 'error', 4000);
+    return;
+  }
+
+  if (tier === 'standard' && !freshMode) {
+    showToast('⚠️ Multi-screenshot analysis is a Pro feature. Upgrade to Pro for multi-captures.', 'warning', 4000);
+    return;
+  }
+
+  if (tier !== 'developer' && profile.tokens_remaining !== undefined && profile.tokens_remaining <= 0) {
+    showToast('⚠️ Monthly token limit reached. Please upgrade your plan on website.', 'error', 4000);
+    return;
+  }
+
   // ── Guard: prevent concurrent calls ──
   // If a capture + analysis is already in progress, ignore the extra press
   if (state.isAnalyzing) {
@@ -2059,6 +2089,19 @@ function updateResumeDropZoneState() {
 }
 
 // ─── Account & Auth Bridge ─────────────────────────────────────
+
+function getUserTierAndProfile() {
+  const rawSession = localStorage.getItem('cocoai_user_session');
+  let session = null;
+  try {
+    session = rawSession ? JSON.parse(rawSession) : null;
+  } catch (e) {
+    session = null;
+  }
+  const profile = (session && session.user) ? (session.profile || {}) : {};
+  const tier = profile.subscription_tier || 'free';
+  return { session, profile, tier };
+}
 
 function updateDesktopAccountUI() {
   const emailEl = $('userAccountEmail');
