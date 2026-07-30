@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { CheckCircle2, Github, Loader2, Send } from "lucide-react";
 import {
   contributorApplicationSchema,
   type ContributorApplicationInput,
 } from "@/lib/contributor-schema";
-import { submitContributorApplication } from "@/lib/contributor.functions";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth-context";
 import { Reveal } from "./reveal";
 import { SectionTag } from "./section-tag";
 
@@ -19,7 +19,7 @@ const labelClass = "mb-2 block text-sm font-medium text-muted-foreground";
 
 export function ContributorForm() {
   const [submitted, setSubmitted] = useState(false);
-  const submitApplication = useServerFn(submitContributorApplication);
+  const { user, refreshProfile } = useAuth();
 
   const {
     register,
@@ -39,7 +39,31 @@ export function ContributorForm() {
 
   async function onSubmit(values: ContributorApplicationInput) {
     try {
-      await submitApplication({ data: values });
+      const { error: dbError } = await supabase.from("contributor_applications").insert({
+        full_name: values.fullName,
+        email: values.email,
+        github_username: values.githubUsername,
+        resume_url: values.resumeUrl,
+        motivation: values.motivation,
+      });
+
+      if (dbError) throw dbError;
+
+      // If user is logged in, automatically upgrade them to Developer tier!
+      if (user) {
+        const { error: updateError } = await supabase
+          .from("user_profiles")
+          .update({ subscription_tier: "developer" })
+          .eq("id", user.id);
+
+        if (updateError) {
+          console.warn("[Contributor] Profile upgrade failed:", updateError.message);
+        } else {
+          await refreshProfile();
+          toast.success("Welcome aboard! You have been upgraded to the Developer Tier 👑");
+        }
+      }
+
       setSubmitted(true);
       reset();
       toast.success("Application received! We'll be in touch soon.");
