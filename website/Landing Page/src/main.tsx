@@ -2,12 +2,12 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider } from "@tanstack/react-router";
 import { getRouter } from "./router";
+import "./styles.css";
 
 const router = getRouter();
 
 const rootElement = document.getElementById("root");
 if (rootElement) {
-  // Always create root and mount RouterProvider
   const root = (rootElement as any)._reactRoot || ReactDOM.createRoot(rootElement);
   (rootElement as any)._reactRoot = root;
   root.render(
