@@ -123,6 +123,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (s?.user) {
           const p = await fetchProfile(s.user.id);
           if (mounted) setProfile(p);
+
+          // Auto-sync with CocoAI Desktop App seamlessly on sign-in
+          if (_event === "SIGNED_IN" && typeof window !== "undefined") {
+            try {
+              const payload = {
+                user: { id: s.user.id, email: s.user.email },
+                profile: p || { subscription_tier: "free" },
+              };
+              const jsonStr = JSON.stringify(payload);
+              if (navigator.clipboard) {
+                navigator.clipboard.writeText(jsonStr).catch(() => {});
+              }
+              window.location.href = `cocoai://auth?session=${encodeURIComponent(jsonStr)}`;
+            } catch (e) {
+              console.warn("[Auth] Auto-sync desktop error:", e);
+            }
+          }
         } else {
           setProfile(null);
         }
