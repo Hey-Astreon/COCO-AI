@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Sparkles, Terminal, Shield, Zap, Code2, ArrowRight } from "lucide-react";
+import { Sparkles, Terminal, Shield, Zap, Code2 } from "lucide-react";
 
 interface Milestone {
   id: string;
@@ -64,15 +64,15 @@ export function AboutTimeline() {
   const current = MILESTONES.find(m => m.id === activeStep) || MILESTONES[0];
 
   return (
-    <div className="w-full rounded-2xl border border-white/10 bg-zinc-950/80 p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
-      <div className="flex items-center gap-2 text-violet-400 mb-2">
+    <div className="w-full rounded-2xl border border-border bg-card text-card-foreground p-6 sm:p-8 backdrop-blur-xl shadow-xl transition-colors duration-300">
+      <div className="flex items-center gap-2 text-violet-600 dark:text-violet-400 mb-2">
         <Terminal className="h-4 w-4" />
         <span className="text-xs font-mono font-bold uppercase tracking-wider">
           Engineering Evolution
         </span>
       </div>
 
-      <h3 className="font-display text-2xl font-bold text-white sm:text-3xl">
+      <h3 className="font-display text-2xl font-bold text-foreground sm:text-3xl">
         How CocoAI Was Built
       </h3>
 
@@ -87,37 +87,37 @@ export function AboutTimeline() {
               onClick={() => setActiveStep(m.id)}
               className={`flex flex-col text-left rounded-xl p-4 transition-all duration-200 cursor-pointer ${
                 isActive
-                  ? "border border-violet-500/50 bg-gradient-to-br from-violet-950/40 to-pink-950/40 text-white shadow-lg shadow-violet-500/20 scale-[1.02]"
-                  : "border border-white/5 bg-zinc-900/60 text-zinc-400 hover:border-zinc-700 hover:bg-zinc-800/60 hover:text-zinc-200"
+                  ? "border border-violet-500/50 bg-gradient-to-br from-violet-500/10 to-pink-500/10 text-foreground shadow-md shadow-violet-500/10 scale-[1.02]"
+                  : "border border-border bg-accent/40 text-muted-foreground hover:border-violet-500/30 hover:bg-accent hover:text-foreground"
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-violet-400">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400">
                   {m.year}
                 </span>
-                <Icon className={`h-4 w-4 ${isActive ? "text-pink-400" : "text-zinc-500"}`} />
+                <Icon className={`h-4 w-4 ${isActive ? "text-pink-500" : "text-muted-foreground"}`} />
               </div>
-              <span className="mt-2 text-xs font-bold text-white line-clamp-1">{m.title}</span>
-              <span className="mt-0.5 text-[11px] text-zinc-400 line-clamp-1">{m.badge}</span>
+              <span className="mt-2 text-xs font-bold text-foreground line-clamp-1">{m.title}</span>
+              <span className="mt-0.5 text-[11px] text-muted-foreground line-clamp-1">{m.badge}</span>
             </button>
           );
         })}
       </div>
 
       {/* Selected Step Expanded Card */}
-      <div className="mt-6 rounded-xl border border-violet-500/20 bg-black/60 p-5 font-mono leading-relaxed text-zinc-200">
-        <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-3">
-          <span className="text-xs font-bold text-pink-400 flex items-center gap-1.5">
+      <div className="mt-6 rounded-xl border border-violet-500/30 bg-accent/30 p-5 font-mono leading-relaxed text-foreground">
+        <div className="flex items-center justify-between border-b border-border pb-3 mb-3">
+          <span className="text-xs font-bold text-pink-600 dark:text-pink-400 flex items-center gap-1.5">
             <Sparkles className="h-3.5 w-3.5" />
             {current.badge}: {current.title}
           </span>
-          <span className="text-[11px] text-zinc-500">{current.year}</span>
+          <span className="text-[11px] text-muted-foreground">{current.year}</span>
         </div>
 
-        <p className="text-xs text-zinc-300 leading-relaxed">{current.summary}</p>
+        <p className="text-xs text-foreground/90 leading-relaxed font-sans">{current.summary}</p>
 
-        <div className="mt-4 rounded-lg bg-violet-950/30 p-3 border border-violet-500/20 text-xs text-violet-300">
-          <span className="font-bold text-violet-400">💡 Deep Technical Insight: </span>
+        <div className="mt-4 rounded-lg bg-violet-500/10 p-3 border border-violet-500/30 text-xs text-violet-700 dark:text-violet-300 font-sans">
+          <span className="font-bold text-violet-600 dark:text-violet-400">💡 Deep Technical Insight: </span>
           {current.techDetails}
         </div>
       </div>

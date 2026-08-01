@@ -18,11 +18,12 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
       type="button"
       onClick={toggleTheme}
       aria-label="Toggle light and dark theme"
-      className={`glass-card grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition-colors duration-300 ease-premium hover:bg-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${className}`}
+      title="Toggle Light / Dark theme"
+      className={`glass-card grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition-colors duration-300 ease-premium hover:bg-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary cursor-pointer ${className}`}
     >
-      {/* Icons follow the .dark class on <html> — no JS state, no hydration mismatch */}
-      <Sun className="hidden h-4 w-4 dark:block" />
-      <Moon className="h-4 w-4 dark:hidden" />
+      {/* Sun shown in Light Mode, Moon shown in Dark Mode */}
+      <Sun className="h-4 w-4 text-amber-500 block dark:hidden" />
+      <Moon className="h-4 w-4 text-violet-400 hidden dark:block" />
     </button>
   );
 }

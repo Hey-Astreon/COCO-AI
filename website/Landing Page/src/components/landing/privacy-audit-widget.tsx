@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ShieldCheck, CheckCircle2, RefreshCw, Lock, EyeOff } from "lucide-react";
+import { ShieldCheck, CheckCircle2, RefreshCw, Lock } from "lucide-react";
 
 interface AuditResult {
   title: string;
@@ -51,17 +51,17 @@ export function PrivacyAuditWidget() {
   };
 
   return (
-    <div className="w-full rounded-2xl border border-white/10 bg-zinc-950/80 p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
+    <div className="w-full rounded-2xl border border-border bg-card text-card-foreground p-6 sm:p-8 backdrop-blur-xl shadow-xl transition-colors duration-300">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-5">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
             <ShieldCheck className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="font-display text-lg font-bold text-white">
+            <h3 className="font-display text-lg font-bold text-foreground">
               Anti-Track Privacy &amp; Security Auditor
             </h3>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-muted-foreground">
               Verify CocoAI's zero-log guarantee right inside your browser
             </p>
           </div>
@@ -86,16 +86,16 @@ export function PrivacyAuditWidget() {
               key={test.title}
               className={`rounded-xl border p-4 transition-all duration-300 ${
                 isPassed
-                  ? "border-emerald-500/40 bg-emerald-950/15 text-white shadow-md shadow-emerald-500/10"
-                  : "border-white/5 bg-zinc-900/50 text-zinc-400"
+                  ? "border-emerald-500/40 bg-emerald-500/10 text-foreground shadow-md shadow-emerald-500/10"
+                  : "border-border bg-accent/30 text-muted-foreground"
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono font-bold text-white flex items-center gap-2">
+                <span className="text-xs font-mono font-bold text-foreground flex items-center gap-2">
                   {isPassed ? (
-                    <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                   ) : (
-                    <Lock className="h-3.5 w-3.5 text-zinc-500" />
+                    <Lock className="h-3.5 w-3.5 text-muted-foreground" />
                   )}
                   {test.title}
                 </span>
@@ -103,15 +103,15 @@ export function PrivacyAuditWidget() {
                 <span
                   className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-full ${
                     isPassed
-                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                      : "bg-zinc-800 text-zinc-500"
+                      ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30"
+                      : "bg-accent text-muted-foreground"
                   }`}
                 >
                   {isPassed ? "PASSED ✓" : "IDLE"}
                 </span>
               </div>
 
-              <p className="mt-2 text-xs text-zinc-300 leading-relaxed font-sans">
+              <p className="mt-2 text-xs text-muted-foreground leading-relaxed font-sans">
                 {test.detail}
               </p>
             </div>

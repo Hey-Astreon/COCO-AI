@@ -33,13 +33,12 @@ const LOGOS = [
 ];
 
 export function LogoTicker() {
-  // Duplicate array 3 times for a smooth, unbroken infinite marquee loop
   const tickerItems = [...LOGOS, ...LOGOS, ...LOGOS];
 
   return (
-    <div className="w-full border-t border-b border-white/10 bg-zinc-950/80 py-6 backdrop-blur-md">
+    <div className="w-full border-t border-b border-border bg-card/70 py-6 backdrop-blur-md transition-colors duration-300">
       <div className="mx-auto max-w-7xl px-4 mb-3 text-center">
-        <span className="text-[11px] font-mono font-semibold uppercase tracking-widest text-zinc-400">
+        <span className="text-[11px] font-mono font-semibold uppercase tracking-widest text-muted-foreground">
           ⚡ Verified 100% Invisible Across 15+ Video Call &amp; Coding Platforms
         </span>
       </div>
@@ -49,15 +48,15 @@ export function LogoTicker() {
           {tickerItems.map((logo, i) => (
             <div
               key={`${logo.name}-${i}`}
-              className="flex shrink-0 items-center justify-center gap-3 rounded-xl border border-white/5 bg-zinc-900/60 px-5 py-2.5 transition-all duration-200 hover:border-violet-500/40 hover:bg-zinc-800/80 hover:scale-105"
+              className="flex shrink-0 items-center justify-center gap-3 rounded-xl border border-border bg-background px-5 py-2.5 shadow-sm transition-all duration-200 hover:border-violet-500/40 hover:scale-105"
             >
               <img
                 src={logo.src}
                 alt={`${logo.name} logo`}
-                className="h-6 w-auto object-contain max-w-[100px] filter brightness-110 contrast-105"
+                className="h-6 w-auto object-contain max-w-[100px]"
                 loading="lazy"
               />
-              <span className="font-sans text-xs font-medium text-zinc-300">
+              <span className="font-sans text-xs font-medium text-foreground">
                 {logo.name}
               </span>
             </div>

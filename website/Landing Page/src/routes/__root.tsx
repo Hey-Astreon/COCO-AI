@@ -124,21 +124,25 @@ function RootComponent() {
     // (index.html's pre-paint script already set the correct class on load;
     // ThemeToggle writes coco-theme to pin a choice.)
     const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const applySystemTheme = () => {
+    const applyTheme = () => {
       try {
         const saved = localStorage.getItem("coco-theme");
-        if (saved) return; // explicit user choice wins
+        if (saved === "light" || saved === "dark") {
+          root.classList.toggle("dark", saved === "dark");
+          sync();
+          return;
+        }
       } catch {
         /* storage unavailable — fall through to system preference */
       }
       root.classList.toggle("dark", media.matches);
       sync();
     };
-    applySystemTheme();
-    media.addEventListener("change", applySystemTheme);
+    applyTheme();
+    media.addEventListener("change", applyTheme);
     return () => {
       observer.disconnect();
-      media.removeEventListener("change", applySystemTheme);
+      media.removeEventListener("change", applyTheme);
     };
   }, []);
 
