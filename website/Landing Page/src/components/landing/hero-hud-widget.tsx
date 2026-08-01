@@ -206,21 +206,26 @@ export function HeroHudWidget() {
             </div>
 
             <div className="text-zinc-200">
-              {displayedTokens.map((token, i) => (
-                <span
-                  key={i}
-                  className="inline-block mr-1 transition-opacity duration-150 animate-in fade-in"
-                  style={{
-                    color: token.startsWith("O(1)") || token.includes("Redis") || token.includes("Postgres")
-                      ? "#a78bfa"
-                      : token.includes("Doubly") || token.includes("HashMap") || token.includes("Sliding")
-                      ? "#ec4899"
-                      : "#f4f4f5",
-                  }}
-                >
-                  {token}
-                </span>
-              ))}
+              {displayedTokens.map((token, i) => {
+                if (!token) return null;
+                const isSpecial = token.startsWith("O(1)") || token.includes("Redis") || token.includes("Postgres");
+                const isHighlight = token.includes("Doubly") || token.includes("HashMap") || token.includes("Sliding");
+                return (
+                  <span
+                    key={i}
+                    className="inline-block mr-1 transition-opacity duration-150 animate-in fade-in"
+                    style={{
+                      color: isSpecial
+                        ? "#a78bfa"
+                        : isHighlight
+                        ? "#ec4899"
+                        : "#f4f4f5",
+                    }}
+                  >
+                    {token}
+                  </span>
+                );
+              })}
 
               {isStreaming && (
                 <span className="inline-block h-3.5 w-2 bg-pink-500 animate-pulse align-middle ml-1" />

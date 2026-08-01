@@ -59,7 +59,7 @@ export function Hero({ onDownloadClick }: HeroProps) {
               </span>
             </span>
             <span className="overflow-hidden pb-1">
-              <span className="hero-word-rise inline-block text-zinc-300" style={{ animationDelay: "0.16s" }}>
+              <span className="hero-word-rise inline-block text-foreground/80" style={{ animationDelay: "0.16s" }}>
                 Technical
               </span>
             </span>
