@@ -743,3 +743,93 @@
   transform: translateY(1px);
 }
 
+/* Conic gradient rotating border button wrapper */
+@property --border-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes spin-border-angle {
+  0% { --border-angle: 0deg; }
+  100% { --border-angle: 360deg; }
+}
+
+.btn-border-wrap {
+  position: relative;
+  display: inline-flex;
+  border-radius: 9999px;
+  padding: 2px;
+  background: transparent;
+  isolation: isolate;
+}
+
+.btn-border-wrap::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 9999px;
+  padding: 2px;
+  background: conic-gradient(
+    from var(--border-angle),
+    #8b5cf6 0%,
+    #ec4899 25%,
+    #8b5cf6 50%,
+    #07070c 75%,
+    #8b5cf6 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: spin-border-angle 3s linear infinite;
+  pointer-events: none;
+}
+
+/* Concentric Orbit Rotation Animations */
+@keyframes orbit-cw {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes orbit-ccw {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+.animate-orbit-cw-30 { animation: orbit-cw 30s linear infinite; }
+.animate-orbit-cw-40 { animation: orbit-cw 40s linear infinite; }
+.animate-orbit-cw-50 { animation: orbit-cw 50s linear infinite; }
+.animate-orbit-ccw-60 { animation: orbit-ccw 60s linear infinite; }
+
+/* Ticker Marquee Animation */
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-ticker-scroll {
+  animation: ticker-scroll 24s linear infinite;
+}
+
+.animate-ticker-scroll:hover {
+  animation-play-state: paused;
+}
+
+.ticker-mask-edges {
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 12%,
+    black 88%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 12%,
+    black 88%,
+    transparent 100%
+  );
+}
+
+
