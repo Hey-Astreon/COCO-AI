@@ -1,7 +1,10 @@
 import { useNavigate } from "@tanstack/react-router";
-import { Github, ExternalLink, Code2 } from "lucide-react";
+import { Code2, Github, Sparkles, Heart } from "lucide-react";
 import { SectionTag } from "./section-tag";
 import { Reveal } from "./reveal";
+import { DeveloperCard } from "./developer-card";
+import { AboutTimeline } from "./about-timeline";
+import { PrivacyAuditWidget } from "./privacy-audit-widget";
 
 const ROUSHAN_GITHUB = "https://github.com/Hey-Astreon";
 const AYUSHI_GITHUB = "https://github.com/Silenttears-cloud";
@@ -13,259 +16,165 @@ export function AboutPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* ─── Hero ─── */}
-      <div className="relative overflow-hidden">
-        {/* Aurora orbs */}
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-          <div className="animate-aurora absolute top-[-120px] left-1/2 h-[420px] w-[760px] -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-600/25 via-pink-500/15 to-rose-500/20 blur-[110px]" />
+    <div className="min-h-screen bg-[#07070c] text-foreground">
+      {/* ─── Hero Header ─── */}
+      <div className="relative overflow-hidden pt-32 pb-16 px-4 sm:px-6">
+        {/* Ambient Aurora Orbs */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
+          <div className="animate-aurora absolute top-[-120px] left-1/2 h-[500px] w-[850px] -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-600/30 via-pink-500/20 to-rose-500/25 blur-[130px]" />
           <div
-            className="animate-aurora absolute right-[-140px] top-[30%] h-[340px] w-[340px] rounded-full bg-gradient-to-br from-pink-500/15 to-rose-500/10 blur-[100px]"
+            className="animate-aurora absolute right-[-140px] top-[30%] h-[380px] w-[380px] rounded-full bg-gradient-to-br from-pink-500/20 to-violet-600/20 blur-[110px]"
             style={{ animationDelay: "-7s" }}
           />
         </div>
 
-        <div className="relative z-10 mx-auto max-w-4xl px-6 pt-32 pb-20 text-center">
+        <div className="relative z-10 mx-auto max-w-4xl text-center">
           <Reveal>
-            <SectionTag label="Our Story" />
+            <div className="glass-card mx-auto inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold text-violet-300 border border-violet-500/30 shadow-lg">
+              <Sparkles className="h-3.5 w-3.5 text-pink-400" />
+              <span>Built Out of Necessity • Engineered for Absolute Stealth &amp; Speed</span>
+            </div>
           </Reveal>
+
           <Reveal delay={100}>
-            <h1 className="font-display mt-5 text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
-              Built by developers, <span className="text-gradient">for developers</span>
+            <h1 className="font-display mt-6 text-4xl font-extrabold tracking-tight text-white sm:text-6xl">
+              Built by developers, <br />
+              <span
+                className="text-gradient"
+                style={{
+                  background: "linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #a78bfa 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                for developers worldwide
+              </span>
             </h1>
           </Reveal>
+
           <Reveal delay={200}>
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-              CocoAI started as a personal tool to survive technical interviews. It grew into
-              something we believe every developer deserves access to.
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-zinc-400 sm:text-lg">
+              CocoAI started when we froze during a high-stakes technical interview. It grew into a
+              category-defining open-source stealth engine that every developer deserves access to.
             </p>
           </Reveal>
         </div>
       </div>
 
-      {/* ─── Mission Card ─── */}
-      <Reveal>
-        <div className="mx-auto max-w-4xl px-6 pb-16">
-          <div className="glass-card gradient-top-border isolate relative overflow-hidden rounded-2xl p-8 sm:p-10">
-            <div
-              className="absolute right-0 bottom-0 -z-10 h-40 w-40 rounded-full bg-violet-600/10 blur-3xl"
-              aria-hidden="true"
-            />
-            <h2 className="font-display text-xl font-bold text-foreground">Why we built CocoAI</h2>
-            <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-              Technical interviews are broken. You're expected to perform at your absolute peak
-              while someone watches every keystroke under artificial pressure. We've both been there
-              — freezing on a problem we'd solved a hundred times before, just because the clock was
-              ticking and eyes were watching.
-            </p>
-            <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-              CocoAI isn't about cheating. It's about leveling the playing field. Big companies use
-              AI tools internally every day. Why shouldn't candidates? We believe your nervousness
-              shouldn't cost you the opportunity you worked years to earn.
-            </p>
-            <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-              So we built an invisible, real-time assistant that works silently in the background —
-              completely hidden from screen sharing — powered by the fastest AI inference on the
-              planet. And we made it open source, because great tools should be accessible to
-              everyone.
-            </p>
-          </div>
-        </div>
-      </Reveal>
+      {/* ─── 1. Engineering Evolution Timeline ─── */}
+      <div className="mx-auto max-w-5xl px-4 pb-20 sm:px-6">
+        <Reveal>
+          <AboutTimeline />
+        </Reveal>
+      </div>
 
-      {/* ─── Team Section ─── */}
-      <div className="mx-auto max-w-4xl px-6 pb-20">
+      {/* ─── 2. 3D Holographic Developer Cards ─── */}
+      <div className="mx-auto max-w-5xl px-4 pb-24 sm:px-6">
         <Reveal className="mb-10 text-center">
-          <SectionTag label="The Team" />
-          <h2 className="font-display mt-4 text-3xl font-bold tracking-tight text-foreground">
-            Built by engineers who care about performance and privacy.
+          <SectionTag label="The Developers" />
+          <h2 className="font-display mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            Meet the Engineers Behind CocoAI
           </h2>
+          <p className="mt-2 text-sm text-zinc-400">
+            Hover over each developer card to inspect 3D tilt effects and code contributions
+          </p>
         </Reveal>
 
-        <div className="grid gap-6 sm:grid-cols-2">
-          {/* ── Roushan Card ── */}
+        <div className="grid gap-8 sm:grid-cols-2">
+          {/* Roushan Card */}
           <Reveal>
-            <div className="glass-card group relative flex h-full flex-col overflow-hidden rounded-2xl p-7 transition-all duration-300 hover:border-lavender/35 hover:shadow-[0_20px_60px_-25px_rgba(139,92,246,0.35)]">
-              {/* Avatar glow */}
-              <div
-                className="absolute -top-8 -right-8 h-36 w-36 rounded-full opacity-10 transition-opacity duration-300 group-hover:opacity-25"
-                style={{ background: "radial-gradient(circle, hsl(262 83% 58%), transparent)" }}
-                aria-hidden="true"
-              />
-
-              {/* GitHub handle + Handle badge */}
-              <div className="flex items-center justify-between">
-                <div className="bg-gradient-brand flex h-12 w-12 items-center justify-center rounded-xl text-xl font-bold text-white shadow-lg shadow-violet-500/20">
-                  R
-                </div>
-                <a
-                  href={ROUSHAN_GITHUB}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 rounded-full border border-border bg-accent/60 px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-                >
-                  <Github className="h-3 w-3" />
-                  Hey-Astreon
-                </a>
-              </div>
-
-              <div className="mt-5">
-                <h3 className="text-lg font-bold text-foreground">
-                  <a
-                    href={ROUSHAN_PORTFOLIO}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 transition-colors hover:text-lavender"
-                  >
-                    Roushan Kumar
-                    <ExternalLink className="h-3.5 w-3.5 opacity-60" />
-                  </a>
-                </h3>
-                <p className="mt-1 text-xs font-semibold tracking-wider text-lavender uppercase">
-                  Founder & Lead Developer
-                </p>
-              </div>
-
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                The mind behind CocoAI.{" "}
-                <a
-                  href={ROUSHAN_PORTFOLIO}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-lavender underline-offset-2 hover:underline"
-                >
-                  Roushan
-                </a>{" "}
-                is a full-stack developer and indie hacker with a deep obsession for building tools
-                that actually solve real problems. He architected the entire Electron stealth
-                engine, the Cerebras AI integration, and the real-time audio transcription pipeline.
-                When not shipping code, he's probably thinking about what to build next.
-              </p>
-
-              <div className="mt-auto flex flex-wrap gap-2 pt-5">
-                {["Electron", "React", "AI/ML", "Node.js", "Supabase"].map((skill) => (
-                  <span
-                    key={skill}
-                    className="rounded-md border border-border bg-accent/50 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors group-hover:border-lavender/25"
-                  >
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
+            <DeveloperCard
+              name="Roushan Kumar"
+              role="Founder & Lead Architect"
+              handle="Hey-Astreon"
+              githubUrl={ROUSHAN_GITHUB}
+              portfolioUrl={ROUSHAN_PORTFOLIO}
+              portfolioDomain="Astreon.me"
+              avatarLetter="R"
+              glowColor="violet"
+              bio="Full-stack engineer and indie builder obsessed with high-craft software. Roushan architected the native C++ DirectX SetWindowDisplayAffinity stealth binding, the Cerebras ultra-fast LLM pipeline, and the VAD audio transcript engine."
+              skills={["Electron", "C++ DirectX", "Cerebras LPU", "React", "Node.js"]}
+              snippetTitle="DirectX Window Stealth Binding (C++)"
+              snippetCode={`// Windows OS-level screen share protection
+const HWND hwnd = (HWND)window->GetNativeWindow();
+SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE);
+// Verified 0% window leakage on Zoom / Meet / OBS`}
+            />
           </Reveal>
 
-          {/* ── Ayushi Card ── */}
+          {/* Ayushi Card */}
           <Reveal delay={100}>
-            <div className="glass-card group relative flex h-full flex-col overflow-hidden rounded-2xl p-7 transition-all duration-300 hover:border-pink/35 hover:shadow-[0_20px_60px_-25px_rgba(236,72,153,0.3)]">
-              <div
-                className="absolute -top-8 -right-8 h-36 w-36 rounded-full opacity-10 transition-opacity duration-300 group-hover:opacity-25"
-                style={{ background: "radial-gradient(circle, hsl(330 80% 60%), transparent)" }}
-                aria-hidden="true"
-              />
-
-              <div className="flex items-center justify-between">
-                <div className="bg-gradient-brand flex h-12 w-12 items-center justify-center rounded-xl text-xl font-bold text-white shadow-lg shadow-pink-500/20">
-                  A
-                </div>
-                <a
-                  href={AYUSHI_GITHUB}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 rounded-full border border-border bg-accent/60 px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-                >
-                  <Github className="h-3 w-3" />
-                  Silenttears-cloud
-                </a>
-              </div>
-
-              <div className="mt-5">
-                <h3 className="text-lg font-bold text-foreground">
-                  <a
-                    href={AYUSHI_PORTFOLIO}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 transition-colors hover:text-pink"
-                  >
-                    Ayushi Raj
-                    <ExternalLink className="h-3.5 w-3.5 opacity-60" />
-                  </a>
-                </h3>
-                <p className="mt-1 text-xs font-semibold tracking-wider text-pink uppercase">
-                  Co-Developer & UX Lead
-                </p>
-              </div>
-
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                The eye for quality behind CocoAI.{" "}
-                <a
-                  href={AYUSHI_PORTFOLIO}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-pink underline-offset-2 hover:underline"
-                >
-                  Ayushi
-                </a>{" "}
-                brings precision, user empathy, and a sharp design sense to every component. She
-                shaped CocoAI's UI language, the product's overall polish, and the attention to
-                detail that separates good software from great software. Her perspective as a
-                developer and user herself keeps the product honest and human.
-              </p>
-
-              <div className="mt-auto flex flex-wrap gap-2 pt-5">
-                {["UI/UX", "TypeScript", "React", "Design Systems", "CSS"].map((skill) => (
-                  <span
-                    key={skill}
-                    className="rounded-md border border-border bg-accent/50 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors group-hover:border-pink/25"
-                  >
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
+            <DeveloperCard
+              name="Ayushi Raj"
+              role="Co-Developer & UX Lead"
+              handle="Silenttears-cloud"
+              githubUrl={AYUSHI_GITHUB}
+              portfolioUrl={AYUSHI_PORTFOLIO}
+              portfolioDomain="Ayushiraj.me"
+              avatarLetter="A"
+              glowColor="pink"
+              bio="The eye for quality behind CocoAI. Ayushi brings UX empathy, design system rigor, and attention to micro-interactions. She designed CocoAI's sleek HUD overlay language, component architecture, and seamless keyboard workflow."
+              skills={["UI/UX Design", "TypeScript", "React", "TailwindCSS", "Design Systems"]}
+              snippetTitle="HUD Overlay State Manager (React/TS)"
+              snippetCode={`// Real-time HUD opacity & hotkey controller
+const [hudState, setHudState] = useState<HudConfig>({
+  opacity: 0.9,
+  stealthMode: true,
+  vadTrigger: true
+});`}
+            />
           </Reveal>
         </div>
       </div>
 
-      {/* ─── Open Source CTA ─── */}
+      {/* ─── 3. Anti-Track Privacy & Security Auditor ─── */}
+      <div className="mx-auto max-w-5xl px-4 pb-24 sm:px-6">
+        <Reveal>
+          <PrivacyAuditWidget />
+        </Reveal>
+      </div>
+
+      {/* ─── 4. 100% Open Source Callout ─── */}
       <Reveal>
-        <div className="mx-auto max-w-4xl px-6 pb-24">
-          <div className="gradient-border-animated relative flex flex-col items-center gap-6 overflow-hidden rounded-2xl bg-card px-8 py-12 text-center">
+        <div className="mx-auto max-w-5xl px-4 pb-24 sm:px-6">
+          <div className="relative overflow-hidden rounded-2xl border border-violet-500/30 bg-zinc-950/90 p-8 sm:p-12 text-center backdrop-blur-xl shadow-2xl">
             <div
-              className="pointer-events-none absolute inset-0 opacity-[0.04]"
+              className="pointer-events-none absolute -inset-8 opacity-20 blur-3xl"
               style={{
-                backgroundImage:
-                  "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
-                backgroundSize: "32px 32px",
+                background: "radial-gradient(circle, #8b5cf6 0%, #ec4899 60%, transparent 80%)",
               }}
               aria-hidden="true"
             />
-            <Code2 className="h-10 w-10 text-lavender" />
-            <div>
-              <h3 className="font-display text-2xl font-bold text-foreground">100% Open Source</h3>
-              <p className="mt-2 max-w-md text-sm text-muted-foreground">
-                CocoAI is fully open source. Read the code, fork it, contribute, or audit exactly
-                how it works. No black boxes. No hidden trackers.
-              </p>
+
+            <Code2 className="mx-auto h-12 w-12 text-violet-400" />
+            <h3 className="font-display text-3xl font-extrabold text-white mt-4">
+              100% Open Source &amp; Transparent
+            </h3>
+            <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-zinc-300">
+              CocoAI is built in the open. You can inspect the code, fork it, submit pull requests, or
+              verify that zero trackers exist. No black boxes. No hidden telemetry.
+            </p>
+
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+              <a
+                href={COCO_REPO}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-shine inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-pink-600 px-8 py-3.5 text-sm font-bold text-white shadow-xl shadow-violet-500/30 transition-all duration-200 hover:scale-105"
+              >
+                <Github className="h-4 w-4" />
+                View Repository on GitHub
+              </a>
             </div>
-            <a
-              href={COCO_REPO}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-shine inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-pink-600 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-500/25 transition-all duration-200 hover:shadow-violet-500/45 hover:scale-[1.02]"
-            >
-              <Github className="h-4 w-4" />
-              View on GitHub
-            </a>
           </div>
         </div>
       </Reveal>
 
-      {/* ─── Back nav ─── */}
+      {/* ─── Back Navigation ─── */}
       <div className="pb-16 text-center">
         <button
           onClick={() => navigate({ to: "/" })}
-          className="text-sm text-muted-foreground transition-colors hover:text-lavender"
+          className="text-sm font-mono text-zinc-400 transition-colors hover:text-violet-400 cursor-pointer"
         >
           ← Back to home
         </button>
