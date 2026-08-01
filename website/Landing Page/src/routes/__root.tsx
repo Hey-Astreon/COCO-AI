@@ -119,15 +119,27 @@ function RootComponent() {
     const sync = () => setIsDark(root.classList.contains("dark"));
     const observer = new MutationObserver(sync);
     observer.observe(root, { attributes: true, attributeFilter: ["class"] });
-    // Pick up the persisted theme on first paint (ThemeToggle writes coco-theme).
-    try {
-      const saved = localStorage.getItem("coco-theme");
-      if (saved) root.classList.toggle("dark", saved === "dark");
-    } catch {
-      /* storage unavailable — keep current class */
-    }
-    sync();
-    return () => observer.disconnect();
+
+    // Follow the OS theme live while no explicit override is pinned.
+    // (index.html's pre-paint script already set the correct class on load;
+    // ThemeToggle writes coco-theme to pin a choice.)
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const applySystemTheme = () => {
+      try {
+        const saved = localStorage.getItem("coco-theme");
+        if (saved) return; // explicit user choice wins
+      } catch {
+        /* storage unavailable — fall through to system preference */
+      }
+      root.classList.toggle("dark", media.matches);
+      sync();
+    };
+    applySystemTheme();
+    media.addEventListener("change", applySystemTheme);
+    return () => {
+      observer.disconnect();
+      media.removeEventListener("change", applySystemTheme);
+    };
   }, []);
 
   // Move focus to the page content on route change for keyboard/screen-reader users.
