@@ -1,10 +1,11 @@
-import transcriptImg from "@/assets/cocoai_transcript.png";
-import settingsImg from "@/assets/cocoai_settings.png";
-import stealthImg from "@/assets/cocoai_stealth_comparison.png";
-import exportImg from "@/assets/cocoai_export_md.png";
-import screenAnalysisImg from "@/assets/cocoai_screen_analysis.png";
+import transcriptImg from "@/assets/cocoai_transcript.webp";
+import settingsImg from "@/assets/cocoai_settings.webp";
+import stealthImg from "@/assets/cocoai_stealth_comparison.webp";
+import exportImg from "@/assets/cocoai_export_md.webp";
+import screenAnalysisImg from "@/assets/cocoai_screen_analysis.webp";
 import { Reveal } from "./reveal";
 import { SectionTag } from "./section-tag";
+import { Spotlight } from "./spotlight";
 
 type FeatureModule = {
   id: string;
@@ -13,6 +14,8 @@ type FeatureModule = {
   description: string;
   chips: string[];
   image: string;
+  imageWidth: number;
+  imageHeight: number;
   imageAlt: string;
   chrome: string;
 };
@@ -26,6 +29,8 @@ const MODULES: FeatureModule[] = [
       "Listens directly to the interviewer, groups sentences using advanced Voice Activity Detection (VAD), and filters pauses. The Live Transcript feed displays real-time speech bubbles with speaker tags (INTERVIEWER / CANDIDATE) and instant '⚡ ANSWER' triggers next to every question.",
     chips: ["Voice Activity Detection", "Speaker Tags", "⚡ Instant Answers"],
     image: transcriptImg,
+    imageWidth: 1584,
+    imageHeight: 884,
     imageAlt:
       "CocoAI live transcript feed with interviewer and candidate speech bubbles and AI answer triggers",
     chrome: "cocoai — live transcript feed",
@@ -38,6 +43,8 @@ const MODULES: FeatureModule[] = [
       "Drag and drop your PDF resume and paste the job description directly into the Settings drawer. CocoAI uses this context to automatically align answers to your project history and specific technical stack (React, TypeScript, Express, MongoDB, FastAPI).",
     chips: ["PDF Resume Upload", "JD Matching", "Stack-Aware Answers"],
     image: settingsImg,
+    imageWidth: 1584,
+    imageHeight: 884,
     imageAlt:
       "CocoAI settings drawer with resume PDF drop zone and job description context input forms",
     chrome: "cocoai — settings & context",
@@ -50,6 +57,8 @@ const MODULES: FeatureModule[] = [
       "Built to be completely invisible on screen sharing (Zoom, Teams, Google Meet). Control overlay modes via globally-registered hotkeys: Ctrl+Shift+H (Hide Window), Ctrl+Shift+A (Analyze Screen), Ctrl+Shift+S (Add Page), and Ctrl+Shift+G (Cycle Stealth). Toggle stealth states with the Eye icon button and slide opacity from 35% to 100%.",
     chips: ["Zoom / Teams / Meet Safe", "Global Hotkeys", "35–100% Opacity"],
     image: stealthImg,
+    imageWidth: 1024,
+    imageHeight: 1024,
     imageAlt:
       "Split-screen comparison showing what the interviewer sees on Zoom screen share versus what the candidate sees with the CocoAI overlay",
     chrome: "cocoai — stealth overlay active",
@@ -62,6 +71,8 @@ const MODULES: FeatureModule[] = [
       "Never lose a valuable interview question or solution. At any point, click the toolbar Export button to download the entire session transcript and generated code answers as clean Markdown (.md), plain Text (.txt), or structural JSON (.json) files for offline study or replay mode.",
     chips: ["Markdown .md", "Plain Text .txt", "Structural .json"],
     image: exportImg,
+    imageWidth: 1024,
+    imageHeight: 1024,
     imageAlt: "CocoAI export session panel with Markdown, JSON, and plain text download options",
     chrome: "cocoai — export session",
   },
@@ -73,6 +84,8 @@ const MODULES: FeatureModule[] = [
       "Struggling with long coding prompts or complex diagrams? Press Ctrl+Shift+A to capture and solve code from any window or monitor. For long-scrolling pages, use Ctrl+Shift+S to stitch multiple page blocks together into a single, cohesive prompt that Gemini analyzes in one go.",
     chips: ["Ctrl+Shift+A Solve", "Scroll Stitching", "Any Monitor"],
     image: screenAnalysisImg,
+    imageWidth: 1024,
+    imageHeight: 1024,
     imageAlt:
       "Diagram of CocoAI screen analysis capturing multiple pages and stitching screenshots into one ultra-long context",
     chrome: "cocoai — screen analysis",
@@ -100,13 +113,18 @@ export function Features() {
         <div className="mt-20 space-y-24 sm:mt-24 sm:space-y-32">
           {MODULES.map((module, i) => (
             <Reveal key={module.id} delay={i * 80}>
-              <article>
+              <article className="group">
                 {/* Header */}
                 <div className="max-w-3xl">
-                  <span className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-lavender">
-                    Module {moduleNo(i)} — {module.eyebrow}
-                  </span>
-                  <h3 className="font-display mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono bg-gradient-brand flex h-9 items-center gap-1.5 rounded-lg px-2.5 text-sm font-bold text-white shadow-lg shadow-violet-500/20">
+                      {moduleNo(i)}
+                    </span>
+                    <span className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-lavender">
+                      {module.eyebrow}
+                    </span>
+                  </div>
+                  <h3 className="font-display mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                     {module.title}
                   </h3>
                   <p className="mt-4 max-w-2xl leading-relaxed text-zinc-400">
@@ -116,7 +134,7 @@ export function Features() {
                     {module.chips.map((chip) => (
                       <span
                         key={chip}
-                        className="rounded-full border border-border px-3.5 py-1.5 text-xs font-medium text-muted-foreground"
+                        className="rounded-full border border-border px-3.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors duration-300 group-hover:border-lavender/30 group-hover:text-foreground"
                       >
                         {chip}
                       </span>
@@ -125,13 +143,13 @@ export function Features() {
                 </div>
 
                 {/* Mockup */}
-                <div className="relative mx-auto mt-10 w-full max-w-5xl">
+                <Spotlight className="relative mx-auto mt-10 w-full max-w-5xl">
                   {/* Ambient backlight */}
                   <div
                     aria-hidden
-                    className="pointer-events-none absolute -inset-8 -z-10 rounded-[2rem] bg-gradient-to-br from-violet-500 via-pink-500 to-rose-500 opacity-10 blur-3xl"
+                    className="pointer-events-none absolute -inset-8 -z-10 rounded-[2rem] bg-gradient-to-br from-violet-500 via-pink-500 to-rose-500 opacity-10 blur-3xl transition-opacity duration-500 group-hover:opacity-20"
                   />
-                  <div className="relative overflow-hidden rounded-xl border border-border bg-card">
+                  <div className="relative overflow-hidden rounded-xl border border-border bg-card transition-all duration-500 group-hover:border-lavender/30 group-hover:shadow-[0_30px_80px_-30px_rgba(139,92,246,0.35)]">
                     {/* Chrome */}
                     <div className="flex items-center gap-3 border-b border-border bg-background px-4 py-3">
                       <div className="flex shrink-0 gap-1.5">
@@ -140,7 +158,7 @@ export function Features() {
                         <span className="h-3 w-3 rounded-full bg-muted-foreground/30" />
                       </div>
                       <div className="mx-auto flex w-full max-w-md items-center justify-center gap-2 rounded-full border border-border bg-card px-4 py-1 font-mono text-[11px] text-muted-foreground">
-                        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-lavender" />
+                        <span className="animate-live-pulse h-1.5 w-1.5 shrink-0 rounded-full bg-lavender" />
                         <span className="truncate">{module.chrome}</span>
                       </div>
                       <div className="w-10 shrink-0" />
@@ -148,12 +166,19 @@ export function Features() {
                     <img
                       src={module.image}
                       alt={module.imageAlt}
+                      width={module.imageWidth}
+                      height={module.imageHeight}
                       loading="lazy"
                       decoding="async"
-                      className="block h-auto w-full"
+                      className="block h-auto w-full transition-transform duration-700 ease-premium group-hover:scale-[1.02]"
+                    />
+                    {/* Scan-line sweep */}
+                    <div
+                      aria-hidden
+                      className="animate-feature-scan pointer-events-none absolute right-0 left-0 h-px bg-gradient-to-r from-transparent via-lavender/70 to-transparent"
                     />
                   </div>
-                </div>
+                </Spotlight>
               </article>
             </Reveal>
           ))}

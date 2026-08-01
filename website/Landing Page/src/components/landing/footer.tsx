@@ -1,13 +1,13 @@
 import { Github } from "lucide-react";
-import logo from "@/assets/coco_logo_nobg.png";
+import { useNavigate } from "@tanstack/react-router";
+import logo from "@/assets/coco_logo_nobg.webp";
 import { COCOAI_REPO_URL } from "@/lib/links";
-import { useNavigation } from "@/lib/navigation";
 
 const ROUSHAN_PORTFOLIO = "https://Astreon.me";
 const AYUSHI_PORTFOLIO = "https://Ayushiraj.me";
 
 export function Footer() {
-  const { navigate } = useNavigation();
+  const navigate = useNavigate();
 
   return (
     <footer className="border-t border-border/60 px-4 py-12 sm:px-6">
@@ -15,10 +15,13 @@ export function Footer() {
         <div className="flex w-full flex-col items-center justify-between gap-6 sm:flex-row">
           <a
             href="/"
-            onClick={(e) => { e.preventDefault(); navigate("/"); }}
+            onClick={(e) => {
+              e.preventDefault();
+              navigate({ to: "/" });
+            }}
             className="flex items-center gap-2.5"
           >
-            <img src={logo} alt="CocoAI logo" className="h-7 w-auto" />
+            <img src={logo} alt="CocoAI logo" width={256} height={201} className="h-7 w-auto" />
             <span className="font-display text-lg font-bold tracking-tight text-foreground">
               CocoAI
             </span>
@@ -27,14 +30,20 @@ export function Footer() {
           <div className="flex items-center gap-6 text-sm font-medium text-muted-foreground">
             <a
               href="/about"
-              onClick={(e) => { e.preventDefault(); navigate("/about"); }}
+              onClick={(e) => {
+                e.preventDefault();
+                navigate({ to: "/about" });
+              }}
               className="transition-colors hover:text-foreground"
             >
               About Us
             </a>
             <a
               href="/contact"
-              onClick={(e) => { e.preventDefault(); navigate("/contact"); }}
+              onClick={(e) => {
+                e.preventDefault();
+                navigate({ to: "/contact" });
+              }}
               className="transition-colors hover:text-foreground"
             >
               Contact Us &amp; FAQ

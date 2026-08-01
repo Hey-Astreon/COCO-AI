@@ -24,6 +24,8 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signInWithGoogle: () => Promise<{ error: Error | null }>;
   signInWithGithub: () => Promise<{ error: Error | null }>;
+  resetPassword: (email: string) => Promise<{ error: Error | null }>;
+  updatePassword: (password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -58,16 +60,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const devUpdate = {
           subscription_tier: "developer" as const,
           tokens_limit: 1500000,
-          tokens_remaining: typeof data.tokens_remaining === "number" && data.tokens_remaining <= 1500000 ? data.tokens_remaining : 1500000,
+          tokens_remaining:
+            typeof data.tokens_remaining === "number" && data.tokens_remaining <= 1500000
+              ? data.tokens_remaining
+              : 1500000,
           audio_minutes_limit: 2000,
-          audio_minutes_remaining: typeof data.audio_minutes_remaining === "number" && data.audio_minutes_remaining <= 2000 ? data.audio_minutes_remaining : 2000,
+          audio_minutes_remaining:
+            typeof data.audio_minutes_remaining === "number" && data.audio_minutes_remaining <= 2000
+              ? data.audio_minutes_remaining
+              : 2000,
         };
 
-        if (data.subscription_tier !== "developer" || data.tokens_limit !== 1500000 || data.audio_minutes_limit !== 2000) {
-          await supabase
-            .from("user_profiles")
-            .update(devUpdate)
-            .eq("id", userId);
+        if (
+          data.subscription_tier !== "developer" ||
+          data.tokens_limit !== 1500000 ||
+          data.audio_minutes_limit !== 2000
+        ) {
+          await supabase.from("user_profiles").update(devUpdate).eq("id", userId);
         }
 
         return {
@@ -118,43 +127,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initAuth();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, s) => {
-        if (!mounted) return;
-        setSession(s);
-        setUser(s?.user ?? null);
-        if (s?.user) {
-          const p = await fetchProfile(s.user.id);
-          if (mounted) setProfile(p);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, s) => {
+      if (!mounted) return;
+      setSession(s);
+      setUser(s?.user ?? null);
+      if (s?.user) {
+        const p = await fetchProfile(s.user.id);
+        if (mounted) setProfile(p);
 
-          // Auto-sync with CocoAI Desktop App — ONLY on a genuine new sign-in.
-          // Supabase fires SIGNED_IN on every page load/refresh for token refresh too.
-          // We guard against that by checking if a session already existed at startup.
-          const isGenuineNewSignIn = _event === "SIGNED_IN" && !hadSessionOnInit;
-          if (isGenuineNewSignIn && typeof window !== "undefined") {
-            // Mark that we've now processed this sign-in so subsequent refreshes are ignored
-            hadSessionOnInit = true;
-            try {
-              const payload = {
-                user: { id: s.user.id, email: s.user.email },
-                profile: p || { subscription_tier: "free" },
-              };
-              const jsonStr = JSON.stringify(payload);
-              if (navigator.clipboard) {
-                navigator.clipboard.writeText(jsonStr).catch(() => {});
-              }
-              window.location.href = `cocoai://auth?session=${encodeURIComponent(jsonStr)}`;
-            } catch (e) {
-              console.warn("[Auth] Auto-sync desktop error:", e);
+        // Auto-sync with CocoAI Desktop App — ONLY on a genuine new sign-in.
+        // Supabase fires SIGNED_IN on every page load/refresh for token refresh too.
+        // We guard against that by checking if a session already existed at startup.
+        const isGenuineNewSignIn = _event === "SIGNED_IN" && !hadSessionOnInit;
+        if (isGenuineNewSignIn && typeof window !== "undefined") {
+          // Mark that we've now processed this sign-in so subsequent refreshes are ignored
+          hadSessionOnInit = true;
+          try {
+            const payload = {
+              user: { id: s.user.id, email: s.user.email },
+              profile: p || { subscription_tier: "free" },
+            };
+            const jsonStr = JSON.stringify(payload);
+            if (navigator.clipboard) {
+              navigator.clipboard.writeText(jsonStr).catch(() => {});
             }
+            window.location.href = `cocoai://auth?session=${encodeURIComponent(jsonStr)}`;
+          } catch (e) {
+            console.warn("[Auth] Auto-sync desktop error:", e);
           }
-        } else {
-          setProfile(null);
-          // Reset so the next sign-in will be treated as genuine
-          hadSessionOnInit = false;
         }
+      } else {
+        setProfile(null);
+        // Reset so the next sign-in will be treated as genuine
+        hadSessionOnInit = false;
       }
-    );
+    });
 
     return () => {
       mounted = false;
@@ -198,6 +207,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error as Error | null };
   }
 
+  async function resetPassword(email: string) {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    return { error: error as Error | null };
+  }
+
+  async function updatePassword(password: string) {
+    const { error } = await supabase.auth.updateUser({ password });
+    return { error: error as Error | null };
+  }
+
   async function signOut() {
     await supabase.auth.signOut();
     setUser(null);
@@ -208,8 +229,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        user, session, profile, loading,
-        signUp, signIn, signInWithGoogle, signInWithGithub, signOut, refreshProfile,
+        user,
+        session,
+        profile,
+        loading,
+        signUp,
+        signIn,
+        signInWithGoogle,
+        signInWithGithub,
+        resetPassword,
+        updatePassword,
+        signOut,
+        refreshProfile,
       }}
     >
       {children}

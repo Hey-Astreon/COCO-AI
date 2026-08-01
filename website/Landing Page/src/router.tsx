@@ -9,6 +9,9 @@ export const getRouter = () => {
     routeTree,
     context: { queryClient },
     scrollRestoration: true,
+    // Preload route chunks on hover/focus of <Link> components so navigating
+    // to /about, /contact, /login, /signup feels instant.
+    defaultPreload: "intent",
     defaultPreloadStaleTime: 0,
   });
 

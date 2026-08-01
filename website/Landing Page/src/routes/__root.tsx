@@ -1,32 +1,52 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/lib/auth-context";
 import {
-  Outlet,
+  HeadContent,
   Link,
+  Outlet,
   createRootRouteWithContext,
+  useLocation,
   useRouter,
 } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { ArrowLeft, Compass, Home, RefreshCcw } from "lucide-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Background } from "@/components/landing/background";
+import { Magnetic } from "@/components/landing/magnetic";
+import { Navbar } from "@/components/landing/navbar";
+import { Footer } from "@/components/landing/footer";
+import { BackToTop } from "@/components/landing/back-to-top";
+import { StateScreen } from "@/components/landing/state-screen";
+import { Toaster } from "sonner";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="font-display text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
-        </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+    <StateScreen
+      code="404"
+      chip="This page went off-grid"
+      chipIcon={Compass}
+      title="Page not found"
+      description="The page you're looking for doesn't exist or has been moved — maybe it was too stealthy even for CocoAI."
+      actions={
+        <>
+          <Magnetic strength={6}>
+            <Link
+              to="/"
+              className="btn-shine bg-gradient-brand relative inline-flex items-center gap-2 overflow-hidden rounded-full px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition-all duration-200 hover:shadow-primary/45"
+            >
+              <Home className="h-4 w-4" />
+              Go home
+            </Link>
+          </Magnetic>
+          <button
+            onClick={() => window.history.back()}
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-medium text-foreground transition-all duration-200 hover:border-lavender/40 hover:bg-accent"
           >
-            Go home
-          </Link>
-        </div>
-      </div>
-    </div>
+            <ArrowLeft className="h-4 w-4" />
+            Go back
+          </button>
+        </>
+      }
+    />
   );
 }
 
@@ -35,33 +55,35 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {error?.message || "Something went wrong on our end."}
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+    <StateScreen
+      variant="card"
+      icon={RefreshCcw}
+      title="This page didn't load"
+      description={error?.message || "Something went wrong on our end."}
+      actions={
+        <>
+          <Magnetic strength={6}>
+            <button
+              onClick={() => {
+                router.invalidate();
+                reset();
+              }}
+              className="btn-shine bg-gradient-brand relative inline-flex items-center gap-2 overflow-hidden rounded-full px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition-all duration-200 hover:shadow-primary/45"
+            >
+              <RefreshCcw className="h-4 w-4" />
+              Try again
+            </button>
+          </Magnetic>
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-medium text-foreground transition-all duration-200 hover:border-lavender/40 hover:bg-accent"
           >
-            Try again
-          </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
+            <Home className="h-4 w-4" />
             Go home
-          </a>
-        </div>
-      </div>
-    </div>
+          </Link>
+        </>
+      }
+    />
   );
 }
 
@@ -79,19 +101,56 @@ function RootShell({ children }: { children: ReactNode }) {
 const defaultQueryClient = new QueryClient();
 
 function RootComponent() {
-  const [queryClient] = useState(() => {
+  const routeContext = Route.useRouteContext();
+  const [queryClient] = useState(() => routeContext?.queryClient || defaultQueryClient);
+
+  const pathname = useLocation().pathname;
+  const isAuthRoute =
+    pathname === "/login" || pathname === "/signup" || pathname === "/reset-password";
+  const mainRef = useRef<HTMLElement>(null);
+
+  // Toast theme follows the .dark class on <html> (toggled by ThemeToggle).
+  const [isDark, setIsDark] = useState(() =>
+    typeof document !== "undefined" ? document.documentElement.classList.contains("dark") : true,
+  );
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const sync = () => setIsDark(root.classList.contains("dark"));
+    const observer = new MutationObserver(sync);
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+    // Pick up the persisted theme on first paint (ThemeToggle writes coco-theme).
     try {
-      const ctx = Route.useRouteContext();
-      return ctx?.queryClient || defaultQueryClient;
+      const saved = localStorage.getItem("coco-theme");
+      if (saved) root.classList.toggle("dark", saved === "dark");
     } catch {
-      return defaultQueryClient;
+      /* storage unavailable — keep current class */
     }
-  });
+    sync();
+    return () => observer.disconnect();
+  }, []);
+
+  // Move focus to the page content on route change for keyboard/screen-reader users.
+  // preventScroll keeps the router's scrollRestoration from being clobbered on back-nav.
+  useEffect(() => {
+    mainRef.current?.focus({ preventScroll: true });
+  }, [pathname]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Outlet />
+        <div className="min-h-screen bg-background font-sans text-foreground antialiased selection:bg-primary/30 selection:text-primary-foreground">
+          <Background />
+          <HeadContent />
+          {!isAuthRoute && <Navbar />}
+          {/* key={pathname} remounts the page on navigation → tab-enter crossfade */}
+          <main ref={mainRef} tabIndex={-1} key={pathname} className="tab-enter outline-none">
+            <Outlet />
+          </main>
+          {!isAuthRoute && <Footer />}
+          {!isAuthRoute && <BackToTop />}
+          <Toaster theme={isDark ? "dark" : "light"} position="bottom-right" richColors />
+        </div>
       </AuthProvider>
     </QueryClientProvider>
   );

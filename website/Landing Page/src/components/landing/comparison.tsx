@@ -1,4 +1,7 @@
 import { Sparkles, Check, X, Minus } from "lucide-react";
+import { SectionTag } from "./section-tag";
+import { Reveal } from "./reveal";
+import cocoLogo from "@/assets/coco_logo_nobg.webp";
 
 const COMPARISON_DATA = {
   features: [
@@ -16,11 +19,57 @@ const COMPARISON_DATA = {
     "No Data Storage / Privacy",
   ],
   tools: [
-    { name: "CocoAI",        color: "hsl(262 83% 68%)", values: [true, true, true, true, true, true, true, true, true, true, true, true] },
-    { name: "Cluely",        color: "hsl(0 0% 55%)",    values: [true, true, true, false, false, false, false, false, false, true, true, "partial"] },
-    { name: "Parakeet AI",   color: "hsl(0 0% 55%)",    values: [true, true, "partial", false, false, false, false, false, true, true, false, "partial"] },
-    { name: "Chiku AI",      color: "hsl(0 0% 55%)",    values: ["partial", true, "partial", false, false, false, false, false, true, true, false, "partial"] },
-    { name: "Mindwhisper AI",color: "hsl(0 0% 55%)",    values: [false, true, "partial", false, false, false, false, false, true, true, false, false] },
+    {
+      name: "CocoAI",
+      logo: { type: "image" },
+      values: [true, true, true, true, true, true, true, true, true, true, true, true],
+    },
+    {
+      name: "Cluely",
+      logo: { type: "monogram", text: "Cl", gradient: "from-cyan-500 to-blue-600" },
+      values: [true, true, true, false, false, false, false, false, false, true, true, "partial"],
+    },
+    {
+      name: "Parakeet AI",
+      logo: { type: "monogram", text: "Pa", gradient: "from-emerald-500 to-teal-600" },
+      values: [
+        true,
+        true,
+        "partial",
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        "partial",
+      ],
+    },
+    {
+      name: "Chiku AI",
+      logo: { type: "monogram", text: "Ch", gradient: "from-amber-500 to-orange-600" },
+      values: [
+        "partial",
+        true,
+        "partial",
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        "partial",
+      ],
+    },
+    {
+      name: "Mindwhisper AI",
+      logo: { type: "monogram", text: "Mi", gradient: "from-fuchsia-500 to-purple-600" },
+      values: [false, true, "partial", false, false, false, false, false, true, true, false, false],
+    },
   ],
 };
 
@@ -28,35 +77,23 @@ function Cell({ value, isCocoAI }: { value: boolean | string; isCocoAI: boolean 
   if (value === true)
     return (
       <span
-        className="inline-flex h-6 w-6 items-center justify-center rounded-full"
-        style={{
-          background: isCocoAI ? "hsl(262 83% 58% / 0.18)" : "hsl(142 70% 45% / 0.12)",
-          color: isCocoAI ? "hsl(262 83% 72%)" : "hsl(142 70% 55%)",
-        }}
+        className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${
+          isCocoAI
+            ? "bg-gradient-brand text-white shadow-md shadow-violet-500/25"
+            : "bg-emerald-500/10 text-emerald-500"
+        }`}
       >
         <Check className="h-3.5 w-3.5" />
       </span>
     );
   if (value === "partial")
     return (
-      <span
-        className="inline-flex h-6 w-6 items-center justify-center rounded-full"
-        style={{
-          background: "hsl(48 95% 50% / 0.12)",
-          color: "hsl(48 95% 60%)",
-        }}
-      >
+      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-amber-500/10 text-amber-500">
         <Minus className="h-3.5 w-3.5" />
       </span>
     );
   return (
-    <span
-      className="inline-flex h-6 w-6 items-center justify-center rounded-full"
-      style={{
-        background: "hsl(0 70% 50% / 0.10)",
-        color: "hsl(0 70% 60%)",
-      }}
-    >
+    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-500/10 text-red-500/80">
       <X className="h-3.5 w-3.5" />
     </span>
   );
@@ -64,97 +101,121 @@ function Cell({ value, isCocoAI }: { value: boolean | string; isCocoAI: boolean 
 
 export function Comparison() {
   return (
-    <section id="comparison" className="relative py-20 px-6">
+    <section id="comparison" className="relative overflow-hidden px-4 py-24 sm:px-6 sm:py-32">
+      {/* Ambient glow */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute top-1/3 left-1/2 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-600/15 via-pink-500/10 to-rose-500/15 blur-[110px]" />
+      </div>
+
       <div className="mx-auto max-w-5xl">
-        <div className="mb-12 text-center">
-          <div
-            className="mb-4 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest"
-            style={{ background: "hsl(262 83% 58% / 0.1)", border: "1px solid hsl(262 83% 58% / 0.25)", color: "hsl(262 83% 72%)" }}
-          >
-            <Sparkles className="h-3 w-3" />
-            Why CocoAI
-          </div>
-          <h2 className="text-3xl font-bold sm:text-4xl text-foreground">
+        <Reveal className="mb-12 text-center">
+          <SectionTag label="Why CocoAI" />
+          <h2 className="font-display mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             CocoAI vs. the competition
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-sm text-muted-foreground">
             See exactly how CocoAI stacks up against other interview copilot tools on the market.
           </p>
-        </div>
+        </Reveal>
 
-        <div
-          className="overflow-hidden rounded-2xl border border-border/60"
-          style={{ background: "hsl(240 6% 7%)" }}
-        >
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr>
-                  <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b border-border/40 text-muted-foreground">
-                    Feature
-                  </th>
-                  {COMPARISON_DATA.tools.map((t, i) => (
-                    <th
-                      key={t.name}
-                      className="px-4 py-4 text-center text-sm font-bold border-b border-border/40"
-                      style={{
-                        color: i === 0 ? "hsl(262 83% 72%)" : "hsl(240 5% 55%)",
-                        background: i === 0 ? "hsl(262 83% 58% / 0.06)" : "transparent",
-                        minWidth: "110px",
-                      }}
-                    >
-                      {i === 0 && (
-                        <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider" style={{ color: "hsl(262 83% 60%)" }}>
-                          ⭐ Best
-                        </div>
-                      )}
-                      {t.name}
+        <Reveal>
+          <div className="glass-card overflow-hidden rounded-2xl">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr>
+                    <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b border-border/60 text-muted-foreground">
+                      Feature
                     </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {COMPARISON_DATA.features.map((feature, fi) => (
-                  <tr
-                    key={feature}
-                    style={{ borderBottom: fi < COMPARISON_DATA.features.length - 1 ? "1px solid hsl(240 6% 12%)" : "none" }}
-                  >
-                    <td className="px-5 py-3.5 text-sm text-foreground/80">
-                      {feature}
-                    </td>
-                    {COMPARISON_DATA.tools.map((t, ti) => (
-                      <td
+                    {COMPARISON_DATA.tools.map((t, i) => (
+                      <th
                         key={t.name}
-                        className="px-4 py-3.5 text-center"
-                        style={{ background: ti === 0 ? "hsl(262 83% 58% / 0.04)" : "transparent" }}
+                        className="relative px-4 py-4 text-center text-sm font-bold border-b border-border/60"
                       >
-                        <div className="flex justify-center">
-                          <Cell value={t.values[fi]} isCocoAI={ti === 0} />
-                        </div>
-                      </td>
+                        {i === 0 && (
+                          <span className="mb-1.5 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-violet-600 to-pink-600 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white shadow-md shadow-violet-500/25">
+                            <Sparkles className="h-2.5 w-2.5" />
+                            Best
+                          </span>
+                        )}
+                        {/* Logo chip: real logo for CocoAI, monogram for rivals */}
+                        <span
+                          className={`mx-auto mb-1.5 flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg shadow-sm ${
+                            t.logo.type === "image"
+                              ? "bg-white ring-1 ring-black/5 dark:ring-white/15"
+                              : `bg-gradient-to-br ${t.logo.gradient} text-[10px] font-bold text-white`
+                          }`}
+                        >
+                          {t.logo.type === "image" ? (
+                            <img
+                              src={cocoLogo}
+                              alt="CocoAI logo"
+                              width={256}
+                              height={201}
+                              className="h-6 w-auto object-contain"
+                            />
+                          ) : (
+                            t.logo.text
+                          )}
+                        </span>
+                        <span
+                          className={`block font-display ${i === 0 ? "text-gradient" : "text-muted-foreground"}`}
+                        >
+                          {t.name}
+                        </span>
+                      </th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {COMPARISON_DATA.features.map((feature, fi) => (
+                    <tr
+                      key={feature}
+                      className={`transition-colors hover:bg-accent/40 ${
+                        fi < COMPARISON_DATA.features.length - 1 ? "border-b border-border/40" : ""
+                      }`}
+                    >
+                      <td className="px-5 py-3.5 text-sm text-foreground/80">{feature}</td>
+                      {COMPARISON_DATA.tools.map((t, ti) => (
+                        <td key={t.name} className="px-4 py-3.5 text-center">
+                          <div className="flex justify-center">
+                            <Cell value={t.values[fi]} isCocoAI={ti === 0} />
+                          </div>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-          {/* Legend */}
-          <div
-            className="flex flex-wrap items-center gap-5 px-5 py-4 border-t border-border/40"
-          >
-            {[
-              { icon: <Check className="h-3 w-3" />, color: "hsl(142 70% 55%)", label: "Supported" },
-              { icon: <Minus className="h-3 w-3" />, color: "hsl(48 95% 60%)", label: "Partial / Limited" },
-              { icon: <X className="h-3 w-3" />, color: "hsl(0 70% 60%)", label: "Not available" },
-            ].map(({ icon, color, label }) => (
-              <div key={label} className="flex items-center gap-1.5">
-                <span style={{ color }}>{icon}</span>
-                <span className="text-xs text-muted-foreground">{label}</span>
-              </div>
-            ))}
+            {/* Legend */}
+            <div className="flex flex-wrap items-center gap-5 border-t border-border/40 px-5 py-4">
+              {[
+                {
+                  icon: <Check className="h-3 w-3" />,
+                  color: "text-emerald-500",
+                  label: "Supported",
+                },
+                {
+                  icon: <Minus className="h-3 w-3" />,
+                  color: "text-amber-500",
+                  label: "Partial / Limited",
+                },
+                {
+                  icon: <X className="h-3 w-3" />,
+                  color: "text-red-500/80",
+                  label: "Not available",
+                },
+              ].map(({ icon, color, label }) => (
+                <div key={label} className="flex items-center gap-1.5">
+                  <span className={color}>{icon}</span>
+                  <span className="text-xs text-muted-foreground">{label}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

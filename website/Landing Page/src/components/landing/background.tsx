@@ -41,6 +41,16 @@ export function Background() {
       <div className="bg-grid absolute inset-0" />
       {/* Cursor-tracking flashlight — a slightly stronger grid revealed by a radial mask. */}
       <div className="grid-flashlight absolute inset-0" />
+      {/* Aurora orbs — deep ambient color that drifts slowly */}
+      <div className="animate-aurora absolute top-[-20%] left-[-10%] h-[60vh] w-[60vh] rounded-full bg-violet-600/15 blur-[120px]" />
+      <div
+        className="animate-aurora absolute right-[-15%] top-[30%] h-[55vh] w-[55vh] rounded-full bg-pink-600/10 blur-[120px]"
+        style={{ animationDelay: "-7s" }}
+      />
+      <div
+        className="animate-aurora absolute bottom-[-25%] left-[20%] h-[50vh] w-[50vh] rounded-full bg-rose-500/10 blur-[120px]"
+        style={{ animationDelay: "-12s" }}
+      />
       {/* Vignette */}
       <div
         className="absolute inset-0"

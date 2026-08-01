@@ -1,14 +1,20 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Background } from "@/components/landing/background";
-import { AuthPage } from "@/components/auth/auth-page";
+import { lazy, Suspense } from "react";
+import { AuthLoading } from "@/components/auth/auth-loading";
+import { seoHead } from "@/lib/seo";
+
+const AuthPage = lazy(() =>
+  import("@/components/auth/auth-page").then((m) => ({ default: m.AuthPage })),
+);
 
 export const Route = createFileRoute("/login")({
-  head: () => ({
-    meta: [
-      { title: "Sign In — CocoAI" },
-      { name: "description", content: "Sign in to your CocoAI account to manage your subscription and access the dashboard." },
-    ],
-  }),
+  head: () =>
+    seoHead({
+      title: "Sign In — CocoAI",
+      description:
+        "Sign in to your CocoAI account to manage your subscription and access the dashboard.",
+      path: "/login",
+    }),
   component: LoginPage,
 });
 
@@ -16,12 +22,8 @@ function LoginPage() {
   const navigate = useNavigate();
 
   return (
-    <>
-      <Background />
-      <AuthPage
-        defaultMode="login"
-        onClose={() => navigate({ to: "/" })}
-      />
-    </>
+    <Suspense fallback={<AuthLoading />}>
+      <AuthPage defaultMode="login" onClose={() => navigate({ to: "/" })} />
+    </Suspense>
   );
 }

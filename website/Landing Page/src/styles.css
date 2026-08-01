@@ -304,11 +304,15 @@
   position: relative;
   isolation: isolate;
 
+  /* z-index: 1 paints the cursor light ABOVE the wrapped card surface
+     (a soft sheen over opaque mockups), while pointer-events:none keeps it
+     non-interactive. Children never get forced position/z-index, so
+     absolutely-positioned children are never clobbered. */
   &::before {
     content: "";
     position: absolute;
     inset: 0;
-    z-index: 0;
+    z-index: 1;
     border-radius: inherit;
     pointer-events: none;
     background: radial-gradient(
@@ -322,11 +326,6 @@
 
   &:hover::before {
     opacity: 1;
-  }
-
-  & > * {
-    position: relative;
-    z-index: 1;
   }
 }
 
@@ -415,10 +414,11 @@
   }
 }
 
-/* Scroll-reveal animation (driven by the Reveal component). */
+/* Scroll-reveal animation (driven by the Reveal component).
+   Elements start hidden (below-fold) and rise into place when scrolled into view. */
 .reveal {
-  opacity: 1;
-  transform: translateY(0);
+  opacity: 0;
+  transform: translateY(28px) scale(0.99);
   transition:
     opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
     transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
@@ -427,11 +427,165 @@
 
 .reveal.is-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
 }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .reveal, .word-reveal .word { opacity: 1; transform: none; transition: none; }
   .tab-enter, .animate-feature-progress, .animate-feature-scan { animation: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PREMIUM UPGRADE — bolder motion, richer depth
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Animated conic-gradient border ring (pricing highlight, giveaway card). */
+@property --ring-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@utility gradient-border-animated {
+  position: relative;
+  isolation: isolate;
+
+  /* The ring must sit BELOW in-flow content but above the card background,
+     without forcing position/z-index onto children (which would clobber
+     absolutely-positioned children like the pricing badge). */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: conic-gradient(
+      from var(--ring-angle, 0deg),
+      var(--primary),
+      var(--pink),
+      var(--crimson),
+      var(--primary)
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: ring-spin 6s linear infinite;
+    pointer-events: none;
+  }
+}
+
+@keyframes ring-spin {
+  to { --ring-angle: 360deg; }
+}
+
+/* Sheen that sweeps across a button on hover. */
+@utility btn-shine {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -60%;
+    width: 45%;
+    z-index: -1;
+    background: linear-gradient(
+      105deg,
+      transparent,
+      color-mix(in oklab, white 45%, transparent),
+      transparent
+    );
+    transform: skewX(-20deg);
+    animation: shine-sweep 3.8s ease-in-out infinite;
+    pointer-events: none;
+  }
+}
+
+@keyframes shine-sweep {
+  0% { left: -60%; }
+  55%, 100% { left: 140%; }
+}
+
+/* Drifting aurora blobs behind the hero. Blur-heavy, so they only run on
+   fine-pointer devices (mouse/trackpad) — gated off for touch/low-end
+   devices to avoid scroll jank. */
+@keyframes aurora-drift {
+  0%, 100% { transform: translate(-2%, -1%) scale(1); }
+  50% { transform: translate(2%, 3%) scale(1.08); }
+}
+
+.animate-aurora {
+  animation: aurora-drift 14s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Gentle vertical float for hero chips. */
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float-y 5s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* On coarse-pointer (touch) devices, static aurora and no bob: the heavy
+   blur + transform churn is the main source of scroll jank on low-end gear. */
+@media (pointer: coarse) {
+  .animate-aurora {
+    animation: none;
+  }
+  .animate-float {
+    animation: none;
+  }
+}
+
+/* Animated gradient text (headline accent). */
+@utility text-gradient-animate {
+  background-image: var(--gradient-brand);
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: gradient-x 6s ease infinite;
+}
+
+@keyframes gradient-x {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Pulsing "live" status dot. */
+@keyframes live-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--lavender) 70%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 7px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.animate-live-pulse {
+  animation: live-pulse 2s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gradient-border-animated::before,
+  .btn-shine::after,
+  .animate-aurora,
+  .animate-float,
+  .animate-live-pulse,
+  .text-gradient-animate {
+    animation: none;
+  }
 }

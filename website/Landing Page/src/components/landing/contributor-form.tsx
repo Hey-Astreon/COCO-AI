@@ -92,11 +92,11 @@ export function ContributorForm() {
         </Reveal>
 
         <Reveal delay={150}>
-          <div className="glass-card relative mt-12 overflow-hidden rounded-2xl p-6 sm:p-10">
+          <div className="glass-card gradient-top-border relative mt-12 overflow-hidden rounded-2xl p-6 sm:p-10">
             {submitted ? (
               <div className="flex flex-col items-center py-10 text-center">
-                <span className="flex h-16 w-16 items-center justify-center rounded-full border border-border bg-background">
-                  <CheckCircle2 className="h-8 w-8 text-lavender" />
+                <span className="bg-gradient-brand flex h-16 w-16 items-center justify-center rounded-full shadow-lg shadow-violet-500/25">
+                  <CheckCircle2 className="h-8 w-8 text-white" />
                 </span>
                 <h3 className="font-display mt-6 text-2xl font-bold text-foreground">
                   Application submitted!
@@ -112,6 +112,9 @@ export function ContributorForm() {
                 >
                   Submit another application
                 </button>
+                <p className="mt-4 text-xs text-muted-foreground">
+                  🎉 Contributing developers are upgraded to the Developer Tier 👑
+                </p>
               </div>
             ) : (
               <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
@@ -207,7 +210,7 @@ export function ContributorForm() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-7 py-3.5 text-sm font-bold text-background transition-transform duration-300 ease-premium hover:scale-[1.01] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
+                  className="btn-shine mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-pink-600 px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-all duration-300 ease-premium hover:scale-[1.01] hover:shadow-violet-500/45 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
                 >
                   {isSubmitting ? (
                     <>

@@ -8,13 +8,22 @@ type RevealProps = {
 
 export function Reveal({ children, className = "", delay = 0 }: RevealProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(true);
+  // Start hidden so the fade-up actually animates; elements already inside the
+  // viewport on load are revealed on first paint (checked synchronously).
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const element = ref.current;
     if (!element) return;
 
     if (!("IntersectionObserver" in window)) {
+      setVisible(true);
+      return;
+    }
+
+    // Already visible on load (hero above the fold) — reveal immediately.
+    const rect = element.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
       setVisible(true);
       return;
     }

@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { HelpCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { SectionTag } from "./section-tag";
+import { Reveal } from "./reveal";
 
 const FAQ_ITEMS = [
   {
@@ -36,54 +38,50 @@ export function Faq() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
-    <section id="faq" className="relative py-20 px-6">
+    <section id="faq" className="relative px-4 py-24 sm:px-6 sm:py-32">
       <div className="mx-auto max-w-2xl">
-        <div className="mb-10 text-center">
-          <div
-            className="mb-4 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest"
-            style={{ background: "hsl(48 95% 50% / 0.1)", border: "1px solid hsl(48 95% 50% / 0.25)", color: "hsl(48 95% 65%)" }}
-          >
-            <HelpCircle className="h-3 w-3" />
-            FAQ
-          </div>
-          <h2 className="text-3xl font-bold text-foreground">
+        <Reveal className="mb-12 text-center">
+          <SectionTag label="FAQ" />
+          <h2 className="font-display mt-4 text-3xl font-bold tracking-tight text-foreground">
             Frequently Asked Questions
           </h2>
           <p className="mt-3 text-sm text-muted-foreground">
             Everything you need to know before your next interview.
           </p>
-        </div>
+        </Reveal>
 
         <div className="space-y-3">
           {FAQ_ITEMS.map((item, i) => (
-            <div
-              key={i}
-              className="overflow-hidden rounded-xl transition-all duration-200 glass-card"
-              style={{
-                border: openFaq === i ? "1px solid hsl(262 83% 58% / 0.4)" : "1px solid hsl(240 6% 15%)",
-                boxShadow: openFaq === i ? "0 4px 20px hsl(262 83% 58% / 0.08)" : "none",
-              }}
-            >
-              <button
-                onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors"
+            <Reveal key={i} delay={i * 40}>
+              <div
+                className={`glass-card overflow-hidden rounded-xl transition-all duration-300 ${
+                  openFaq === i
+                    ? "border-lavender/40 shadow-[0_8px_30px_-8px_rgba(139,92,246,0.25)]"
+                    : "hover:border-lavender/25"
+                }`}
               >
-                <span className="text-sm font-medium text-foreground">
-                  {item.q}
-                </span>
-                <span className="shrink-0 transition-transform duration-200" style={{ color: "hsl(262 83% 68%)" }}>
-                  {openFaq === i ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                </span>
-              </button>
-              {openFaq === i && (
-                <div className="px-5 pb-5">
-                  <div className="h-px mb-4 bg-border/40" />
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {item.a}
-                  </p>
-                </div>
-              )}
-            </div>
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  aria-expanded={openFaq === i}
+                  className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors"
+                >
+                  <span className="text-sm font-medium text-foreground">{item.q}</span>
+                  <span
+                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
+                      openFaq === i ? "bg-gradient-brand text-white shadow-md shadow-violet-500/25" : "bg-accent text-muted-foreground"
+                    }`}
+                  >
+                    {openFaq === i ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                  </span>
+                </button>
+                {openFaq === i && (
+                  <div className="px-5 pb-5">
+                    <div className="mb-4 h-px bg-border/40" />
+                    <p className="text-sm leading-relaxed text-muted-foreground">{item.a}</p>
+                  </div>
+                )}
+              </div>
+            </Reveal>
           ))}
         </div>
       </div>
