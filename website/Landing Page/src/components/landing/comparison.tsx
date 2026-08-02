@@ -152,6 +152,8 @@ export function Comparison() {
                               alt="CocoAI logo"
                               width={256}
                               height={201}
+                              decoding="async"
+                              loading="lazy"
                               className="h-6 w-auto object-contain"
                             />
                           ) : (

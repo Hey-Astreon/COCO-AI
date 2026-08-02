@@ -796,10 +796,10 @@
   to { transform: rotate(-360deg); }
 }
 
-.animate-orbit-cw-30 { animation: orbit-cw 30s linear infinite; }
-.animate-orbit-cw-40 { animation: orbit-cw 40s linear infinite; }
-.animate-orbit-cw-50 { animation: orbit-cw 50s linear infinite; }
-.animate-orbit-ccw-60 { animation: orbit-ccw 60s linear infinite; }
+.animate-orbit-cw-30 { animation: orbit-cw 30s linear infinite; will-change: transform; }
+.animate-orbit-cw-40 { animation: orbit-cw 40s linear infinite; will-change: transform; }
+.animate-orbit-cw-50 { animation: orbit-cw 50s linear infinite; will-change: transform; }
+.animate-orbit-ccw-60 { animation: orbit-ccw 60s linear infinite; will-change: transform; }
 
 /* Ticker Marquee Animation */
 @keyframes ticker-scroll {
@@ -809,6 +809,7 @@
 
 .animate-ticker-scroll {
   animation: ticker-scroll 24s linear infinite;
+  will-change: transform;
 }
 
 .animate-ticker-scroll:hover {

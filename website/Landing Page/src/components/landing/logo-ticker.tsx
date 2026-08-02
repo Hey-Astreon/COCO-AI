@@ -44,17 +44,20 @@ export function LogoTicker() {
       </div>
 
       <div className="ticker-mask-edges relative overflow-hidden w-full">
-        <div className="animate-ticker-scroll flex w-max items-center gap-12 sm:gap-16">
+        <div className="animate-ticker-scroll flex w-max items-center gap-10 sm:gap-16">
           {tickerItems.map((logo, i) => (
             <div
               key={`${logo.name}-${i}`}
-              className="flex shrink-0 items-center justify-center gap-3 rounded-xl border border-border bg-background px-5 py-2.5 shadow-sm transition-all duration-200 hover:border-violet-500/40 hover:scale-105"
+              className="flex shrink-0 items-center justify-center gap-2.5 rounded-xl border border-border bg-background px-4 sm:px-5 py-2 sm:py-2.5 shadow-sm transition-all duration-200 hover:border-violet-500/40 hover:scale-105"
             >
               <img
                 src={logo.src}
                 alt={`${logo.name} logo`}
-                className="h-6 w-auto object-contain max-w-[100px]"
+                width={24}
+                height={24}
+                decoding="async"
                 loading="lazy"
+                className="h-5 sm:h-6 w-auto object-contain max-w-[90px] sm:max-w-[100px]"
               />
               <span className="font-sans text-xs font-medium text-foreground">
                 {logo.name}
