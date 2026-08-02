@@ -4,6 +4,27 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
     <meta name="theme-color" content="#07070c" />
+    <title>CocoAI — Invisible Real-Time Interview Copilot</title>
+    <meta name="description" content="Ace your technical interviews invisibly. Real-time question detection, personalized answers based on your resume, and a fully customizable stealth overlay powered by Cerebras ultra-fast LLMs." />
+    <meta name="keywords" content="CocoAI, AI interview copilot, technical interview assistant, invisible interview AI, Cerebras AI, Deepgram Nova-3, LeetCode copilot, System design AI, real-time interview helper, stealth overlay, DirectX screen share protection" />
+    <meta name="author" content="Roushan Kumar & Ayushi Raj" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://coco-ai-cyan.vercel.app/" />
+    <meta property="og:title" content="CocoAI — Invisible Real-Time Interview Copilot" />
+    <meta property="og:description" content="Real-time audio question detection, personalized answers tailored to your resume, and native DirectX screen-share protection." />
+    <meta property="og:image" content="https://coco-ai-cyan.vercel.app/real_cocoai_ui_preview.webp" />
+    <meta property="og:site_name" content="CocoAI" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://coco-ai-cyan.vercel.app/" />
+    <meta name="twitter:title" content="CocoAI — Invisible Real-Time Interview Copilot" />
+    <meta name="twitter:description" content="Real-time audio question detection, personalized answers tailored to your resume, and native DirectX screen-share protection." />
+    <meta name="twitter:image" content="https://coco-ai-cyan.vercel.app/real_cocoai_ui_preview.webp" />
+
     <script>
       /* Pre-paint theme: pinned override (coco-theme) wins, else follow the OS. */
       (function () {
@@ -21,14 +42,90 @@
         }
       })();
     </script>
-    <title>CocoAI — Invisible Real-Time Interview Copilot</title>
-    <meta name="description" content="Ace your technical interviews invisibly. Real-time question detection, personalized answers based on your resume, and a fully customizable stealth overlay." />
+
+    <!-- Resource prefetching -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
     <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    
     <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Structured Data (JSON-LD) for Google Rich Snippets -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "SoftwareApplication",
+            "name": "CocoAI",
+            "operatingSystem": "Windows 10, Windows 11",
+            "applicationCategory": "DeveloperApplication",
+            "url": "https://coco-ai-cyan.vercel.app",
+            "image": "https://coco-ai-cyan.vercel.app/real_cocoai_ui_preview.webp",
+            "description": "Invisible real-time AI technical interview copilot overlay. Powered by Cerebras ultra-fast LLMs and Deepgram Nova-3 transcription with DirectX screen protection.",
+            "softwareVersion": "1.0.0",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "author": [
+              {
+                "@type": "Person",
+                "name": "Roushan Kumar",
+                "sameAs": "https://github.com/Hey-Astreon"
+              },
+              {
+                "@type": "Person",
+                "name": "Ayushi Raj",
+                "sameAs": "https://github.com/Silenttears-cloud"
+              }
+            ]
+          },
+          {
+            "@type": "Organization",
+            "name": "CocoAI",
+            "url": "https://coco-ai-cyan.vercel.app",
+            "logo": "https://coco-ai-cyan.vercel.app/favicon.png",
+            "sameAs": [
+              "https://github.com/Hey-Astreon/COCO-AI"
+            ]
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Will CocoAI get me banned or flagged during an interview?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. CocoAI runs as an invisible overlay that is completely undetectable by screen-sharing software like Zoom, Google Meet, MS Teams, or any proctoring tool using Electron's content protection API."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Do you store my interview conversations or audio?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Absolutely not. CocoAI processes everything locally on your machine. Your audio is streamed directly to Deepgram for transcription and immediately discarded. Nothing is logged or stored on CocoAI servers."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What AI models power CocoAI?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "CocoAI is powered by Cerebras ultra-fast LPUs (2,000+ tokens/sec) running Llama 3.3 70B, with automatic silent fallback to Groq and Gemini 2.0 Flash for multi-screenshot vision analysis."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

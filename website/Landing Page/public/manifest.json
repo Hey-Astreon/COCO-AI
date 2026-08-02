@@ -1,0 +1,16 @@
+{
+  "name": "CocoAI — Invisible Real-Time Interview Copilot",
+  "short_name": "CocoAI",
+  "description": "Ace your technical interviews invisibly. Real-time question detection, personalized answers based on your resume, and a fully customizable stealth overlay.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07070c",
+  "theme_color": "#07070c",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
