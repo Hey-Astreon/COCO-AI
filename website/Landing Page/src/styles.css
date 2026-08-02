@@ -420,37 +420,17 @@
   }
 }
 
-/* Smooth theme swap — enabled briefly by the toggle fallback. */
-.theme-anim,
-.theme-anim * {
-  transition:
-    background-color 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-    color 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-
-/* ─── View Transitions API — Circular Liquid Radial Theme Reveal ─── */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-
-::view-transition-old(root) {
-  z-index: 1;
-}
-
-::view-transition-new(root) {
-  z-index: 9999;
-}
-
-.dark::view-transition-old(root) {
-  z-index: 9999;
-}
-
-.dark::view-transition-new(root) {
-  z-index: 1;
+/* Fast, lag-free hardware-accelerated theme transition */
+html,
+body,
+header,
+footer,
+nav,
+main,
+section,
+article,
+.glass-card {
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Content swap for route changes. Transform-only on purpose: the wrapped
