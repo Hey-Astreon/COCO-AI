@@ -5,9 +5,8 @@ import { DownloadModal } from "@/components/landing/download-modal";
 import { seoHead } from "@/lib/seo";
 
 // Every section below the hero is code-split into its own chunk. Instead of
-// fetching them all on load, each <LazySection> only starts importing its chunk
-// once the user scrolls within ~1200px of it — a head start long enough for the
-// chunk to finish downloading before the section enters the viewport.
+// fetching them all on load, each <LazySection> starts importing its chunk
+// once the user scrolls within ~1200px or clicks its navbar link.
 const Platforms = lazy(() =>
   import("@/components/landing/platforms").then((m) => ({ default: m.Platforms })),
 );
@@ -36,17 +35,45 @@ function SectionFallback() {
 }
 
 /**
- * Renders nothing (just a spacer) until the sentinel scrolls within 1200px of
- * the viewport, then mounts the lazy section — triggering its chunk download
- * with enough time to finish before the user arrives.
+ * Renders fallback until sentinel scrolls within 1200px OR nav click / hash targets it,
+ * then mounts the section instantly.
  */
-function LazySection({ loader, children }: { loader: () => void; children: ReactNode }) {
+function LazySection({
+  sectionId,
+  loader,
+  children,
+}: {
+  sectionId: string;
+  loader: () => void;
+  children: ReactNode;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const [near, setNear] = useState(false);
 
   useEffect(() => {
+    // Check if initial hash matches this section
+    const currentHash = window.location.hash.replace("#", "");
+    if (currentHash === sectionId) {
+      setNear(true);
+      loader();
+      return;
+    }
+
+    const handleMount = (e: Event) => {
+      const custom = e as CustomEvent<{ id: string }>;
+      if (custom.detail?.id === sectionId) {
+        setNear(true);
+        loader();
+      }
+    };
+
+    window.addEventListener("coco-mount-section", handleMount);
+
     const el = ref.current;
-    if (!el || near) return;
+    if (!el || near) {
+      return () => window.removeEventListener("coco-mount-section", handleMount);
+    }
+
     const io = new IntersectionObserver(
       (entries) => {
         if (entries.some((entry) => entry.isIntersecting)) {
@@ -58,11 +85,15 @@ function LazySection({ loader, children }: { loader: () => void; children: React
       { rootMargin: "1200px 0px" },
     );
     io.observe(el);
-    return () => io.disconnect();
-  }, [near, loader]);
+
+    return () => {
+      window.removeEventListener("coco-mount-section", handleMount);
+      io.disconnect();
+    };
+  }, [near, loader, sectionId]);
 
   return (
-    <div ref={ref}>
+    <div ref={ref} id={sectionId}>
       {near ? <Suspense fallback={<SectionFallback />}>{children}</Suspense> : <SectionFallback />}
     </div>
   );
@@ -87,25 +118,25 @@ function Index() {
     <>
       <Hero onDownloadClick={() => setDownloadModalOpen(true)} />
 
-      <LazySection loader={loadPlatforms}>
+      <LazySection sectionId="platforms" loader={loadPlatforms}>
         <Platforms />
       </LazySection>
-      <LazySection loader={loadFeatures}>
+      <LazySection sectionId="features" loader={loadFeatures}>
         <Features />
       </LazySection>
-      <LazySection loader={loadComparison}>
+      <LazySection sectionId="comparison" loader={loadComparison}>
         <Comparison />
       </LazySection>
-      <LazySection loader={loadPricing}>
+      <LazySection sectionId="pricing" loader={loadPricing}>
         <Pricing />
       </LazySection>
-      <LazySection loader={loadFaq}>
+      <LazySection sectionId="faq" loader={loadFaq}>
         <Faq />
       </LazySection>
-      <LazySection loader={loadGiveaway}>
+      <LazySection sectionId="giveaway" loader={loadGiveaway}>
         <Giveaway />
       </LazySection>
-      <LazySection loader={loadContributorForm}>
+      <LazySection sectionId="contributor" loader={loadContributorForm}>
         <ContributorForm />
       </LazySection>
 
@@ -118,8 +149,7 @@ function Index() {
   );
 }
 
-// The import() factories — kept outside the lazy wrappers so <LazySection> can
-// fire them early (React.lazy would otherwise defer the request to first render).
+// Import factories
 function loadPlatforms() {
   return import("@/components/landing/platforms");
 }

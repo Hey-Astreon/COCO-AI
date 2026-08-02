@@ -33,6 +33,9 @@ const SECTION_IDS = NAV_LINKS.filter((link) => !link.page).map((link) => link.id
 // is clicked (or right after navigating back to "/"). Poll briefly until the
 // element appears, then smooth-scroll it under the fixed header.
 function scrollToSection(id: string) {
+  // Fire mount signal to load lazy section immediately if not already mounted
+  window.dispatchEvent(new CustomEvent("coco-mount-section", { detail: { id } }));
+
   const attempt = () => {
     const el = document.getElementById(id);
     if (!el) return false;
