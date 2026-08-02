@@ -73,30 +73,37 @@ export function HeroHudWidget() {
 
   // Global keydown handler to react to physical keyboard hotkeys
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout | null = null;
+    const triggerHotkey = (label: string, action: () => void) => {
+      if (timeoutId) clearTimeout(timeoutId);
+      setActiveHotkey(label);
+      action();
+      timeoutId = setTimeout(() => setActiveHotkey(null), 1000);
+    };
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey) {
         const key = e.key.toUpperCase();
         if (key === "A") {
           e.preventDefault();
-          setActiveHotkey("Ctrl+Shift+A");
-          setSelectedTopic(prev => (prev === "algo" ? "system" : prev === "system" ? "behavioral" : "algo"));
-          setTimeout(() => setActiveHotkey(null), 1000);
+          triggerHotkey("Ctrl+Shift+A", () =>
+            setSelectedTopic(prev => (prev === "algo" ? "system" : prev === "system" ? "behavioral" : "algo"))
+          );
         } else if (key === "H") {
           e.preventDefault();
-          setActiveHotkey("Ctrl+Shift+H");
-          setStealthHidden(prev => !prev);
-          setTimeout(() => setActiveHotkey(null), 1000);
+          triggerHotkey("Ctrl+Shift+H", () => setStealthHidden(prev => !prev));
         } else if (key === "G") {
           e.preventDefault();
-          setActiveHotkey("Ctrl+Shift+G");
-          setHudOpacity(prev => (prev <= 40 ? 90 : prev - 25));
-          setTimeout(() => setActiveHotkey(null), 1000);
+          triggerHotkey("Ctrl+Shift+G", () => setHudOpacity(prev => (prev <= 40 ? 90 : prev - 25)));
         }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, []);
 
   return (

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ShieldCheck, CheckCircle2, RefreshCw, Lock } from "lucide-react";
 
 interface AuditResult {
@@ -10,6 +10,15 @@ interface AuditResult {
 export function PrivacyAuditWidget() {
   const [isRunning, setIsRunning] = useState(false);
   const [auditIndex, setAuditIndex] = useState(-1);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
 
   const tests: AuditResult[] = [
     {
@@ -35,17 +44,20 @@ export function PrivacyAuditWidget() {
   ];
 
   const handleRunAudit = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
     setIsRunning(true);
     setAuditIndex(-1);
 
     let current = 0;
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       if (current < 4) {
         setAuditIndex(current);
         current++;
       } else {
         setIsRunning(false);
-        clearInterval(interval);
+        if (intervalRef.current) clearInterval(intervalRef.current);
       }
     }, 450);
   };
@@ -79,7 +91,7 @@ export function PrivacyAuditWidget() {
 
       {/* Tests Grid */}
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        {tests.map((test, index) => {
+        {tests.map((test) => {
           const isPassed = test.status === "passed";
           return (
             <div

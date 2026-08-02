@@ -136,7 +136,7 @@ function Index() {
       <LazySection sectionId="giveaway" loader={loadGiveaway}>
         <Giveaway />
       </LazySection>
-      <LazySection sectionId="contributor" loader={loadContributorForm}>
+      <LazySection sectionId="contributors" loader={loadContributorForm}>
         <ContributorForm />
       </LazySection>
 
