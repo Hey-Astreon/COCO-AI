@@ -23,13 +23,14 @@ export function AuthLoading() {
       </div>
 
       <div className="relative z-10 flex flex-col items-center gap-5">
-        <div className="bg-gradient-brand flex h-16 w-16 items-center justify-center rounded-2xl shadow-lg shadow-violet-500/25">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-violet-500/30 bg-card p-3 shadow-lg shadow-violet-500/20 backdrop-blur-md">
           <img
             src={cocoLogo}
             alt="CocoAI"
             width={256}
             height={201}
-            className="h-10 w-10 rounded-xl"
+            decoding="async"
+            className="h-9 w-auto object-contain"
           />
         </div>
         <div className="flex items-center gap-2.5 text-sm font-medium text-muted-foreground">

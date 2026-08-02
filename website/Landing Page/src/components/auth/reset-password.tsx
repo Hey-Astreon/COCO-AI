@@ -112,13 +112,14 @@ export function ResetPasswordPage() {
           <div className="glass-card relative overflow-hidden rounded-3xl p-8">
             {/* Logo */}
             <div className="flex flex-col items-center text-center">
-              <div className="bg-gradient-brand flex h-14 w-14 items-center justify-center rounded-2xl shadow-lg shadow-violet-500/25">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-violet-500/30 bg-card p-2.5 shadow-lg shadow-violet-500/20 backdrop-blur-md">
                 <img
                   src={cocoLogo}
                   alt="CocoAI"
                   width={256}
                   height={201}
-                  className="h-9 w-9 rounded-xl"
+                  decoding="async"
+                  className="h-8 w-auto object-contain"
                 />
               </div>
               <h1 className="font-display mt-5 text-2xl font-bold tracking-tight text-foreground">
