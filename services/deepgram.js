@@ -97,41 +97,55 @@ class DeepgramService {
         finalStream = micStream;
 
       } else if (audioMode === 'interviewer') {
-        // Mode 2: Interviewer Only (System Audio Loopback Only)
+        // Mode 2: Interviewer Only (System Audio Loopback with Mic Fallback)
         console.log('[Audio] Starting Interviewer-only (System Loopback) audio capture');
-        if (!window.electronAPI || !window.electronAPI.getSystemAudioSourceId) {
-          throw new Error('System audio loopback requires Electron process environment.');
+        let systemStream = null;
+
+        if (window.electronAPI && window.electronAPI.getSystemAudioSourceId) {
+          try {
+            const sourceId = await window.electronAPI.getSystemAudioSourceId();
+            console.log('[Audio] Capturing system loopback source:', sourceId);
+
+            systemStream = await navigator.mediaDevices.getUserMedia({
+              audio: {
+                mandatory: {
+                  chromeMediaSource: 'desktop',
+                  chromeMediaSourceId: sourceId
+                }
+              },
+              video: {
+                mandatory: {
+                  chromeMediaSource: 'desktop',
+                  chromeMediaSourceId: sourceId,
+                  maxHeight: 1,
+                  maxWidth: 1
+                }
+              }
+            });
+
+            this.systemStreamTracks = systemStream.getTracks();
+
+            // IMMEDIATELY stop the video track — we only need audio
+            systemStream.getVideoTracks().forEach(track => {
+              console.log('[Audio] Stopping unused loopback video track:', track.label);
+              track.stop();
+            });
+
+            finalStream = systemStream;
+          } catch (sysErr) {
+            console.warn('[Audio] System loopback capture failed, falling back to standard microphone:', sysErr);
+          }
         }
 
-        const sourceId = await window.electronAPI.getSystemAudioSourceId();
-        console.log('[Audio] Capturing system loopback source:', sourceId);
-
-        const systemStream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            mandatory: {
-              chromeMediaSource: 'desktop',
-              chromeMediaSourceId: sourceId
-            }
-          },
-          video: {
-            mandatory: {
-              chromeMediaSource: 'desktop',
-              chromeMediaSourceId: sourceId,
-              maxHeight: 1,
-              maxWidth: 1
-            }
-          }
-        });
-
-        this.systemStreamTracks = systemStream.getTracks();
-
-        // IMMEDIATELY stop the video track — we only need audio
-        systemStream.getVideoTracks().forEach(track => {
-          console.log('[Audio] Stopping unused loopback video track:', track.label);
-          track.stop();
-        });
-
-        finalStream = systemStream;
+        // Fallback to standard microphone if system loopback is unsupported or denied
+        if (!finalStream) {
+          console.log('[Audio] Falling back to standard Microphone audio capture');
+          const micStream = await navigator.mediaDevices.getUserMedia({
+            audio: highQualityMicConstraints
+          });
+          this.micStreamTracks = micStream.getTracks();
+          finalStream = micStream;
+        }
 
       } else if (audioMode === 'both') {
         // Mode 3: Mixed (Mic + System Loopback)

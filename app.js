@@ -257,7 +257,13 @@ function initDeepgram() {
   // Handle errors
   state.deepgramService.onError = (err) => {
     console.error('[Deepgram] Error:', err);
-    showToast('🎙 Audio error: ' + (err.message || 'Connection failed'), 'error');
+    let msg = err.message || 'Connection failed';
+    if (msg.includes('Could not start audio source') || msg.includes('NotReadableError')) {
+      msg = 'Microphone permission denied or device busy. Please check Windows Privacy Settings.';
+    } else if (msg.includes('401') || msg.includes('Invalid credentials')) {
+      msg = 'Invalid Deepgram API Key. Please update your API Key in Settings ⚙️';
+    }
+    showToast('🎙 Audio error: ' + msg, 'error');
   };
 
   updateStatus('idle', 'Ready');
