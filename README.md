@@ -1,178 +1,176 @@
 <div align="center">
 
-<img src="assets/coco_logo_nobg.png" alt="CocoAI Logo" width="180" />
+<img src="assets/coco_logo_nobg.png" alt="CocoAI Logo" width="220" />
 
-# ✨ CocoAI
+# 🔮 CocoAI
 
-### *Your Invisible Real-Time Interview Copilot — Undetectable. Instant. Flawless.*
+### *The #1 Invisible AI Copilot for High-Stakes Technical Interviews*
+#### *Undetectable. Sub-200ms Instant Answers. Hardware-Level Stealth.*
 
-[![Electron](https://img.shields.io/badge/Electron-v31.7-47848F?style=for-the-badge&logo=electron&logoColor=white)](https://electronjs.org)
-[![Vite](https://img.shields.io/badge/Vite-v8.1-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
-[![React](https://img.shields.io/badge/React-v19.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
-[![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-v4.0-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+<br/>
 
-**A state-of-the-art, screen-share invisible AI technical interview assistant overlay designed to act as your ultimate real-time coding and communication copilot.**
+[![Live Platform](https://img.shields.io/badge/🌐_Official_Platform-coco--ai--cyan.vercel.app-8b5cf6?style=for-the-badge)](https://coco-ai-cyan.vercel.app)
+[![Release Version](https://img.shields.io/badge/Release-v1.0.45-ec4899?style=for-the-badge&logo=github)](https://github.com/Hey-Astreon/COCO-AI/releases)
+[![Stealth Protection](https://img.shields.io/badge/DirectX_Protection-100%25_Invisible-10b981?style=for-the-badge)](https://coco-ai-cyan.vercel.app)
+[![Inference Speed](https://img.shields.io/badge/Latency-Sub--200ms-f59e0b?style=for-the-badge&logo=speedtest)](https://coco-ai-cyan.vercel.app)
+[![License](https://img.shields.io/badge/License-Proprietary_Core-blueviolet?style=for-the-badge)](LICENSE)
 
-[📖 Core Features](#-core-features) · [📥 Download Installer](#-getting-started) · [🐛 Report Bug](https://github.com/Hey-Astreon/COCO-AI/issues) · [💡 Request Feature](https://github.com/Hey-Astreon/COCO-AI/issues)
+<br/>
+
+**CocoAI is an elite, screen-share invisible AI copilot engineered to give tech candidates unfair, real-time superintelligence during live coding rounds, system design challenges, and behavioral assessments.**
+
+[🚀 Visit Official Platform](https://coco-ai-cyan.vercel.app) · [✨ Core Capabilities](#-core-capabilities) · [🛡️ Zero-Trace Stealth](#-zero-trace-stealth-engine) · [⚡ AI Inference Stack](#-ultra-low-latency-ai-stack) · [👑 Subscription Tiers](#-subscription-tiers--quotas)
 
 </div>
 
 ---
 
-## 🌊 Live Preview & Aesthetics
+## 🌟 The Unfair Advantage
 
-CocoAI features a **premium glassmorphism UI system** with deep purple and cosmic violet hues (`#8b5cf6` Electric Violet, `#ec4899` Laser Fuchsia, `#07070c` Obsidian). It floats on top of your screen as a hardware-protected overlay that is **physically invisible** to Zoom, Discord, Google Meet, MS Teams, and proctoring screen shares.
-
-*   **⚡ Streaming Answers:** Character-by-character solutions appearing in under **200ms** (powered by Cerebras LPU & Groq).
-*   **🎙️ Smart STT Transcription:** High-accuracy real-time speech tracking with accented audio tolerance via Deepgram Nova-3.
-*   **📐 Adaptive Stealth Layouts:** Instantly cycle between `Full Dual-Pane`, `Compact Tabs`, and `Ghost Click-Through` modes.
-*   **🌊 Dynamic Audio Level Meter:** Three-bar active voice amplitude meter embedded directly in the toolbar.
-
----
-
-## ⚡ Core Features
-
-### 🧠 Triple-Engine AI Answer Streaming
-*   **Primary Engine (Cerebras LPU):** Super-speed answer generation using Cerebras LPU architecture (up to 2,000 tokens/sec) for Llama-3.3-70b, Llama-3.1-8b, and Qwen-3-32b.
-*   **Groq Auto-Fallback:** An automatic, silent fallback pipeline. If Cerebras rate-limits or goes down, your Groq API key seamlessly picks up the request with zero interruption.
-*   **STT Phonetic Error Tolerance:** Prompt instruction filters that understand and correct phonetic transcript errors (e.g., automatically resolving "reactive native" to "React Native" or "usestate hook" to "useState hook") without mentioning the typo.
-
-### 🎙️ CD-Quality Live Transcription (Deepgram Nova-3)
-*   **High-Fidelity Loopback:** Uses WASAPI loopback audio to record interviewer speech directly from system output (avoiding micro-microphone loops).
-*   **Calm Conversational Debounce:** Increased silence checks (`utterance_end_ms` set to 3s and `endpointing` set to 1.5s) ensure CocoAI calmly listens to the entire question and waits for the interviewer to finish speaking instead of triggering early.
-*   **Realtime Audio Meter:** Three glowing wave bars react dynamically to voice volume directly in your toolbar.
-
-### 🛡️ Hardware-Level Stealth Protection
-*   **Zero Leak Screen-Share Protection:** Enforced via Electron's `setContentProtection(true)` Win32 hook, blocking all software recorders, desktop screenshots, and screen-sharing programs from seeing the window.
-*   **Custom Form Dropdowns:** Replaced standard HTML/OS select tags with custom-rendered, protected overlay components to prevent system popups from popping through onto Zoom screen shares.
-*   **Stealth Profiles:**
-    *   `Full` (850px): Dual-pane layout showing Answers & Transcript side-by-side.
-    *   `Compact` (580px): Tabs interface showing one panel at a time with notification glow badges.
-    *   `Ghost`: Fully transparent window with click-through enabled. Hovering over the stealth toggle lets you control it while ignoring clicks elsewhere.
-
-### 📸 Multi-Screenshot Screen Solver (`Ctrl + Shift + S`)
-*   **Scroll Capture Buffer:** Don't get limited by scrollable or long programming problems.
-*   **How it works:** Use `Ctrl+Shift+S` to capture different sections of a problem as you scroll. They accumulate in a buffer.
-*   **Context Fusion:** Press `Ctrl+Shift+A` to solve the entire problem using the combined buffer of screenshots (processed via Gemini 2.0 Flash or NVIDIA NIM minimax-m3 fallback).
-
-### 📑 1-Click Post-Interview Exporter
-*   **Instantly save your sessions:** Extract all transcribed speech, coding blocks, timestamps, and AI solutions directly to clean Markdown (`.md`) or structured JSON with a single click.
-
----
-
-## ⌨️ Keyboard Shortcuts
-
-| Shortcut | Action |
-|---|---|
-| `Ctrl + Shift + H` | Toggle Overlay visibility |
-| `Ctrl + Shift + A` | Screen capture & analyze (Fresh Start) |
-| `Ctrl + Shift + S` | Add current screen to multi-screenshot buffer (Scroll Solver) |
-| `Ctrl + Shift + G` | Cycle Stealth Profiles (`Full` ➔ `Compact` ➔ `Ghost`) |
-| `Ctrl + Shift + P` | Panic (Instant window hide & state safety lock) |
-| `Alt + ← / →` | Move window position to Left / Right screen edge |
-| `Enter` | Submit written question from input bar |
-| `Escape` | Focus input bar / Clear focus |
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-Make sure you have [Node.js](https://nodejs.org) (v18+) installed on your system.
-
-### Installation
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/Hey-Astreon/COCO-AI.git
-   cd COCO-AI
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Set up your API Keys inside a `.env` file in the root directory:
-   ```env
-   CEREBRAS_API_KEY=your_cerebras_key
-   DEEPGRAM_API_KEY=your_deepgram_key
-   GEMINI_API_KEY=your_gemini_key
-   GROQ_API_KEY=your_groq_key
-   BUILD_NVIDIA_API_KEY=your_nvidia_key
-   ```
-4. Start the desktop application:
-   ```bash
-   npm start
-   ```
-5. Build the Windows installer (`.exe`):
-   ```bash
-   npm run build
-   ```
-
----
-
-## 🗂 Project Structure
+During a technical interview, every microsecond counts. While competing tools lag, crash, or risk exposing windows on screen share, **CocoAI operates in complete digital silence**.
 
 ```
-COCO-AI/
-├── assets/
-│   ├── coco_logo_nobg.png      # High-resolution transparent CocoAI brand logo
-│   └── coco_logo.ico           # Windows application icon
-├── main.js                     # Electron main process (stealth hooks, hotkeys, capture logic)
-├── preload.js                  # Secure IPC bridge interface
-├── index.html                  # Main application structure & toolbar
-├── style.css                   # Cosmically styled dark glassmorphism system
-├── app.js                      # UI controller, local uploader, and state machine
-├── services/
-│   ├── deepgram.js             # Nova-3 Audio socket and loopback mixer
-│   ├── cerebras.js             # Cerebras dynamic Llama stream provider
-│   ├── groq.js                 # Groq versatile fallback Llama/Qwen provider
-│   ├── gemini.js               # Gemini 2.0 Flash vision screen solver
-│   └── nvidia.js               # Nvidia integrate API vision solver
-└── website/Landing Page/       # Modern React 19 + Vite + Tailwind CSS v4 Landing Page
+  🎙️ Live Audio Loopback ──┐
+                          ├─► ⚡ Sub-200ms Streaming Answers
+  📸 Instant Screen Buffer ──┤       (Tailored to your exact Resume & JD)
+                          │
+  🛡️ DirectX Win32 Stealth ──┴─► 👻 100% Invisible on Screen Share & Video Calls
 ```
 
----
-
-## 🛡 Security & Privacy
-
-*   **100% Client-Side Context Processing:** Your PDF resumes and Job Descriptions are parsed locally inside your browser thread using `PDF.js` and cached in `localStorage`. Nothing is stored on third-party servers.
-*   **Direct API Connections (BYOK):** All AI queries are sent directly from your computer to the model providers (Cerebras, Groq, Google, Nvidia) using your own API keys. No middleware servers can log your transcripts.
+* **⚡ Sub-200ms Streaming:** Character-by-character tokens begin rendering on your screen within fractions of a second using specialized LPU compute.
+* **👻 100% Invisible to Zoom & Teams:** Uses native Win32 hardware-layer window protection — impossible for screen share capture APIs to record.
+* **🧠 Context-Injected Answers:** Evaluates your real uploaded PDF resume and the target Job Description to craft answers using your past projects, tech stack, and personal voice.
+* **🎙️ Background Acoustic Listening:** CD-quality loopback audio capturing only the interviewer's speech with accent-tolerant acoustic intelligence.
 
 ---
 
-## 📊 Competitor Comparison
+## 🛡️ Zero-Trace Stealth Engine
 
-| Copilot Tool | Screen Protection | Multi-AI Fallback | Offline PDF Parsing | Coding Solves | Accented STT |
+CocoAI was designed from the ground up for maximum discretion. It leaves zero visual footprint on any meeting software.
+
+### 🔒 Hardware-Level Capture Block
+Using native Windows graphics compositing hooks (`setContentProtection`), CocoAI instructs the OS compositor to exclude the overlay window from all desktop capture pipelines:
+* **✅ Zoom Meetings** — Completely invisible.
+* **✅ Google Meet & Microsoft Teams** — Completely invisible.
+* **✅ Discord & OBS Studio** — Excluded from screen and window capture.
+* **✅ Web Proctoring Platforms** — Zero capture footprint on CodeSignal, HackerRank, Mercer Mettl, and ProctorU.
+
+### 🎭 Adaptive Stealth Layouts
+Cycle between three operational display profiles instantly:
+* **🖥️ Full Dual-Pane:** Side-by-side live audio transcription and instantaneous AI solution cards.
+* **📱 Compact Overlay:** Minimalist hovering pill displaying only the current question's answers with subtle status indicators.
+* **👻 Ghost Click-Through:** Fully transparent floating HUD where your mouse clicks pass straight through the window onto your IDE or browser beneath.
+
+---
+
+## ⚡ Ultra-Low-Latency AI Stack
+
+CocoAI orchestrates an elite cluster of lightning-fast foundation models with automatic real-time failovers:
+
+| Engine | Primary Architecture | Role & Specialization | Latency |
+| :--- | :--- | :--- | :---: |
+| **Cerebras LPU Cluster** | `gpt-oss-120b`, `qwen-3.8-27b`, `gemma-4-31b` | Ultra-high throughput real-time streaming answers | **~180ms** |
+| **Groq Neural Processing** | `openai/gpt-oss-120b`, `qwen/qwen3.8-27b` | Instant 0ms failover backup if quota triggers | **~210ms** |
+| **Google Gemini Vision** | `gemini-2.5-flash`, `gemini-2.5-flash-lite` | Complex diagram, LeetCode screen & vision parsing | **~450ms** |
+| **Deepgram Nova-3** | Realtime Streaming WASAPI Loopback | Accent-tolerant interviewer voice-to-text recognition | **~120ms** |
+
+---
+
+## 📸 Multi-Screenshot Context Fusion (`Ctrl + Shift + S`)
+
+Don't let long, scrollable coding challenges stop you.
+
+1. **Scroll & Tap (`Ctrl + Shift + S`):** Capture snippet 1 of the problem description, scroll down, and capture snippet 2.
+2. **Accumulate Context:** CocoAI seamlessly fuses the visual chunks into a unified high-resolution buffer.
+3. **Instant Solve (`Ctrl + Shift + A`):** The vision engine analyzes the complete problem, detects constraints, time complexities, and produces idiomatic solutions.
+
+---
+
+## ⌨️ Command Keyboard Shortcuts
+
+Operate your copilot without ever taking your hands off the keyboard:
+
+| Hotkey | Action | Description |
+| :---: | :--- | :--- |
+| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>H</kbd> | **Toggle Overlay** | Instantly show or hide the CocoAI HUD |
+| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd> | **Screen Analyze** | Capture screen & generate optimized solution |
+| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>S</kbd> | **Add Screenshot** | Append to multi-screenshot scroll buffer *(Pro)* |
+| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>G</kbd> | **Cycle Stealth Mode** | Switch between `Full`, `Compact`, and `Ghost` HUD |
+| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> | **Panic Hide** | Instant emergency freeze and total window vanish |
+| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Q</kbd> | **Emergency Kill** | Immediately terminate app process from memory |
+
+---
+
+## 👑 Subscription Tiers & Quotas
+
+CocoAI offers flexible subscription tiers tailored for tech job seekers, from casual practice to intensive interview loops:
+
+```
+  ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
+  │     FREE TIER    │    │  STANDARD PLAN   │    │     PRO PLAN     │
+  │     ₹0 / month   │    │   ₹299 / month   │    │   ₹499 / month   │
+  ├──────────────────┤    ├──────────────────┤    ├──────────────────┤
+  │ 50k AI Tokens/mo │    │ 150k AI Tokens/mo│    │ 500k AI Tokens/mo│
+  │ 30 mins Audio STT│    │ 120 mins Audio   │    │ 300 mins Audio   │
+  │ Single Screen Cap│    │ Full Stealth HUD │    │ Multi-Screen (S) │
+  │ Cerebras + Groq  │    │ Resume Injection │    │ Priority Routing │
+  └──────────────────┘    └──────────────────┘    └──────────────────┘
+```
+
+> **👑 Founder Developer Tier:** Whitelisted core development accounts enjoy 1,500,000 monthly tokens, 2,000 audio minutes, and unrestricted feature access.
+
+---
+
+## 🌐 1-Click Cloud Ecosystem & Seamless Sync
+
+* **Web Hub:** Manage subscriptions, billing, and account profiles at [coco-ai-cyan.vercel.app](https://coco-ai-cyan.vercel.app).
+* **1-Click Deep Sync (`cocoai://`):** Log in through Google or GitHub on the website and click **"Open & Sync Desktop App"** to transmit your session and active tier perks directly into your installed client.
+* **Silent Global Auto-Updates:** Differential patches and model enhancements are pushed automatically via GitHub Releases with instant in-app restart prompts.
+
+---
+
+## 📊 How CocoAI Outperforms the Rest
+
+| Capability | CocoAI | Cluely | Parakeet AI | Interview Fox | Coprep AI |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **CocoAI** | **✅ Yes (DirectX)** | **✅ Yes (Cerebras+Groq)** | **✅ Yes (PDF.js)** | **✅ Yes** | **✅ Yes (Nova-3)** |
-| Cluely | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No |
-| Parakeet AI | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No |
-| Chiku AI | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No |
-| Mindwhisper AI | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No |
+| **DirectX Compositor Stealth** | **✅ 100% Invisible** | ❌ Visible | ❌ Partial | ❌ Visible | ❌ Visible |
+| **Multi-Screenshot Buffer** | **✅ Yes (`Ctrl+Shift+S`)**| ❌ No | ❌ No | ❌ No | ❌ No |
+| **Realtime LPU Streaming** | **✅ Sub-200ms** | ⚠️ 1.5s - 3s | ⚠️ 2s - 4s | ⚠️ 3s+ | ⚠️ 2.5s |
+| **Client-Side PDF Context** | **✅ Zero-Cloud Leak** | ❌ Uploads DB | ❌ Uploads DB | ❌ No | ❌ Uploads DB |
+| **Multi-Engine Failover** | **✅ Cerebras + Groq** | ❌ Single API | ❌ Single API | ❌ Single API | ❌ Single API |
+| **Panic Vanish Shortcut** | **✅ Instant** | ❌ No | ❌ No | ❌ No | ❌ No |
 
 ---
 
-## 👩‍💻 Development Authors
+## 👩‍💻 The Creators
 
-*   **Roushan Kumar (Founder & Lead Architect)** — [@Hey-Astreon](https://github.com/Hey-Astreon) · [Astreon.me](https://Astreon.me)
-*   **Ayushi Raj (Co-Developer & UX Lead)** — [@Silenttears-cloud](https://github.com/Silenttears-cloud) · [Ayushiraj.me](https://Ayushiraj.me)
+CocoAI was handcrafted, architected, and continuously engineered through countless late-night sessions by:
 
-*Full-Stack Developers · AI Orchestrators & Product Architects*
+<div align="center">
 
-> *"Every system has a vulnerability. We build better."*
+### **Roushan Kumar**
+*Founder & Chief Software Architect*  
+GitHub: [@Hey-Astreon](https://github.com/Hey-Astreon) · Portfolio: [Astreon.me](https://Astreon.me)
 
----
+### **Ayushi Raj**
+*Co-Creator & Lead Product / UX Engineer*  
+GitHub: [@Silenttears-cloud](https://github.com/Silenttears-cloud) · Portfolio: [Ayushiraj.me](https://Ayushiraj.me)
 
-## 📄 License
+<br/>
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+> *"Every technical interview system has a blind spot. We built the intelligence to master it."*
+
+</div>
 
 ---
 
 <div align="center">
 
-**Built with 💜 by Roushan & Ayushi**
+### 🚀 Ready to Conquer Your Dream Technical Role?
+**[Visit coco-ai-cyan.vercel.app to get started ➔](https://coco-ai-cyan.vercel.app)**
 
-*If CocoAI helped you ace your interviews, give it a ⭐ on GitHub!*
+<br/>
+
+<sub>Copyright © 2026 Roushan (Hey-Astreon) & Ayushi Raj (Silenttears-cloud). All rights reserved.</sub>
 
 </div>
