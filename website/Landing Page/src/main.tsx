@@ -3,6 +3,12 @@ import ReactDOM, { type Root } from "react-dom/client";
 import { RouterProvider } from "@tanstack/react-router";
 import { getRouter } from "./router";
 import "./styles.css";
+// Auto-recover from stale chunks or momentary network drops on dynamic imports
+window.addEventListener('vite:preloadError', (event) => {
+  console.warn('[Vite] Chunk preload error detected. Reloading to get latest build assets...');
+  event.preventDefault();
+  window.location.reload();
+});
 
 // Persist the React root on the element so HMR re-mounts into the same root
 // instead of creating a second one (avoids the "already mounted" warning).
