@@ -5,16 +5,17 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 const GeminiService = {
-  // Model fallback chain — prioritize stable production models (updated September 2026)
+  // Model fallback chain — prioritize active high-throughput vision models (updated September 2026)
   MODEL_CHAIN: [
-    'gemini-2.5-flash',        // Stable flagship — fast, multimodal, 1M context
-    'gemini-2.5-flash-lite',   // Ultra-low-latency fallback
-    'gemini-3.6-flash',        // Preview fallback (may rate-limit)
+    'gemini-3.8-flash',        // Fastest, highest capacity, 200 OK vision flagship
+    'gemini-3.7-flash',        // Instant fallback vision model
+    'gemini-3.5-flash',        // Rock-solid fallback
+    'gemini-flash-latest',     // Dynamic alias fallback
   ],
 
-  MAX_RETRIES: 2,
-  BASE_DELAY_MS: 500,
-  REQUEST_TIMEOUT_MS: 30000, // 30s timeout per model for vision processing (was 6s, too short)
+  MAX_RETRIES: 1,
+  BASE_DELAY_MS: 200,
+  REQUEST_TIMEOUT_MS: 25000, // 25s timeout for vision processing
 
   async analyzeImage(apiKey, base64Images, prompt, onChunk, onStatus) {
     if (!prompt) {
@@ -78,16 +79,14 @@ const GeminiService = {
             clearTimeout(timeoutId);
           }
 
-          // Rate Limit (429) — Retry same model with short backoff
-          if (response.status === 429) {
-            const delay = this.BASE_DELAY_MS * Math.pow(2, attempt);
-            console.warn(`⚠️ Gemini 429 on ${model}. Waiting ${delay}ms...`);
-            if (onStatus) onStatus(`⏳ Gemini rate limited — retrying in ${delay}ms...`);
-            await new Promise(r => setTimeout(r, delay));
-            continue;
+          // Rate Limit (429) or Server Busy (503) — switch to next model immediately for zero-lag interview response!
+          if (response.status === 429 || response.status === 503) {
+            console.warn(`⚠️ Gemini ${model} returned ${response.status} — failing over to next model immediately.`);
+            lastError = new Error(`Gemini ${model} ${response.status}`);
+            break; // Immediately try next model in MODEL_CHAIN
           }
 
-          // Invalid Model (404/400) or Server Error — break attempt loop and switch to next model immediately!
+          // Invalid Model (404/400) or other Error — switch to next model immediately
           if (!response.ok) {
             const errText = await response.text();
             console.warn(`⚠️ Gemini ${model} returned HTTP ${response.status}: ${errText.slice(0, 150)} — switching model...`);
