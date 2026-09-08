@@ -12,7 +12,7 @@ const state = {
   messageCount: 0,
   autoScroll: true,
   lastAnswer: '',
-  currentModel: 'llama-3.3-70b',
+  currentModel: 'gpt-oss-120b',
   apiKeys: { cerebras: '', deepgram: '', gemini: '', nvidia: '', groq: '' },
   resume: '',
   jobDescription: '',

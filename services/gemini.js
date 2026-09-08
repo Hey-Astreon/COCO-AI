@@ -5,10 +5,11 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 const GeminiService = {
-  // Model fallback chain — Google Gemini official REST endpoints
+  // Model fallback chain — prioritize stable production models (updated September 2026)
   MODEL_CHAIN: [
-    'gemini-3.6-flash',
-    'gemini-3.5-flash',
+    'gemini-2.5-flash',        // Stable flagship — fast, multimodal, 1M context
+    'gemini-2.5-flash-lite',   // Ultra-low-latency fallback
+    'gemini-3.6-flash',        // Preview fallback (may rate-limit)
   ],
 
   MAX_RETRIES: 2,

@@ -7,14 +7,14 @@ const https = require('https');
 
 const CEREBRAS_BASE = 'api.cerebras.ai';
 
-// Available models on Cerebras
+// Available models on Cerebras (updated September 2026)
 const MODELS = {
-  'llama-8b': 'llama-3.1-8b',
-  'llama-70b': 'llama-3.3-70b',
-  'qwen-32b': 'qwen-3-32b',
+  'gpt-120b':  'gpt-oss-120b',
+  'qwen-27b':  'qwen-3.8-27b',
+  'gemma-31b': 'gemma-4-31b',
 };
 
-const DEFAULT_MODEL = 'llama-3.3-70b';
+const DEFAULT_MODEL = 'gpt-oss-120b';
 
 /**
  * Build the system prompt for interview context
@@ -120,11 +120,12 @@ function streamCompletion(apiKey, question, options = {}) {
       'Accept': 'text/event-stream',
     },
   }, (res) => {
-    // ── Handle 429 Queue / Rate Limit Exceeded — Instant Failover to Groq LPUs ──
-    if (res.statusCode === 429) {
+    // ── Handle 429 Rate Limit & 402 Payment Required — Instant Failover to Groq LPUs ──
+    if (res.statusCode === 429 || res.statusCode === 402) {
       if (!isAborted) {
-        console.warn(`⚡ Cerebras 429 Rate Limit on ${model} — instant failover to Groq LPUs...`);
-        onError(new Error(`Cerebras 429 Rate Limit Exceeded on ${model}`));
+        const reason = res.statusCode === 402 ? 'Cerebras quota exhausted (402)' : `Cerebras 429 Rate Limit Exceeded on ${model}`;
+        console.warn(`⚡ ${reason} — instant failover to Groq LPUs...`);
+        onError(new Error(reason));
       }
       return;
     }

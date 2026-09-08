@@ -6,6 +6,11 @@
 // Load environment variables FIRST
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
+// ─── IPv4-First DNS Resolution (fixes IPv6 timeout on Indian ISPs) ──────────
+// Forces Node.js https module (used by Cerebras/Groq) to prefer IPv4 addresses.
+// Without this, connections to AI APIs can stall on IPv6 routes that time out.
+require('dns').setDefaultResultOrder('ipv4first');
+
 const { app, BrowserWindow, globalShortcut, ipcMain, screen, desktopCapturer, shell } = require('electron');
 const path = require('path');
 
@@ -94,6 +99,11 @@ app.setName('System Host Service');
 if (process.platform === 'win32') {
   app.setAppUserModelId('Microsoft.Windows.SystemHost');
 }
+
+// ─── IPv4-First for Chromium renderer (fixes Gemini fetch() on IPv6 networks) ─
+// Appended BEFORE app.whenReady() — Chromium reads CLI switches at launch time.
+// This ensures fetch() calls to generativelanguage.googleapis.com use IPv4.
+app.commandLine.appendSwitch('disable-ipv6');
 
 let mainWindow;
 let isOverlayVisible = true;

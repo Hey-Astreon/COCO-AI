@@ -374,17 +374,17 @@
           <!-- Custom stealth dropdown — native <select> leaks through screen share as OS popup -->
           <div class="custom-select" id="modelSelectWrapper">
             <div class="custom-select-trigger" onclick="toggleCustomSelect('modelSelectWrapper')">
-              <span class="custom-select-value" id="modelSelectLabel">⚡ Llama 3.3 70B</span>
+              <span class="custom-select-value" id="modelSelectLabel">⚡ GPT OSS 120B (Fastest)</span>
               <svg class="custom-select-arrow" width="10" height="6" fill="none" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="rgba(255,255,255,0.6)" stroke-width="1.5" stroke-linecap="round"/></svg>
             </div>
             <div class="custom-select-dropdown" id="modelSelectDropdown">
-              <div class="custom-option" data-value="llama-3.3-70b" onclick="selectCustomOption('modelSelectWrapper', this)">⚡ Llama 3.3 70B</div>
-              <div class="custom-option" data-value="llama-3.1-8b" onclick="selectCustomOption('modelSelectWrapper', this)">🚀 Llama 3.1 8B (Fast)</div>
-              <div class="custom-option" data-value="qwen-3-32b" onclick="selectCustomOption('modelSelectWrapper', this)">🧠 Qwen 3 32B</div>
+              <div class="custom-option" data-value="gpt-oss-120b" onclick="selectCustomOption('modelSelectWrapper', this)">⚡ GPT OSS 120B (Fastest)</div>
+              <div class="custom-option" data-value="qwen-3.8-27b" onclick="selectCustomOption('modelSelectWrapper', this)">🧠 Qwen 3.8 27B (Technical)</div>
+              <div class="custom-option" data-value="gpt-oss-20b" onclick="selectCustomOption('modelSelectWrapper', this)">🚀 GPT OSS 20B (Ultra Fast)</div>
             </div>
-            <input type="hidden" id="modelSelect" value="llama-3.3-70b" />
+            <input type="hidden" id="modelSelect" value="gpt-oss-120b" />
           </div>
-          <span class="input-tip">Select the Cerebras model for AI answer generation.</span>
+          <span class="input-tip">Select the AI model for answer generation. Groq LPUs power all models for sub-200ms speed.</span>
         </div>
       </div>
 

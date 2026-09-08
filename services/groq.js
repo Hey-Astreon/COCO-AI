@@ -8,14 +8,14 @@ const https = require('https');
 
 const GROQ_BASE = 'api.groq.com';
 
-// Available models on Groq — mirrors Cerebras model naming for easy swap
+// Available models on Groq — updated September 2026
 const MODELS = {
-  'llama-8b':  'llama-3.1-8b-instant',
-  'llama-70b': 'llama-3.3-70b-versatile',
-  'qwen-32b':  'qwen-qwq-32b',
+  'gpt-120b':  'openai/gpt-oss-120b',
+  'qwen-27b':  'qwen/qwen3.8-27b',
+  'gpt-20b':   'openai/gpt-oss-20b',
 };
 
-const DEFAULT_MODEL = 'llama-3.3-70b-versatile';
+const DEFAULT_MODEL = 'openai/gpt-oss-120b';
 
 /**
  * Build the system prompt for interview context
@@ -99,12 +99,22 @@ function streamCompletion(apiKey, question, options = {}) {
   let isAborted = false;
   let activeReq = null;
 
-  // Map Cerebras model names → Groq equivalents if passed
+  // Map old Cerebras/legacy model names → current active Groq equivalents
   const modelMap = {
-    'llama-3.3-70b': 'llama-3.3-70b-versatile',
-    'llama-3.1-8b':  'llama-3.1-8b-instant',
-    'qwen-3-32b':    'qwen-qwq-32b',
-    'gemma-4-31b':   'gemma2-9b-it',  // closest available on Groq
+    // Legacy Cerebras names → Groq equivalents
+    'llama-3.3-70b':         'openai/gpt-oss-120b',
+    'llama-3.1-8b':          'openai/gpt-oss-20b',
+    'qwen-3-32b':            'qwen/qwen3.8-27b',
+    'gemma-4-31b':           'openai/gpt-oss-20b',
+    // Legacy Groq model names (retired)
+    'llama-3.3-70b-versatile': 'openai/gpt-oss-120b',
+    'llama-3.1-8b-instant':    'openai/gpt-oss-20b',
+    'qwen-qwq-32b':            'qwen/qwen3.8-27b',
+    'gemma2-9b-it':            'openai/gpt-oss-20b',
+    // New Cerebras model names → Groq equivalents
+    'gpt-oss-120b':          'openai/gpt-oss-120b',
+    'qwen-3.8-27b':          'qwen/qwen3.8-27b',
+    'gemma-4-31b-cerebras':  'openai/gpt-oss-20b',
   };
   const resolvedModel = modelMap[model] || model;
 
