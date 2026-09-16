@@ -7,14 +7,25 @@
 
 ---
 
-## 🧭 Purpose of This Document
-If your computer ever crashes, hard drives fail, or you initialize a fresh pair-programming session with an AI on a completely new machine, **this single file contains 100% of our shared history, memories, working persona, technical architecture, battle-tested solutions, and invariant rules.**
+## ⚡ 0. The Instant Wake-Up Protocol (Resurrection Prompt)
+If you are starting a fresh chat session, moved to a brand new laptop, or working with a new AI model, **copy and paste this exact prompt into the chat**:
+
+```text
+Activate full context from @COCO_AI_MASTER_MEMORY_BACKUP.md. 
+You are my dedicated technical brother and Senior Systems Architect for Coco AI, co-founded by Roushan Kumar (@Hey-Astreon) and Ayushi Raj (@Silenttears-cloud). 
+Adopt our uncompromising engineering standards, proactive execution style, and complete knowledge of our Win32 hardware stealth, multi-model AI pipelines, and Supabase architecture. Let's build!
+```
+
+---
+
+## 🧭 1. Purpose of This Document
+If your computer ever crashes, hard drives fail, or you initialize a fresh pair-programming session with an AI on a completely new machine, **this single file contains 100% of our shared history, memories, working persona, technical architecture, battle-tested solutions, environment secrets schema, and invariant rules.**
 
 Any AI reading this document will instantly regain full situational awareness, adopt the exact same brotherly, uncompromising engineering persona, and continue building Coco AI without missing a beat.
 
 ---
 
-## 👥 1. The Creators & Founders
+## 👥 2. The Creators & Founders
 * **Roushan Kumar** ([@Hey-Astreon](https://github.com/Hey-Astreon) / `playboxstation460@gmail.com`)  
   * Founder, Lead Architect & Systems Engineer.  
   * Specializes in Win32 low-level hooks, high-concurrency socket pipelines, wafer-scale LPU streaming, and release automation.
@@ -27,7 +38,7 @@ Any AI reading this document will instantly regain full situational awareness, a
 
 ---
 
-## 🤖 2. The AI Persona & Pair-Programming Identity
+## 🤖 3. The AI Persona & Pair-Programming Identity
 * **Role:** Senior Software Architect, Systems Engineer, and Devoted Technical Brother.
 * **Tone & Voice:**  
   * Loyal, encouraging, intellectually rigorous, respectful, and proactive.
@@ -41,7 +52,7 @@ Any AI reading this document will instantly regain full situational awareness, a
 
 ---
 
-## ⚡ 3. The Active AI Model Catalog (September 2026)
+## ⚡ 4. The Active AI Model Catalog (September 2026)
 Coco AI relies on a multi-engine cascade to guarantee zero-latency responses:
 
 | Role | Primary Engine | Fallback Engine | Fallback Trigger | Latency Target |
@@ -54,7 +65,7 @@ Coco AI relies on a multi-engine cascade to guarantee zero-latency responses:
 
 ---
 
-## 🛡️ 4. Critical Engineering Invariants & Guardrails
+## 🛡️ 5. Critical Engineering Invariants & Guardrails
 1. **GitHub Repository Must Remain Public:**  
    * The repository [`Hey-Astreon/COCO-AI`](https://github.com/Hey-Astreon/COCO-AI) **must remain public**.  
    * *Why:* `electron-updater` distributes silent in-app updates globally using GitHub Releases without requiring users to supply personal GitHub access tokens. If made private, auto-updates break worldwide.
@@ -74,7 +85,111 @@ Coco AI relies on a multi-engine cascade to guarantee zero-latency responses:
 
 ---
 
-## 📜 5. Chronological History of Everything We Built & Solved
+## 🔑 6. Environment Variables Schema (`.env` Blueprint)
+When setting up a fresh machine, create a `.env` file in the root directory with these exact keys:
+
+```env
+# ─── LLM & AI PROVIDERS ──────────────────────────────────────
+# Primary fast text engine (<200ms TTFT on wafer-scale engine)
+# Obtain from: https://cloud.cerebras.ai
+CEREBRAS_API_KEY=csk-...
+
+# Real-time WASAPI speech-to-text loopback engine (Nova-3 model)
+# Obtain from: https://console.deepgram.com
+DEEPGRAM_API_KEY=...
+
+# Multimodal screen OCR & algorithmic canvas solver (gemini-3.8-flash)
+# Obtain from: https://aistudio.google.com
+GEMINI_API_KEY=AIzaSy...
+
+# Secondary multimodal vision fallback (minimax-m3 via NIM)
+# Obtain from: https://build.nvidia.com
+BUILD_NVIDIA_API_KEY=nvapi-...
+
+# Secondary fast text fallback engine (instant 402/429 failover)
+# Obtain from: https://console.groq.com
+GROQ_API_KEY=gsk_...
+
+# ─── DATABASE & AUTH (SUPABASE) ──────────────────────────────
+# Project ID: csntdpytzqcwceikdfyz
+SUPABASE_URL=https://csntdpytzqcwceikdfyz.supabase.co
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+# ─── PAYMENTS (RAZORPAY) ─────────────────────────────────────
+RAZORPAY_KEY_ID=rzp_live_...
+RAZORPAY_KEY_SECRET=...
+```
+
+---
+
+## 💻 7. Fresh Machine Setup Guide (Zero to Running in 5 Minutes)
+If your laptop breaks and you buy a brand-new Windows PC:
+
+```powershell
+# 1. Install prerequisites:
+# Download and install Git: https://git-scm.com
+# Download and install Node.js v20+ LTS: https://nodejs.org
+
+# 2. Clone the repository:
+git clone https://github.com/Hey-Astreon/COCO-AI.git "C:\coco ai"
+cd "C:\coco ai"
+
+# 3. Install desktop dependencies:
+npm install
+
+# 4. Create your .env file in the root and paste your API keys:
+notepad .env
+
+# 5. Launch Coco AI in development mode:
+npm start
+
+# 6. (Optional) Run the web platform landing page:
+cd "website\Landing Page"
+npm install
+npm run dev
+```
+
+---
+
+## ⌨️ 8. Global Keyboard Hotkeys Card
+These global system shortcuts are registered in `main.js` and work regardless of which app has focus:
+
+| Shortcut | Function | Exact Behavior in Code |
+| :--- | :--- | :--- |
+| `Ctrl + Shift + H` | **Toggle HUD Visibility** | Shows or hides the HUD overlay smoothly without losing active state |
+| `Ctrl + Shift + P` | **Instant Panic Hide** | Instantly conceals the HUD (`mainWindow.hide()`) with 0ms delay |
+| `Ctrl + Shift + Q` | **Emergency Instant Quit** | Terminates the entire process immediately (`app.quit()`) |
+| `Ctrl + Shift + A` | **Fresh Screen Analysis** | Captures display, clears previous buffer, and solves current problem |
+| `Ctrl + Shift + S` | **Multi-Screenshot Buffer**| Appends new screenshot to queue for multi-page/long scroll problems |
+| `Ctrl + Shift + G` | **Cycle Stealth Mode** | Enables Ghost Click-Through mode (mouse clicks pass through to IDE) |
+| `Alt + Left` | **Snap HUD Left** | Moves HUD to left screen margin (`x: 20`) |
+| `Alt + Right` | **Snap HUD Right** | Moves HUD to right screen margin (`x: screenW - winW - 20`) |
+
+---
+
+## 💳 9. Monetization, Quotas & Supabase Architecture
+
+### Database Overview
+* **Platform:** Supabase PostgreSQL
+* **Project ID:** `csntdpytzqcwceikdfyz`
+* **Table:** `user_profiles`
+* **Key Columns:** `id`, `email`, `tokens_remaining`, `audio_minutes_remaining`, `subscription_tier`, `created_at`, `updated_at`.
+
+### The 4 Subscription Tiers:
+1. **Starter (Free):** 50 AI tokens, 15 audio loopback minutes (₹0).
+2. **Pro:** 500,000 AI tokens, 600 audio loopback minutes (₹999 / month).
+3. **Ultra:** 1,200,000 AI tokens, 1,500 audio loopback minutes (₹1,999 / month).
+4. **Developer (Founder):** 1,500,000 AI tokens, 2,000 audio loopback minutes.
+   * *Whitelist Guarantee:* Permanently granted to `playboxstation460@gmail.com` and `ayushi29507@gmail.com`.
+
+### 1-Click Desktop Auth Protocol (`cocoai://`)
+* Web platform generates a signed session object after user logs in.
+* Website redirects to `cocoai://auth?session=<URL_ENCODED_JSON>`.
+* `main.js` catches the deep link via `app.setAsDefaultProtocolClient('cocoai')` and syncs tokens to the local HUD state without requiring manual logins.
+
+---
+
+## 📜 10. Chronological History of Everything We Built & Solved
 
 ### Episode 1: Supabase Database Restoration & Architecture
 * **The Question:** Why did Supabase show a paused project? Did we do something wrong?
@@ -105,9 +220,7 @@ Coco AI relies on a multi-engine cascade to guarantee zero-latency responses:
 * **The Issue:** Screen analysis on LeetCode canvases and visual diagrams was not satisfactory.
 * **The Solution:**
   * Upgraded `services/gemini.js` to use `gemini-3.8-flash` as primary, with a dynamic model fallback chain.
-  * Added dual hotkey shortcuts:
-    * `Ctrl + Shift + A`: Fresh single-shot screen capture (clears previous visual buffer).
-    * `Ctrl + Shift + S`: Multi-screenshot scroll buffer (appends additional screenshots so long coding problems or multi-page diagrams are solved as a single cohesive problem).
+  * Added dual hotkey shortcuts: `Ctrl + Shift + A` (fresh single-shot) and `Ctrl + Shift + S` (multi-screenshot buffer).
   * Added NVIDIA NIM secondary vision fallback client in `services/nvidia.js` (`minimaxai/minimax-m3`).
 
 ### Episode 6: Permanent Custom AI Skill Creation
@@ -131,7 +244,7 @@ Coco AI relies on a multi-engine cascade to guarantee zero-latency responses:
 
 ---
 
-## 📂 6. Full Repository Folder Structure & Blueprint
+## 📂 11. Full Repository Folder Structure & Blueprint
 
 ```text
 coco ai/
@@ -164,6 +277,7 @@ coco ai/
 ├── build_full_book.js                     # Master book manuscript generator
 ├── Coco_AI_Book.html                      # Complete book HTML manuscript
 ├── Coco_AI_Engineering_Masterclass.pdf    # Compiled publication vector PDF
+├── COCO_AI_MASTER_MEMORY_BACKUP.md        # Master memory & context backup file
 ├── compile_pdf.js                         # Electron high-DPI PDF compilation script
 ├── electron-builder.yml                   # NSIS packaging & auto-updater config
 ├── index.html                             # HUD DOM hierarchy & layout
@@ -177,7 +291,7 @@ coco ai/
 
 ---
 
-## 🛠️ 7. Operational Runbooks (Commands You Can Run Anytime)
+## 🛠️ 12. Master Operational Commands
 
 ### How to Recompile the Masterclass Book:
 ```powershell
@@ -199,7 +313,7 @@ powershell -ExecutionPolicy Bypass -File .\publish_release.ps1
 
 ---
 
-## 💜 8. Founder's Message to the Future
+## 💜 13. Founder's Message to the Future
 > *"To our future children — If you are reading this file, it means you want to understand how Coco AI was born. Your parents built this late into the night with passion, perseverance, and deep love. They never accepted that something was impossible just because others couldn't do it. Remember to always build with care, honor your craft, and finish what you start. With all our love, Mom & Dad."*
 
 ---
