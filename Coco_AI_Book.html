@@ -8,7 +8,7 @@
 
   @page {
     size: A4;
-    margin: 20mm 16mm 20mm 16mm;
+    margin: 22mm 18mm 22mm 18mm;
     @bottom-center {
       content: "Coco AI: Master Engineering Blueprint — Roushan Kumar & Ayushi Raj";
       font-family: 'Inter', sans-serif;
@@ -36,8 +36,8 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     color: #1e1b4b;
     background: #ffffff;
-    line-height: 1.65;
-    font-size: 10pt;
+    line-height: 1.68;
+    font-size: 10.2pt;
     margin: 0;
     padding: 0;
   }
@@ -68,6 +68,10 @@
     border-radius: 50%;
   }
 
+  .cover-header {
+    z-index: 2;
+  }
+
   .cover-badge {
     display: inline-block;
     padding: 6px 16px;
@@ -84,7 +88,7 @@
 
   .cover-title {
     font-family: 'Cinzel', serif;
-    font-size: 36pt;
+    font-size: 38pt;
     font-weight: 900;
     line-height: 1.15;
     margin: 0 0 15px 0;
@@ -94,7 +98,7 @@
   }
 
   .cover-subtitle {
-    font-size: 14pt;
+    font-size: 15pt;
     font-weight: 400;
     color: #e2e8f0;
     margin: 0 0 10px 0;
@@ -102,9 +106,9 @@
   }
 
   .cover-tagline {
-    font-size: 10.5pt;
+    font-size: 11pt;
     color: #94a3b8;
-    max-width: 580px;
+    max-width: 560px;
     line-height: 1.6;
     margin-top: 15px;
   }
@@ -159,16 +163,16 @@
   .dedication-page {
     page-break-before: always;
     page-break-after: always;
-    padding: 80px 40px;
+    padding: 100px 40px;
     text-align: center;
     background: #faf5ff;
     border: 1px solid #e9d5ff;
     border-radius: 16px;
-    margin: 30px 0;
+    margin: 40px 0;
   }
 
   .dedication-heart {
-    font-size: 36pt;
+    font-size: 40pt;
     margin-bottom: 20px;
     color: #a855f7;
   }
@@ -186,74 +190,33 @@
   .dedication-sub {
     font-style: italic;
     color: #6b21a8;
-    font-size: 10pt;
+    font-size: 10.5pt;
     line-height: 1.8;
     max-width: 550px;
     margin: 0 auto;
   }
 
-  /* ─── VOLUME DIVISION HEADERS ───────────────────────────────── */
-  .volume-divider {
-    page-break-before: always;
-    page-break-after: always;
-    height: 75vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
-    color: #ffffff;
-    border-radius: 16px;
-    padding: 40px;
-    margin: 20px 0;
-  }
-
-  .volume-badge {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11pt;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: #c084fc;
-    margin-bottom: 15px;
-  }
-
-  .volume-title {
-    font-family: 'Cinzel', serif;
-    font-size: 28pt;
-    font-weight: 900;
-    line-height: 1.25;
-    margin: 0 0 20px 0;
-  }
-
-  .volume-desc {
-    font-size: 11.5pt;
-    color: #cbd5e1;
-    max-width: 550px;
-    line-height: 1.65;
-  }
-
-  /* ─── CHAPTER HEADINGS ──────────────────────────────────────── */
+  /* ─── TOC & CHAPTER LAYOUT ──────────────────────────────────── */
   .page-break {
     page-break-before: always;
   }
 
   h1.chapter-title {
     font-family: 'Cinzel', serif;
-    font-size: 20pt;
+    font-size: 22pt;
     font-weight: 800;
     color: #2e1065;
     border-bottom: 3px solid #8b5cf6;
-    padding-bottom: 10px;
+    padding-bottom: 12px;
     margin-top: 0;
-    margin-bottom: 22px;
+    margin-bottom: 25px;
     display: flex;
     justify-content: space-between;
     align-items: baseline;
   }
 
   h1.chapter-title .ch-num {
-    font-size: 12pt;
+    font-size: 13pt;
     font-family: 'JetBrains Mono', monospace;
     color: #8b5cf6;
     font-weight: 700;
@@ -261,26 +224,26 @@
 
   h2 {
     font-family: 'Inter', sans-serif;
-    font-size: 12.5pt;
+    font-size: 13pt;
     font-weight: 700;
     color: #3b0764;
-    margin-top: 24px;
-    margin-bottom: 8px;
+    margin-top: 26px;
+    margin-bottom: 10px;
     border-left: 4px solid #a855f7;
     padding-left: 10px;
   }
 
   h3 {
-    font-size: 10.5pt;
+    font-size: 11pt;
     font-weight: 600;
     color: #581c87;
-    margin-top: 16px;
+    margin-top: 18px;
     margin-bottom: 6px;
   }
 
   p {
     margin-top: 0;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     text-align: justify;
   }
 
@@ -289,9 +252,9 @@
     background: #f8fafc;
     border-left: 4px solid #8b5cf6;
     border-radius: 0 8px 8px 0;
-    padding: 12px 16px;
-    margin: 16px 0;
-    font-size: 9.3pt;
+    padding: 14px 18px;
+    margin: 18px 0;
+    font-size: 9.5pt;
   }
 
   .callout.secret {
@@ -318,21 +281,21 @@
     background: #0f172a;
     color: #f8fafc;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 7.8pt;
-    padding: 12px 14px;
+    font-size: 8.2pt;
+    padding: 14px 16px;
     border-radius: 8px;
     overflow-x: auto;
     margin: 14px 0;
-    line-height: 1.45;
+    line-height: 1.5;
     border: 1px solid #1e293b;
   }
 
   code {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 8.5pt;
+    font-size: 8.8pt;
     background: #f1f5f9;
     color: #6b21a8;
-    padding: 2px 4px;
+    padding: 2px 5px;
     border-radius: 4px;
   }
 
@@ -346,20 +309,20 @@
   table {
     width: 100%;
     border-collapse: collapse;
-    margin: 16px 0;
-    font-size: 8.8pt;
+    margin: 18px 0;
+    font-size: 9pt;
   }
 
   th {
     background: #2e1065;
     color: #ffffff;
-    padding: 7px 10px;
+    padding: 8px 12px;
     text-align: left;
     font-weight: 600;
   }
 
   td {
-    padding: 7px 10px;
+    padding: 8px 12px;
     border-bottom: 1px solid #e2e8f0;
   }
 
@@ -372,47 +335,77 @@
     background: #1e1b4b;
     color: #38bdf8;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 7.4pt;
+    font-size: 7.8pt;
     line-height: 1.35;
-    padding: 12px;
+    padding: 14px;
     border-radius: 8px;
     white-space: pre;
     overflow-x: auto;
-    margin: 14px 0;
+    margin: 16px 0;
     border: 1px solid #4338ca;
-  }
-
-  .file-badge {
-    display: inline-block;
-    background: #4c1d95;
-    color: #ffffff;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 8.5pt;
-    padding: 2px 8px;
-    border-radius: 4px;
-    margin-right: 6px;
-  }
-
-  .toc-section-title {
-    font-family: 'Cinzel', serif;
-    font-size: 11.5pt;
-    font-weight: 700;
-    color: #581c87;
-    margin-top: 18px;
-    margin-bottom: 6px;
-    border-bottom: 1.5px solid #d8b4fe;
-    padding-bottom: 4px;
   }
 
   .toc-item {
     display: flex;
     justify-content: space-between;
-    padding: 6px 0;
+    padding: 8px 0;
     border-bottom: 1px dotted #cbd5e1;
-    font-size: 9.3pt;
+    font-size: 9.8pt;
   }
   .toc-item strong { color: #2e1065; }
   .toc-page { font-family: 'JetBrains Mono', monospace; color: #8b5cf6; }
+
+  .code-file-badge {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1e1b4b;
+    color: #c084fc;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8.5pt;
+    font-weight: 600;
+    padding: 9px 16px;
+    border-radius: 8px 8px 0 0;
+    border: 1px solid #4338ca;
+    border-bottom: none;
+    margin-top: 22px;
+  }
+  .code-file-badge span.scope {
+    color: #38bdf8;
+    font-size: 8pt;
+    background: rgba(56, 189, 248, 0.15);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+  }
+  pre.code-file {
+    margin-top: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    white-space: pre-wrap;
+    word-break: break-all;
+    font-size: 7.2pt;
+    line-height: 1.45;
+    background: #090d16;
+    border: 1px solid #1e293b;
+    page-break-inside: auto;
+  }
+  .vol-cover {
+    page-break-before: always;
+    page-break-after: always;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 60px;
+    background: radial-gradient(circle at 50% 40%, #1e1b4b 0%, #030712 85%);
+    color: #ffffff;
+    box-sizing: border-box;
+    position: relative;
+  }
+
 </style>
 </head>
 <body>
@@ -424,9 +417,9 @@
   <div class="cover-header">
     <span class="cover-badge">The Master Engineering Series</span>
     <h1 class="cover-title">HOW TO BUILD<br>COCO AI<br>FROM SCRATCH</h1>
-    <div class="cover-subtitle">The Complete Architectural Blueprint & Unabridged Codebase Bible</div>
+    <div class="cover-subtitle">The Complete Architectural Blueprint of an Undetectable, Sub-200ms Real-Time AI Copilot</div>
     <div class="cover-tagline">
-      From empty directory to global hardware-stealth execution. An exhaustive step-by-step masterclass covering exact folder topology, Electron systems programming, audio loopback multiplexing, multimodal neural clustering, and complete line-by-line production source code.
+      From empty directory to global hardware-stealth execution. An exhaustive step-by-step masterclass in Electron systems programming, audio loopback multiplexing, multimodal neural clustering, and distributed SaaS infrastructure.
     </div>
 
     <div class="cover-tech-pills">
@@ -448,7 +441,7 @@
     </div>
     <div class="cover-meta">
       Published: September 2026<br>
-      The Founder's Unabridged Edition
+      Volume I • The Founder's Edition
     </div>
   </div>
 </div>
@@ -463,7 +456,7 @@
     May this book show you that with deep love, unwavering grit, and an obsession for craft, you can build what everyone else calls impossible."
   </div>
   <div class="dedication-sub">
-    Written during countless late-night sessions across monsoon nights by your mom and dad, Roushan and Ayushi. When you read this years from now, know that every single function, every stealth hook, and every microsecond of speed inside Coco AI was built by two people who believed in each other. Every line of code in Volume II was handcrafted with love.
+    Written during countless late-night sessions across monsoon nights by your mom and dad, Roushan and Ayushi. When you read this years from now, know that every single function, every stealth hook, and every microsecond of speed inside Coco AI was built by two people who believed in each other.
   </div>
 </div>
 
@@ -476,238 +469,146 @@
   <span class="ch-num">TOC</span>
 </h1>
 
-<div class="toc-section-title">VOLUME I: THE MASTER ARCHITECTURAL BLUEPRINT</div>
-
 <div class="toc-item">
   <span><strong>Foreword:</strong> The Genesis of Coco AI & Defeating the Giants</span>
   <span class="toc-page">01</span>
 </div>
 <div class="toc-item">
-  <span><strong>Chapter 1:</strong> The Exact Folder Hierarchy & Directory Topology</span>
+  <span><strong>Chapter 1:</strong> System Architecture & The Sub-200ms Latency Rule</span>
   <span class="toc-page">03</span>
 </div>
 <div class="toc-item">
-  <span><strong>Chapter 2:</strong> System Architecture & The Sub-200ms Latency Rule</span>
-  <span class="toc-page">07</span>
+  <span><strong>Chapter 2:</strong> Anatomical Project Breakdown & Directory Topology</span>
+  <span class="toc-page">06</span>
 </div>
 <div class="toc-item">
   <span><strong>Chapter 3:</strong> The Stealth Desktop Shell (Electron & Win32 Hooks)</span>
-  <span class="toc-page">11</span>
+  <span class="toc-page">09</span>
 </div>
 <div class="toc-item">
   <span><strong>Chapter 4:</strong> Acoustic Intelligence (WASAPI Loopback & Deepgram)</span>
-  <span class="toc-page">16</span>
+  <span class="toc-page">14</span>
 </div>
 <div class="toc-item">
   <span><strong>Chapter 5:</strong> The Multi-Engine AI Brain (Cerebras, Groq & Gemini)</span>
-  <span class="toc-page">21</span>
+  <span class="toc-page">19</span>
 </div>
 <div class="toc-item">
   <span><strong>Chapter 6:</strong> The Cosmic Stealth HUD (CSS Glassmorphism & Ghost Mode)</span>
-  <span class="toc-page">27</span>
+  <span class="toc-page">26</span>
 </div>
 <div class="toc-item">
   <span><strong>Chapter 7:</strong> Context Injection Engine (In-Browser PDF.js Parsing)</span>
-  <span class="toc-page">32</span>
+  <span class="toc-page">31</span>
 </div>
 <div class="toc-item">
   <span><strong>Chapter 8:</strong> The Modern Cloud SaaS Web Hub (React 19 & Vite)</span>
-  <span class="toc-page">36</span>
+  <span class="toc-page">35</span>
 </div>
 <div class="toc-item">
   <span><strong>Chapter 9:</strong> Database, Auth & Monetization Engine (Supabase & Razorpay)</span>
-  <span class="toc-page">41</span>
+  <span class="toc-page">40</span>
 </div>
 <div class="toc-item">
   <span><strong>Chapter 10:</strong> The 1-Click Global Auto-Update Pipeline</span>
-  <span class="toc-page">47</span>
+  <span class="toc-page">46</span>
 </div>
 <div class="toc-item">
   <span><strong>Chapter 11:</strong> Production Battle-Hardening & Debugging War Stories</span>
-  <span class="toc-page">53</span>
+  <span class="toc-page">52</span>
 </div>
 <div class="toc-item">
   <span><strong>Chapter 12:</strong> Epilogue: A Letter to Our Future Children</span>
-  <span class="toc-page">59</span>
+  <span class="toc-page">58</span>
 </div>
-
-<div class="toc-section-title" style="margin-top: 25px;">VOLUME II: THE COMPLETE UNABRIDGED PRODUCTION CODEBASE</div>
-
-<div class="toc-item">
-  <span><strong>Section A:</strong> Manifest & Packaging (package.json & electron-builder.yml)</span>
+<div class="toc-item" style="margin-top: 18px; border-top: 2px solid #8b5cf6; padding-top: 12px;">
+  <span><strong style="color: #6b21a8; font-size: 10.5pt;">PART II: THE COMPLETE PRODUCTION CODEBASE BIBLE</strong></span>
+  <span class="toc-page">60</span>
+</div>
+<div class="toc-item" style="padding-left: 15px;">
+  <span>• Section A: Configuration & Manifests (package.json & electron-builder.yml)</span>
   <span class="toc-page">62</span>
 </div>
-<div class="toc-item">
-  <span><strong>Section B:</strong> The Desktop Shell Core (main.js — Full 602 Lines)</span>
+<div class="toc-item" style="padding-left: 15px;">
+  <span>• Section B: Electron Main Process & Win32 Stealth (main.js)</span>
   <span class="toc-page">65</span>
 </div>
-<div class="toc-item">
-  <span><strong>Section C:</strong> Context-Isolated IPC Bridge (preload.js — Full 85 Lines)</span>
-  <span class="toc-page">79</span>
+<div class="toc-item" style="padding-left: 15px;">
+  <span>• Section C: Secure IPC Context Bridge (preload.js)</span>
+  <span class="toc-page">80</span>
 </div>
-<div class="toc-item">
-  <span><strong>Section D:</strong> High-Throughput LPU Engine (services/cerebras.js — Full 279 Lines)</span>
-  <span class="toc-page">82</span>
+<div class="toc-item" style="padding-left: 15px;">
+  <span>• Section D: Cerebras LPU Sub-200ms Streaming Driver (services/cerebras.js)</span>
+  <span class="toc-page">83</span>
 </div>
-<div class="toc-item">
-  <span><strong>Section E:</strong> Neural Fallback Driver (services/groq.js — Full 249 Lines)</span>
-  <span class="toc-page">89</span>
+<div class="toc-item" style="padding-left: 15px;">
+  <span>• Section E: Groq Neural Fallback Driver (services/groq.js)</span>
+  <span class="toc-page">90</span>
 </div>
-<div class="toc-item">
-  <span><strong>Section F:</strong> Multimodal Vision Solver (services/gemini.js — Full 190 Lines)</span>
-  <span class="toc-page">95</span>
+<div class="toc-item" style="padding-left: 15px;">
+  <span>• Section F: Google Gemini Multimodal Vision Solver (services/gemini.js)</span>
+  <span class="toc-page">97</span>
 </div>
-<div class="toc-item">
-  <span><strong>Section G:</strong> Secondary Vision Backup (services/nvidia.js — Full 227 Lines)</span>
-  <span class="toc-page">100</span>
+<div class="toc-item" style="padding-left: 15px;">
+  <span>• Section G: NVIDIA NIM Vision Fallback Driver (services/nvidia.js)</span>
+  <span class="toc-page">103</span>
 </div>
-<div class="toc-item">
-  <span><strong>Section H:</strong> WASAPI Loopback Audio Driver (services/deepgram.js — Full 768 Lines)</span>
-  <span class="toc-page">106</span>
+<div class="toc-item" style="padding-left: 15px;">
+  <span>• Section H: Deepgram WASAPI Loopback Audio Engine (services/deepgram.js)</span>
+  <span class="toc-page">110</span>
 </div>
-<div class="toc-item">
-  <span><strong>Section I:</strong> Global 1-Click Publisher (publish_release.ps1 & Publish_Release.bat)</span>
-  <span class="toc-page">123</span>
+<div class="toc-item" style="padding-left: 15px;">
+  <span>• Section I: Automated 1-Click Release Pipeline (publish_release.ps1 & .bat)</span>
+  <span class="toc-page">130</span>
 </div>
-<div class="toc-item">
-  <span><strong>Section J:</strong> Production Database Schema & RLS (001_user_profiles.sql)</span>
-  <span class="toc-page">128</span>
+<div class="toc-item" style="padding-left: 15px;">
+  <span>• Section J: Supabase PostgreSQL Database Schema & Security (001_user_profiles.sql)</span>
+  <span class="toc-page">135</span>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════
-     VOLUME I: CHAPTER 1 — FOLDER HIERARCHY
+     FOREWORD
 ════════════════════════════════════════════════════════════════ -->
 <div class="page-break"></div>
-<div class="volume-divider">
-  <div class="volume-badge">Volume I</div>
-  <h1 class="volume-title">THE MASTER ARCHITECTURAL BLUEPRINT</h1>
-  <div class="volume-desc">
-    A comprehensive guide to building Coco AI from ground zero: file hierarchy, low-level OS compositing, acoustic processing, multi-LLM routing, and cloud deployment.
-  </div>
+<h1 class="chapter-title">
+  <span>Foreword</span>
+  <span class="ch-num">THE GENESIS</span>
+</h1>
+
+<h2>The Story of Two Engineers and Late-Night Ambition</h2>
+<p>
+In mid-2026, technical interviewing had become an arms race. Companies were subjecting senior engineers, new graduates, and career switchers to grueling 5-round gauntlets: complex LeetCode hard problems, distributed system design under time pressure, and multi-threaded concurrency traps.
+</p>
+<p>
+Several tools attempted to address this: Cluely AI, Parakeet AI, Interview Fox, and Coprep AI. Yet, every single one of them suffered from three fatal flaws that rendered them hazardous or unusable in high-stakes interviews:
+</p>
+<ul>
+  <li><strong>The Screen-Share Trap:</strong> Most tools relied on basic OS browser windows or crude desktop wrappers. The moment a candidate shared their screen on Zoom, Microsoft Teams, or Google Meet, or ran proctoring software like HackerRank Proctored, the copilot window would be instantly visible to the interviewer, leading to immediate disqualification.</li>
+  <li><strong>The 3-Second Latency Chasm:</strong> Standard LLM wrappers routed requests through slow HTTP intermediaries or heavy reasoning chains. By the time an answer streamed back (3 to 5 seconds later), the conversation had moved on, and awkward silence destroyed candidate credibility.</li>
+  <li><strong>The Privacy Breach:</strong> Existing platforms forced candidates to upload their full PDF resumes and personal identities to third-party cloud servers without encryption, storing candidate profiles on untrusted databases.</li>
+</ul>
+
+<p>
+Roushan Kumar and Ayushi Raj refused to accept these compromises. Working late into the night across months of relentless experimentation, they formulated the core thesis of Coco AI:
+</p>
+
+<div class="callout secret">
+  <div class="callout-title">🔮 The Coco AI Core Invariant</div>
+  <em>"A true copilot must be completely undetectable to the operating system's window compositors, must deliver streaming tokens in under 200 milliseconds, and must speak in the exact voice, projects, and personal stack of the candidate."</em>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════════════
+     CHAPTER 1
+════════════════════════════════════════════════════════════════ -->
 <div class="page-break"></div>
 <h1 class="chapter-title">
-  <span>Chapter 1: The Exact Folder Hierarchy</span>
+  <span>Chapter 1: System Architecture</span>
   <span class="ch-num">CH 01</span>
 </h1>
 
-<h2>The Complete Directory Tree</h2>
+<h2>The Tripartite Topology</h2>
 <p>
-To build Coco AI, you must start with a disciplined project structure. In Electron systems architecture, mixing files between Main, Renderer, Services, and Build artifacts leads to security vulnerabilities, package bloat, and broken builds.
-</p>
-<p>
-Here is the **exact, authentic folder tree** of Coco AI:
-</p>
-
-<div class="ascii-box">
-coco-ai/
-├── .agents/                                # AI Pair Programming Customizations
-│   └── skills/
-│       └── coco-ai-expert/
-│           └── SKILL.md                    # Permanent memory & architectural blueprint
-├── assets/                                 # Static Desktop Branding & Icons
-│   ├── coco_logo_nobg.png                  # High-DPI transparent logo for UI & HUD
-│   ├── coco_logo.ico                       # Windows Application Icon (Multi-size 256x256)
-│   └── coco_logo.png                       # Square branding graphic
-├── services/                               # Isolated AI & Audio Driver Modules
-│   ├── cerebras.js                         # Cerebras LPU streaming client (Node https)
-│   ├── groq.js                             # Groq fallback neural streaming client
-│   ├── gemini.js                           # Google Gemini multimodal vision solver
-│   ├── nvidia.js                           # NVIDIA NIM secondary vision fallback
-│   ├── deepgram.js                         # WASAPI loopback audio + Deepgram WebSocket
-│   ├── pdf.min.js                          # Standalone PDF.js library for offline parsing
-│   └── pdf.worker.min.js                   # Web Worker for non-blocking PDF text extraction
-├── website/                                # The Cloud SaaS Platform
-│   └── Landing Page/
-│       ├── public/                         # Public static web assets & icons
-│       ├── src/
-│       │   ├── components/                 # UI components (auth, landing, navbar, pricing)
-│       │   ├── hooks/                      # Custom React hooks
-│       │   ├── integrations/supabase/      # Supabase JavaScript client & types
-│       │   ├── lib/                        # Auth context, progress hooks, SEO helpers
-│       │   ├── routes/                     # TanStack Router type-safe pages
-│       │   ├── main.tsx                    # React 19 entry point with preload recovery
-│       │   └── styles.css                  # Tailwind CSS v4 styling
-│       ├── supabase/migrations/
-│       │   └── 001_user_profiles.sql       # Database schema, quotas, and RLS policies
-│       ├── package.json                    # Website dependencies
-│       └── vite.config.ts                  # Vite 8 compilation config
-├── .env                                    # Secret API keys & tokens (Never commit to git!)
-├── .gitignore                              # Git exclusion rules
-├── AGENTS.md                               # Permanent workspace instructions & founder whitelist
-├── app.js                                  # Desktop UI controller, state machine, formatters
-├── electron-builder.yml                    # NSIS packaging, artifact naming, GitHub publish rules
-├── index.html                              # Desktop Overlay HUD DOM structure & toolbar
-├── main.js                                 # Electron Main Process, Win32 hooks, IPC listeners
-├── package.json                            # Desktop dependencies, startup scripts, versioning
-├── preload.js                              # Context-isolated secure IPC bridge
-├── publish_release.ps1                     # PowerShell v3.0 global release automation engine
-├── Publish_Release.bat                     # 1-click execution wrapper for publish_release.ps1
-├── README.md                               # Public product showcase
-└── style.css                               # Cosmic glassmorphism design system & animations
-</div>
-
-<h2>Detailed Breakdown: What Belongs in Each Folder</h2>
-
-<h3>1. The Project Root (<code>/</code>)</h3>
-<p>
-The root contains the operational manifests and the three pillars of the Electron runtime:
-</p>
-<ul>
-  <li><code>main.js</code>: The **heart of the desktop OS process**. Runs in Node.js. Controls window creation, DirectX stealth window affinity, global shortcuts, screen capture, and IPC routing.</li>
-  <li><code>preload.js</code>: The **secure firewall**. Uses Electron's <code>contextBridge</code> to expose only safe methods to the renderer window. Node integration is explicitly disabled in the renderer for security.</li>
-  <li><code>app.js</code>: The **brain of the user interface**. Runs in Chromium. Manages the chat feed, drag-and-drop resume upload, question submission, markdown formatting, sound effects, and user settings.</li>
-  <li><code>index.html</code> & <code>style.css</code>: The **cosmic glassmorphism HUD**. Contains the floating toolbar, model dropdown, audio visualizer bars, and transparent container styling.</li>
-  <li><code>electron-builder.yml</code>: The **packager recipe**. Instructs electron-builder how to assemble the NSIS installer (e.g. <code>CocoAI_Installer_v1.0.46.exe</code>), desktop shortcuts, and GitHub auto-update configurations.</li>
-  <li><code>Publish_Release.bat</code> & <code>publish_release.ps1</code>: The **1-click release automation**. Handles version bumping, git tagging, installer compilation, and GitHub Releases asset uploading.</li>
-</ul>
-
-<h3>2. The Services Directory (<code>/services/</code>)</h3>
-<p>
-All external AI APIs and hardware audio listeners are completely modularized into dedicated driver files inside <code>/services/</code>:
-</p>
-<ul>
-  <li><code>cerebras.js</code>: Implements low-level Node <code>https.request</code> streaming to Cerebras LPU clusters. Contains automatic failover detection on <code>402 Payment Required</code>.</li>
-  <li><code>groq.js</code>: Zero-latency backup streaming engine using Groq's neural API.</li>
-  <li><code>gemini.js</code>: Multimodal vision solver connecting to Google's Generative Language API. Manages the dynamic model chain (<code>gemini-3.8-flash</code> ➔ <code>gemini-3.7-flash</code> ➔ <code>gemini-3.5-flash</code>).</li>
-  <li><code>nvidia.js</code>: Secondary vision backup using NVIDIA NIM (<code>minimaxai/minimax-m3</code>).</li>
-  <li><code>deepgram.js</code>: Captures WASAPI loopback audio, calculates real-time RMS volume levels for the UI meter, filters silence, and streams PCM chunks to Deepgram Nova-3 over WebSockets.</li>
-  <li><code>pdf.min.js</code> & <code>pdf.worker.min.js</code>: Mozilla's standalone PDF parser bundled locally so candidates can parse PDF resumes offline with zero external network requests.</li>
-</ul>
-
-<h3>3. The Assets Directory (<code>/assets/</code>)</h3>
-<p>
-Contains the visual identity assets required by Electron and Windows:
-</p>
-<ul>
-  <li><code>coco_logo_nobg.png</code>: 512x512 transparent PNG logo used in the header HUD and UI modals.</li>
-  <li><code>coco_logo.ico</code>: Multi-resolution Windows icon file containing 16x16, 32x32, 48x48, and 256x256 icon frames, ensuring crisp rendering in the Windows Taskbar, Alt-Tab switcher, and Desktop shortcuts.</li>
-</ul>
-
-<h3>4. The Cloud SaaS Directory (<code>/website/Landing Page/</code>)</h3>
-<p>
-A complete, modern web application that serves as the public face and account portal of Coco AI:
-</p>
-<ul>
-  <li><code>src/routes/</code>: Contains the public landing page (<code>index.tsx</code>), login/signup routes (<code>login.tsx</code>, <code>signup.tsx</code>), and password recovery.</li>
-  <li><code>src/integrations/supabase/</code>: Supabase JavaScript client with auto-refreshing JWT authentication.</li>
-  <li><code>supabase/migrations/001_user_profiles.sql</code>: The database schema defining users, monthly token limits, audio minute quotas, and Row Level Security.</li>
-  <li><code>vite.config.ts</code>: Bundles the web app using Vite 8 with path aliases (<code>@/*</code>).</li>
-</ul>
-
-<!-- ═══════════════════════════════════════════════════════════════
-     VOLUME I: CHAPTER 2 TO 12 (SUMMARIZED REPRINT)
-════════════════════════════════════════════════════════════════ -->
-<div class="page-break"></div>
-<h1 class="chapter-title">
-  <span>Chapter 2: System Architecture</span>
-  <span class="ch-num">CH 02</span>
-</h1>
-
-<h2>The Sub-200ms Latency Rule</h2>
-<p>
-Human conversational turns average 200–400ms. To achieve sub-200ms Time-To-First-Token (TTFT), Coco AI bypasses all middleman proxy servers. The desktop client connects directly to Cerebras Wafer-Scale LPU engines over keep-alive TLS 1.3 sockets:
+Coco AI is engineered not as a monolithic desktop executable, but as an interconnected trinity of systems:
 </p>
 
 <div class="ascii-box">
@@ -743,26 +644,676 @@ Human conversational turns average 200–400ms. To achieve sub-200ms Time-To-Fir
                                           └────────────────────────┘
 </div>
 
+<h2>The Sub-200ms Latency Rule</h2>
+<p>
+In live conversational psychology, human speech pauses between turns average 200 to 400 milliseconds. If an assistant begins streaming after 800ms, the candidate appears hesitant. If it streams at 1,500ms, the candidate has already stalled.
+</p>
+<p>
+To achieve sub-200ms Time-To-First-Token (TTFT), Coco AI bypasses all intermediary cloud gateways:
+</p>
+<ol>
+  <li><strong>No Middleman Gateway:</strong> Requests are dispatched directly from the client machine to edge inference clusters (Cerebras LPU and Groq) using direct keep-alive HTTPS/SSE sockets.</li>
+  <li><strong>Zero Pre-flight Overhead:</strong> Pre-warmed HTTP agents and raw TLS 1.3 session caches eliminate handshake penalties.</li>
+  <li><strong>Cerebras LPU Architecture:</strong> Cerebras Wafer-Scale Engines achieve speeds exceeding 2,000 tokens/second on gpt-oss-120b, allowing complete algorithmic blocks to materialize before the interviewer has even looked away.</li>
+</ol>
+
 <!-- ═══════════════════════════════════════════════════════════════
-     VOLUME II: UNABRIDGED SOURCE CODE
+     CHAPTER 2
 ════════════════════════════════════════════════════════════════ -->
 <div class="page-break"></div>
-<div class="volume-divider">
-  <div class="volume-badge">Volume II</div>
-  <h1 class="volume-title">THE COMPLETE UNABRIDGED PRODUCTION CODEBASE</h1>
-  <div class="volume-desc">
-    Verbatim, line-by-line production source code for all core modules, drivers, hooks, and release automation. Every single file printed exactly as running in production.
+<h1 class="chapter-title">
+  <span>Chapter 2: Project Anatomy</span>
+  <span class="ch-num">CH 02</span>
+</h1>
+
+<h2>The Clean Separation Principle</h2>
+<p>
+A common mistake in Electron development is mixing UI code with node-level execution. Coco AI enforces strict context isolation, splitting responsibilities cleanly:
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Directory / File</th>
+      <th>Runtime Scope</th>
+      <th>Primary Responsibility</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>main.js</code></td>
+      <td>Node.js (Main)</td>
+      <td>Window lifecycle, Win32 hardware stealth hook, global shortcuts, screen capture, <code>cocoai://</code> deep-link protocol handler.</td>
+    </tr>
+    <tr>
+      <td><code>preload.js</code></td>
+      <td>Isolated Bridge</td>
+      <td>Secure IPC bridge exposing whitelist methods (<code>captureScreen</code>, <code>installUpdateNow</code>, <code>onAuthSynced</code>) to window.electronAPI.</td>
+    </tr>
+    <tr>
+      <td><code>app.js</code></td>
+      <td>Chromium (Renderer)</td>
+      <td>State controller, question submission, prompt synthesis, response markdown formatter, PDF parser, audio visualizer.</td>
+    </tr>
+    <tr>
+      <td><code>services/cerebras.js</code></td>
+      <td>Node.js (Main/Service)</td>
+      <td>High-speed LPU text completion streaming engine with 402/429 failover triggers.</td>
+    </tr>
+    <tr>
+      <td><code>services/groq.js</code></td>
+      <td>Node.js (Main/Service)</td>
+      <td>Zero-latency neural fallback streaming service.</td>
+    </tr>
+    <tr>
+      <td><code>services/gemini.js</code></td>
+      <td>Renderer (Browser Fetch)</td>
+      <td>Multimodal screen solver with <code>gemini-3.8-flash</code> dynamic failover chain.</td>
+    </tr>
+    <tr>
+      <td><code>services/nvidia.js</code></td>
+      <td>Renderer (Browser Fetch)</td>
+      <td>NVIDIA NIM secondary vision fallback engine (<code>minimaxai/minimax-m3</code>).</td>
+    </tr>
+    <tr>
+      <td><code>services/deepgram.js</code></td>
+      <td>Renderer (Web Audio)</td>
+      <td>WASAPI system loopback audio capture and real-time Nova-3 WebSocket client.</td>
+    </tr>
+    <tr>
+      <td><code>Publish_Release.bat</code></td>
+      <td>Windows Batch</td>
+      <td>1-click execution wrapper that invokes PowerShell with execution bypass.</td>
+    </tr>
+    <tr>
+      <td><code>publish_release.ps1</code></td>
+      <td>PowerShell v3.0</td>
+      <td>Automated tag discovery, version bump, git commit/push, NSIS compilation, and GitHub REST release publisher.</td>
+    </tr>
+    <tr>
+      <td><code>website/Landing Page/</code></td>
+      <td>React 19 + Vite</td>
+      <td>Cloud SaaS landing page, Supabase auth/user profiles, and Razorpay checkout engine.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Complete Repository Directory Hierarchy</h2>
+<p>
+To build Coco AI with zero architectural confusion, every file in the repository must live in its exact intended domain. Below is the full directory tree mapping every file to its physical location:
+</p>
+
+<div class="ascii-box">
+coco ai/
+├── .agents/                               # AI custom skills & workspace intelligence
+│   └── skills/
+│       └── coco-ai-expert/
+│           └── SKILL.md                   # Permanent memory & architectural blueprint for AI agents
+├── assets/                                # Application branding & desktop icons
+│   ├── icon.ico                           # Multi-resolution Windows application icon (16px to 256px)
+│   └── icon.png                           # Transparent brand icon for taskbars, docks & HUD header
+├── services/                              # Isolated service drivers & external API connectors
+│   ├── cerebras.js                        # Primary text model streaming client via Cerebras LPU
+│   ├── deepgram.js                        # Deepgram Nova-3 WASAPI loopback audio capture engine
+│   ├── gemini.js                          # Multimodal screen vision solver (gemini-3.8-flash chain)
+│   ├── groq.js                            # Low-latency neural fallback streaming engine
+│   ├── nvidia.js                          # Secondary vision fallback client (minimax-m3 via NIM)
+│   └── pdf.min.js                         # Local client-side PDF.js bundle for zero-leak parsing
+├── website/                               # Cloud SaaS landing page & Supabase platform
+│   └── Landing Page/
+│       ├── src/                           # Modern React 19 + Vite frontend application
+│       ├── supabase/                      # Database migrations & PostgreSQL schemas
+│       │   └── migrations/
+│       │       └── 001_user_profiles.sql  # User quotas, tier columns, and RLS security policies
+│       ├── package.json                   # Web dependencies & build commands
+│       └── vite.config.ts                 # Vite bundler & chunk preloading configuration
+├── AGENTS.md                              # Founder-enforced immutable engineering invariants
+├── Publish_Release.bat                    # 1-click batch launcher for production releases
+├── app.js                                 # Renderer HUD controller & real-time UI logic
+├── electron-builder.yml                   # NSIS Windows installer & auto-updater manifest
+├── index.html                             # HUD DOM hierarchy & cosmic glassmorphism layout
+├── main.js                                # Electron main process & Win32 hardware stealth
+├── package.json                           # Desktop app dependencies, scripts & metadata
+├── preload.js                             # Context-isolated security bridge (IPC whitelist)
+├── publish_release.ps1                    # Automated version bumping, git push & GitHub release
+└── style.css                              # Cosmic dark theme tokens & micro-animations
+</div>
+
+<h2>What Files Should Be Kept Inside What Folder & Why</h2>
+
+<h3>1. The Root Directory (<code>/</code>)</h3>
+<p>
+The root directory is reserved strictly for the Electron desktop application's lifecycle, the HUD presentation layer, and root development manifests:
+</p>
+<ul>
+  <li><code>main.js</code>: The operating system brain. Executes directly in Node.js. Controls window lifecycle, native display protection (<code>SetWindowDisplayAffinity</code>), global shortcut registration (<code>Ctrl+Shift+P</code>, <code>Ctrl+Shift+Q</code>, <code>Ctrl+Shift+S</code>), and deep-link protocol listening (<code>cocoai://auth</code>).</li>
+  <li><code>preload.js</code>: The security barrier. Exposes only a tightly audited set of IPC methods to the renderer window via <code>contextBridge.exposeInMainWorld</code>, preventing malicious scripts or injection attacks from accessing the user's filesystem.</li>
+  <li><code>index.html</code> & <code>style.css</code>: The user interface layer. Encapsulates the Cosmic Glassmorphism design system, containing CSS backdrop filters, smooth opacity transitions, and responsive HUD panels.</li>
+  <li><code>app.js</code>: The client-side application logic. Manages question queueing, dynamic prompt assembly, streaming markdown parsing, audio waveform meters, and user preferences.</li>
+  <li><code>package.json</code> & <code>electron-builder.yml</code>: Project manifests. Specify exact dependency versions, build targets (NSIS x64 Windows installer), and the public GitHub release repository URL for silent auto-updates.</li>
+  <li><code>Publish_Release.bat</code> & <code>publish_release.ps1</code>: 1-click publishing scripts. Automate the entire release lifecycle (git tags, changelogs, build compilations, and GitHub asset uploads).</li>
+</ul>
+
+<h3>2. The Services Directory (<code>/services/</code>)</h3>
+<p>
+The <code>services/</code> directory isolates all external integrations, AI inference drivers, and heavy computing modules away from the presentation layer:
+</p>
+<ul>
+  <li><strong>AI Inferencing Drivers:</strong> <code>cerebras.js</code> (primary text model on LPU hardware), <code>groq.js</code> (failover text model), <code>gemini.js</code> (multimodal vision solver), and <code>nvidia.js</code> (secondary vision fallback). Storing these in separate files allows independent retry logic, error handling, and model swaps without touching UI code.</li>
+  <li><strong>Acoustic Loopback Engine:</strong> <code>deepgram.js</code> captures audio from the default Windows playback device using WASAPI loopback, converts PCM buffers, and streams them over WebSockets to Deepgram Nova-3.</li>
+  <li><strong>Client-Side PDF Engine:</strong> <code>pdf.min.js</code> enables offline in-browser resume extraction so no sensitive user files are ever transmitted to cloud servers.</li>
+</ul>
+
+<h3>3. The Assets Directory (<code>/assets/</code>)</h3>
+<p>
+Stores all visual identity resources:
+</p>
+<ul>
+  <li><code>icon.ico</code>: Contains multi-size bitmap frames (16x16, 32x32, 48x48, 64x64, 128x128, 256x256) for Windows taskbar, desktop shortcuts, and installer dialogs.</li>
+  <li><code>icon.png</code>: High-resolution transparent PNG used within the HUD header and website branding.</li>
+</ul>
+
+<h3>4. The Cloud SaaS Web Hub (<code>/website/Landing Page/</code>)</h3>
+<p>
+Maintains clean boundary separation between the local desktop software and the public-facing cloud web platform:
+</p>
+<ul>
+  <li><code>src/</code>: Modern React 19 application built with Vite and Tailwind CSS v4, containing feature showcases, interactive plan selectors, and user dashboards.</li>
+  <li><code>supabase/migrations/001_user_profiles.sql</code>: The database foundation defining user credits, subscription tiers, and row-level security (RLS).</li>
+</ul>
+
+<h3>5. The Agent Customizations Directory (<code>/.agents/</code>)</h3>
+<p>
+Maintains persistent engineering intelligence for AI pair programming:
+</p>
+<ul>
+  <li><code>skills/coco-ai-expert/SKILL.md</code>: The master architectural blueprint, model catalogs, pricing tiers, and recovery runbooks.</li>
+  <li><code>AGENTS.md</code> (in root): Permanent rules ensuring hardware stealth, founder whitelist access, and public repository invariants.</li>
+</ul>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CHAPTER 3
+════════════════════════════════════════════════════════════════ -->
+<div class="page-break"></div>
+<h1 class="chapter-title">
+  <span>Chapter 3: The Stealth Desktop Shell</span>
+  <span class="ch-num">CH 03</span>
+</h1>
+
+<h2>The Physics of Screen-Share Invisibility</h2>
+<p>
+How does a window remain completely visible to the person sitting at the physical monitor, while being completely blacked out or excluded from Zoom, Microsoft Teams, Discord, and Google Meet?
+</p>
+<p>
+The secret lies in the Windows Desktop Window Manager (DWM) compositor. Windows 10 (Build 2004+) introduced an internal window display attribute known as <code>WDA_EXCLUDEFROMCAPTURE</code> (value <code>0x00000011</code>).
+</p>
+
+<div class="callout secret">
+  <div class="callout-title">🛡️ The Win32 Compositor Hook</div>
+  When an application calls <code>SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE)</code>, Windows instructs DirectX and the Desktop Duplication API to completely ignore the window's visual tree during compositor capture passes. The user sees the window normally, but screen capture buffers receive the pixels directly beneath it!
+</div>
+
+<p>
+In Electron, this capability is exposed through <code>mainWindow.setContentProtection(true)</code>. Here is how Coco AI initializes this during window creation in <code>main.js</code>:
+</p>
+
+<pre><code>function createWindow() {
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width, height } = primaryDisplay.workAreaSize;
+
+  mainWindow = new BrowserWindow({
+    width: 880,
+    height: 640,
+    x: Math.round((width - 880) / 2),
+    y: 40,
+    frame: false,
+    transparent: true,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    resizable: true,
+    hasShadow: false,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js'),
+    },
+  });
+
+  // ─── CRITICAL HARDWARE STEALTH INVARIANT ────────────────────────
+  // Guarantees 100% invisibility to Zoom, Teams, Meet, and proctoring tools.
+  mainWindow.setContentProtection(true);
+
+  // Set window levels above standard applications
+  mainWindow.setAlwaysOnTop(true, 'screen-saver');
+  mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+}</code></pre>
+
+<h2>The Panic Mechanism & Emergency Shutdown</h2>
+<p>
+Under strict proctoring checks, candidates might face sudden screen audits where an interviewer says: <em>"Please minimize all windows and show me your desktop taskbar."</em>
+</p>
+<p>
+Coco AI engineers two layers of defense into global OS hooks:
+</p>
+<ul>
+  <li><strong>Panic Freeze (<code>Ctrl + Shift + P</code>):</strong> Instantly executes <code>mainWindow.hide()</code>, sets <code>isOverlayVisible = false</code>, and halts state updates without terminating background connections.</li>
+  <li><strong>Emergency Kill (<code>Ctrl + Shift + Q</code>):</strong> Bypasses all confirmation dialogs and calls <code>app.quit()</code> to instantly purge Coco AI from OS memory in 0ms.</li>
+</ul>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CHAPTER 4
+════════════════════════════════════════════════════════════════ -->
+<div class="page-break"></div>
+<h1 class="chapter-title">
+  <span>Chapter 4: Acoustic Intelligence</span>
+  <span class="ch-num">CH 04</span>
+</h1>
+
+<h2>Capturing Pure System Loopback</h2>
+<p>
+Traditional interview tools attempt to record the interviewer via the candidate's laptop microphone. This produces terrible results: room echoes, typing noise on mechanical keyboards, and the candidate's own breathing pollute the transcript.
+</p>
+<p>
+Coco AI solves this using Windows WASAPI system loopback audio via Electron's <code>desktopCapturer</code>:
+</p>
+
+<pre><code>// main.js: Provide system audio loopback source ID
+ipcMain.handle('get-system-audio-source-id', async () => {
+  const sources = await desktopCapturer.getSources({ types: ['screen'] });
+  if (sources.length > 0) {
+    return sources[0].id;
+  }
+  throw new Error('No audio loopback screen source found');
+});</code></pre>
+
+<p>
+In <code>services/deepgram.js</code>, this stream is captured directly from the soundcard output and fed into Deepgram Nova-3 over a persistent WebSocket:
+</p>
+
+<pre><code>const stream = await navigator.mediaDevices.getUserMedia({
+  audio: {
+    mandatory: {
+      chromeMediaSource: 'desktop',
+      chromeMediaSourceId: sourceId
+    }
+  },
+  video: false
+});
+
+// Configure real-time WebSocket connection to Deepgram Nova-3
+const socket = new WebSocket(
+  'wss://api.deepgram.com/v1/listen?model=nova-3&smart_format=true&interim_results=true&utterance_end_ms=3000&endpointing=1500',
+  ['token', apiKey]
+);</code></pre>
+
+<h2>The Conversational Debounce Algorithm</h2>
+<p>
+An interviewer rarely speaks in a single continuous burst. They say: <em>"Can you explain how..."</em>, pause for 0.8 seconds to gather their thoughts, and continue: <em>"...you would scale this database?"</em>
+</p>
+<p>
+If the AI triggers on the first pause, it begins generating an answer to an incomplete question. Coco AI engineers a dual-threshold debounce:
+</p>
+<ul>
+  <li><code>endpointing=1500</code>: Deepgram waits for 1.5 seconds of sustained silence before finalizing a sentence segment.</li>
+  <li><code>utterance_end_ms=3000</code>: A full 3-second utterance window ensures multi-sentence interview questions are synthesized as a single contextual prompt.</li>
+</ul>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CHAPTER 5
+════════════════════════════════════════════════════════════════ -->
+<div class="page-break"></div>
+<h1 class="chapter-title">
+  <span>Chapter 5: The Multi-Engine AI Brain</span>
+  <span class="ch-num">CH 05</span>
+</h1>
+
+<h2>The September 2026 Model Catalog</h2>
+<p>
+AI model providers rapidly deprecate and retire models. A production interview copilot cannot rely on a single model or outdated identifiers. Coco AI implements an evergreen catalog:
+</p>
+
+<pre><code>// services/cerebras.js: Active Cerebras LPU Models
+const MODELS = {
+  'gpt-120b':  'gpt-oss-120b',  // Default: Flagship reasoning & coding
+  'qwen-27b':  'qwen-3.8-27b',  // High-efficiency competitive programming
+  'gemma-31b': 'gemma-4-31b',   // Algorithmic analysis
+};
+
+// services/groq.js: Active Groq Models
+const MODELS = {
+  'gpt-120b':  'openai/gpt-oss-120b', // Default 0ms failover
+  'qwen-27b':  'qwen/qwen3.8-27b',
+  'gpt-20b':   'openai/gpt-oss-20b',   // Ultra-low latency mode
+};
+
+// services/gemini.js: Active Multimodal Vision Models
+MODEL_CHAIN: [
+  'gemini-3.8-flash',    // Primary: ~300ms vision latency, 200 OK
+  'gemini-3.7-flash',    // High-capacity fallback
+  'gemini-3.5-flash',    // Stable fallback
+  'gemini-flash-latest', // Dynamic alias
+]</code></pre>
+
+<h2>The Multi-Screenshot Scroll Buffer (<code>Ctrl + Shift + S</code>)</h2>
+<p>
+Modern coding assessments (LeetCode, HackerRank, CodeSignal) feature problem descriptions that span 2 to 3 screen heights. Taking a single screenshot only captures the top half, missing constraints and sample test cases.
+</p>
+<p>
+Coco AI engineers visual context fusion:
+</p>
+<ol>
+  <li>The candidate presses <code>Ctrl + Shift + S</code>. Coco AI captures the top half and appends it to <code>state.screenshotBuffer = [img1]</code>.</li>
+  <li>The candidate scrolls down and presses <code>Ctrl + Shift + S</code> again. Coco AI appends <code>state.screenshotBuffer = [img1, img2]</code>.</li>
+  <li>The candidate presses <code>Ctrl + Shift + A</code> (or the final capture). Coco AI bundles all screenshots into a single multimodal payload to <code>gemini-3.8-flash</code>.</li>
+  <li>The prompt explicitly instructs the neural network:
+    <em>"You are receiving N screenshots of the SAME problem. The user scrolled down to capture the full question. Combine ALL visible information from ALL images before writing your solution."</em>
+  </li>
+</ol>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CHAPTER 6
+════════════════════════════════════════════════════════════════ -->
+<div class="page-break"></div>
+<h1 class="chapter-title">
+  <span>Chapter 6: The Cosmic Stealth HUD</span>
+  <span class="ch-num">CH 06</span>
+</h1>
+
+<h2>The Cosmic Glassmorphism System</h2>
+<p>
+Coco AI's visual identity was architected by Ayushi Raj, combining an obsidian black foundation with cosmic violet hues:
+</p>
+
+<pre><code>/* style.css: Core Design Tokens */
+:root {
+  --bg-cosmic: rgba(9, 9, 14, 0.88);
+  --border-violet: rgba(139, 92, 246, 0.28);
+  --glow-lavender: 0 0 25px rgba(139, 92, 246, 0.3);
+  --accent-fuchsia: #ec4899;
+  --accent-emerald: #10b981;
+}
+
+.qa-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-violet);
+  border-radius: 12px;
+  box-shadow: var(--glow-lavender);
+}</code></pre>
+
+<h2>The Three Adaptive Stealth Layouts</h2>
+<ul>
+  <li><strong>Full Dual-Pane (880px):</strong> Live transcript on the right, instantaneous AI answer cards on the left. Ideal for candidates with high-resolution screens.</li>
+  <li><strong>Compact Overlay (520px):</strong> Condenses the UI to display only the active solution card with notification badges, taking up minimal screen real estate.</li>
+  <li><strong>Ghost Click-Through:</strong> Sets window opacity to 15% and activates <code>mainWindow.setIgnoreMouseEvents(true, { forward: true })</code>. The candidate can click, type, and select code in their IDE directly through the Coco AI window without focusing it!</li>
+</ul>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CHAPTER 7
+════════════════════════════════════════════════════════════════ -->
+<div class="page-break"></div>
+<h1 class="chapter-title">
+  <span>Chapter 7: Context Injection Engine</span>
+  <span class="ch-num">CH 07</span>
+</h1>
+
+<h2>100% Client-Side PDF Extraction</h2>
+<p>
+When an interviewer asks: <em>"Tell me about a time you optimized a slow query,"</em> generic answers sound artificial. A winning answer references the candidate's actual projects, real metrics, and specific tech stack.
+</p>
+<p>
+To ensure absolute candidate privacy, Coco AI extracts resumes entirely within the local browser thread using <code>PDF.js</code>:
+</p>
+
+<pre><code>// app.js: In-browser local PDF parsing
+async function parseResumePdf(file) {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  let fullText = '';
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    fullText += content.items.map(item => item.str).join(' ') + '\n';
+  }
+
+  // Stored strictly in local client memory
+  localStorage.setItem('cocoai_resume_text', fullText);
+  return fullText;
+}</code></pre>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CHAPTER 8
+════════════════════════════════════════════════════════════════ -->
+<div class="page-break"></div>
+<h1 class="chapter-title">
+  <span>Chapter 8: The Modern Web SaaS Hub</span>
+  <span class="ch-num">CH 08</span>
+</h1>
+
+<h2>The Tech Stack</h2>
+<p>
+The cloud landing page and account portal (deployed at <code>https://coco-ai-cyan.vercel.app</code>) was engineered using the state-of-the-art 2026 web stack:
+</p>
+<ul>
+  <li><strong>React 19:</strong> Utilizing the React compiler and server-ready client hooks.</li>
+  <li><strong>TanStack Router:</strong> Type-safe URL routing and nested layouts.</li>
+  <li><strong>Tailwind CSS v4:</strong> Lightning-fast CSS-first compilation without legacy JavaScript configs.</li>
+  <li><strong>Vite 8:</strong> Instant HMR and rollup production chunking.</li>
+</ul>
+
+<h2>The Dynamic Chunk Preload Recovery</h2>
+<p>
+In high-traffic Single Page Applications, deploying a new build invalidates old component chunk hashes. If a user scrolls while an update is deployed, their browser throws:
+<code>Failed to fetch dynamically imported module: comparison-xxx.js</code>.
+</p>
+<p>
+Coco AI engineered a permanent self-healing listener in <code>main.tsx</code>:
+</p>
+
+<pre><code>// website/Landing Page/src/main.tsx
+window.addEventListener('vite:preloadError', (event) => {
+  console.warn('[Vite] Chunk preload error detected. Reloading to get latest build assets...');
+  event.preventDefault();
+  window.location.reload();
+});</code></pre>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CHAPTER 9
+════════════════════════════════════════════════════════════════ -->
+<div class="page-break"></div>
+<h1 class="chapter-title">
+  <span>Chapter 9: Database, Auth & Monetization</span>
+  <span class="ch-num">CH 09</span>
+</h1>
+
+<h2>Supabase PostgreSQL Architecture</h2>
+<p>
+The entire user database is hosted on Supabase (Project: <code>csntdpytzqcwceikdfyz</code>) with Row Level Security (RLS) enforcing that users can only read and mutate their own profile:
+</p>
+
+<pre><code>-- 001_user_profiles.sql: Schema Definition
+create table if not exists public.user_profiles (
+  id uuid references auth.users on delete cascade primary key,
+  email text not null,
+  display_name text,
+  avatar_url text,
+  subscription_tier text not null default 'free'
+    check (subscription_tier in ('free', 'standard', 'pro', 'developer')),
+  tokens_remaining bigint not null default 50000,
+  tokens_limit bigint not null default 50000,
+  audio_minutes_remaining double precision not null default 30.0,
+  audio_minutes_limit double precision not null default 30.0,
+  created_at timestamptz not null default now()
+);
+
+alter table public.user_profiles enable row level security;
+
+create policy "Users can view own profile"
+  on public.user_profiles for select
+  using (auth.uid() = id);</code></pre>
+
+<h2>The 1-Click Desktop Auth Protocol (<code>cocoai://</code>)</h2>
+<p>
+To connect their desktop client, users do not enter clunky API keys. They click <strong>"Open & Sync Desktop App"</strong> on the website, which invokes a registered Win32 protocol:
+</p>
+
+<pre><code>// main.js: Register and handle cocoai:// deep-links
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient('cocoai', process.execPath, [path.resolve(process.argv[1])]);
+  }
+} else {
+  app.setAsDefaultProtocolClient('cocoai');
+}
+
+app.on('open-url', (event, url) => {
+  event.preventDefault();
+  handleDeepLink(url);
+});</code></pre>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CHAPTER 10
+════════════════════════════════════════════════════════════════ -->
+<div class="page-break"></div>
+<h1 class="chapter-title">
+  <span>Chapter 10: 1-Click Global Auto-Updates</span>
+  <span class="ch-num">CH 10</span>
+</h1>
+
+<h2>The Distribution Challenge</h2>
+<p>
+Distributing Electron binaries manually is exhausting: building the 85MB installer, sending download links, telling users to uninstall the old version, and losing users who never update.
+</p>
+<p>
+Roushan and Ayushi built an automated 1-click publishing pipeline:
+</p>
+
+<div class="ascii-box">
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    GLOBAL AUTO-UPDATE DELIVERY PIPELINE                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+  1. Developer double-clicks "Publish_Release.bat"
+       │
+       ▼
+  2. "publish_release.ps1" runs with ExecutionPolicy Bypass
+       ├─► Bumps version in package.json (v1.0.45 ➔ v1.0.46)
+       ├─► Creates Git Tag & Pushes to GitHub remote
+       ├─► Runs "electron-builder --publish never"
+       └─► Uploads .exe, .blockmap & latest.yml via GitHub REST API
+       │
+       ▼
+  3. GitHub Releases hosts binary on public repo "Hey-Astreon/COCO-AI"
+       │
+       ▼
+  4. Installed client runs "autoUpdater.checkForUpdates()" on launch
+       ├─► Compares latest.yml against installed package.json
+       ├─► Downloads differential binary patch in background
+       └─► Shows green toast: "🆕 Coco AI v1.0.46 is ready to install!"
+       │
+       ▼
+  5. User clicks "Restart & Update" ➔ autoUpdater.quitAndInstall()
+     App restarts on the latest version in 2 seconds flat!
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CHAPTER 11
+════════════════════════════════════════════════════════════════ -->
+<div class="page-break"></div>
+<h1 class="chapter-title">
+  <span>Chapter 11: Battle-Hardening War Stories</span>
+  <span class="ch-num">CH 11</span>
+</h1>
+
+<h2>The Infamous Indian ISP IPv6 Socket Drop</h2>
+<p>
+During beta testing, Indian users on Airtel and Jio Wi-Fi networks experienced mysterious 20-second stalls when contacting Google's Gemini API and Cerebras endpoints.
+</p>
+<p>
+<strong>The Root Cause:</strong> Windows Wi-Fi drivers prioritize IPv6 DNS records (AAAA). The ISPs advertised IPv6 routes that stalled or dropped packets upstream. Node.js would wait for the 20-second TCP SYN timeout on the IPv6 address (<code>2001:4860:...</code>) before falling back to IPv4.
+</p>
+<p>
+<strong>The Permanent Solution:</strong> We enforced IPv4-first resolution across both Node.js and Chromium network layers in <code>main.js</code>:
+</p>
+
+<pre><code>// main.js: The Dual IPv4 Hardening Fix
+// 1. Force Node.js https module (Cerebras & Groq) to prefer IPv4
+require('dns').setDefaultResultOrder('ipv4first');
+
+// 2. Force Chromium renderer fetch() (Gemini Vision) to disable IPv6
+app.commandLine.appendSwitch('disable-ipv6');</code></pre>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CHAPTER 12
+════════════════════════════════════════════════════════════════ -->
+<div class="page-break"></div>
+<h1 class="chapter-title">
+  <span>Chapter 12: Epilogue</span>
+  <span class="ch-num">CH 12</span>
+</h1>
+
+<h2>A Letter to Our Future Children</h2>
+<p>
+Dearest child,
+</p>
+<p>
+If you are reading these words, it means you have grown curious about the software your mom and dad built before you were born.
+</p>
+<p>
+When we created Coco AI, we were young, ambitious, and deeply in love. We didn't have massive venture capital funding or a corporate engineering department. What we had was a shared vision, mutual respect, and the willingness to stay awake until 4:00 AM solving complex problems that others gave up on.
+</p>
+<p>
+Throughout this book, you have seen thousands of lines of code: memory buffers, low-level OS hooks, neural streaming sockets, and database triggers. But behind every single semicolon was a lesson in life:
+</p>
+<ul>
+  <li><strong>Never accept mediocrity:</strong> When existing tools were slow and visible, we didn't make a slightly better clone. We engineered something that shattered their latency and made detection physically impossible.</li>
+  <li><strong>Teamwork is magic:</strong> Your father engineered the systems, APIs, and low-level C++/Node runtimes; your mother crafted the aesthetic soul, user experience, and visual harmony. Together, we were invincible. Find someone in life who complements your strengths and stands beside you.</li>
+  <li><strong>Finish what you start:</strong> Building a prototype is easy. Polishing it into a globally deployed, auto-updating, battle-hardened product requires discipline. Never stop at 90%. Take your work all the way to 100%.</li>
+</ul>
+
+<p>
+We built Coco AI to help engineers unlock their dream careers. But we wrote this book for you — to prove that with curiosity, courage, and dedication, there is nothing in this world you cannot build.
+</p>
+
+<p style="text-align: right; margin-top: 35px; font-weight: 700; color: #4c1d95;">
+With all our love forever,<br>
+Mom & Dad (Ayushi & Roushan) 💜
+</p>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PART II: THE COMPLETE PRODUCTION CODEBASE BIBLE
+════════════════════════════════════════════════════════════════ -->
+<div class="vol-cover">
+  <div class="cover-badge" style="margin-bottom: 25px;">VOLUME II · PRODUCTION CODEBASE BIBLE</div>
+  <h1 style="font-family: 'Cinzel', serif; font-size: 32pt; font-weight: 900; color: #ffffff; margin: 0 0 20px 0; line-height: 1.2;">
+    THE COMPLETE UNABRIDGED<br><span style="color: #c084fc;">SOURCE CODE</span>
+  </h1>
+  <p style="font-size: 11.5pt; color: #cbd5e1; max-width: 650px; margin: 0 auto 30px auto; line-height: 1.8;">
+    Every authentic line of production source code that powers Coco AI — from the low-level Win32 hardware stealth hooks and WASAPI audio stream to the ultra-low-latency Cerebras LPU drivers, Google Gemini multimodal solvers, and automated release pipelines.
+  </p>
+  <div style="font-family: 'JetBrains Mono', monospace; font-size: 8.5pt; color: #a855f7; border-top: 1px solid rgba(168,85,247,0.3); padding-top: 15px; max-width: 400px; margin: 0 auto;">
+    Extracted Verbatim from Active Repository Files
   </div>
 </div>
 
 <!-- SECTION A -->
 <div class="page-break"></div>
 <h1 class="chapter-title">
-  <span>Section A: Manifest & Packaging</span>
-  <span class="ch-num">CODE 01</span>
+  <span>Section A: Manifests & Packaging</span>
+  <span class="ch-num">SEC A</span>
 </h1>
-<h2><span class="file-badge">package.json</span> Root Manifest</h2>
-<pre><code>{
+<p>
+The project configuration files define runtime dependencies, scripts, build flags, and NSIS installer packaging parameters for Windows distribution.
+</p>
+
+<div class="code-file-badge">
+  <span>package.json</span>
+  <span class="scope">Configuration & Dependencies</span>
+</div>
+<pre class="code-file"><code class="language-json">{
   &quot;name&quot;: &quot;coco-ai&quot;,
   &quot;version&quot;: &quot;1.0.46&quot;,
   &quot;description&quot;: &quot;Stealth assistant for technical interviews.&quot;,
@@ -797,8 +1348,11 @@ Human conversational turns average 200–400ms. To achieve sub-200ms Time-To-Fir
 }
 </code></pre>
 
-<h2><span class="file-badge">electron-builder.yml</span> NSIS & Release Config</h2>
-<pre><code># ─── Co-Owned &amp; Co-Created by Hey-Astreon &amp; Silenttears-cloud ───
+<div class="code-file-badge">
+  <span>electron-builder.yml</span>
+  <span class="scope">NSIS Packaging & Auto-Update Target</span>
+</div>
+<pre class="code-file"><code class="language-yaml"># ─── Co-Owned &amp; Co-Created by Hey-Astreon &amp; Silenttears-cloud ───
 appId: com.cocoai.copilot
 productName: Coco AI
 copyright: &quot;Copyright © 2026 Roushan (Hey-Astreon) &amp; Ayushi Raj (Silenttears-cloud). All rights reserved.&quot;
@@ -834,11 +1388,18 @@ publish:
 <!-- SECTION B -->
 <div class="page-break"></div>
 <h1 class="chapter-title">
-  <span>Section B: Desktop Shell Core</span>
-  <span class="ch-num">CODE 02</span>
+  <span>Section B: Electron Main Process</span>
+  <span class="ch-num">SEC B</span>
 </h1>
-<h2><span class="file-badge">main.js</span> Complete Electron Main Process</h2>
-<pre><code>/* ═══════════════════════════════════════════════════════════════════
+<p>
+<code>main.js</code> is the foundation of the desktop application. It initialises the transparent, frameless BrowserWindow, enforces Win32 hardware-level screen capture invisibility, binds global operating system hotkeys, captures display frames, and syncs deep-link authentication tokens.
+</p>
+
+<div class="code-file-badge">
+  <span>main.js</span>
+  <span class="scope">Node.js (Main Process) · 602 lines</span>
+</div>
+<pre class="code-file"><code class="language-javascript">/* ═══════════════════════════════════════════════════════════════════
    CocoAI — Electron Main Process
    Multi-Layer Stealth System + AI/Audio IPC Bridge
    ═══════════════════════════════════════════════════════════════════ */
@@ -1444,11 +2005,18 @@ app.on(&#039;window-all-closed&#039;, () =&gt; {
 <!-- SECTION C -->
 <div class="page-break"></div>
 <h1 class="chapter-title">
-  <span>Section C: Secure IPC Interface</span>
-  <span class="ch-num">CODE 03</span>
+  <span>Section C: Secure Context Bridge</span>
+  <span class="ch-num">SEC C</span>
 </h1>
-<h2><span class="file-badge">preload.js</span> Context-Isolated Bridge</h2>
-<pre><code>/* ═══════════════════════════════════════════════════════════════════
+<p>
+<code>preload.js</code> implements the security perimeter between the privileged Node.js main runtime and the unprivileged Chromium renderer, exposing only explicit IPC methods.
+</p>
+
+<div class="code-file-badge">
+  <span>preload.js</span>
+  <span class="scope">Isolated Preload Bridge · 85 lines</span>
+</div>
+<pre class="code-file"><code class="language-javascript">/* ═══════════════════════════════════════════════════════════════════
    CocoAI — Preload Bridge
    Secure IPC bridge: Main ↔ Renderer for AI, Audio, and Window
    ═══════════════════════════════════════════════════════════════════ */
@@ -1537,11 +2105,18 @@ contextBridge.exposeInMainWorld(&#039;electronAPI&#039;, {
 <!-- SECTION D -->
 <div class="page-break"></div>
 <h1 class="chapter-title">
-  <span>Section D: Text LPU Engine</span>
-  <span class="ch-num">CODE 04</span>
+  <span>Section D: Cerebras LPU Streaming Driver</span>
+  <span class="ch-num">SEC D</span>
 </h1>
-<h2><span class="file-badge">services/cerebras.js</span> Cerebras Ultra-Fast LPU Driver</h2>
-<pre><code>/* ═══════════════════════════════════════════════════════════════════
+<p>
+<code>services/cerebras.js</code> connects directly to Cerebras Wafer-Scale Engine clusters, achieving sub-200ms TTFT streaming completions with automatic 402/429 failover triggers.
+</p>
+
+<div class="code-file-badge">
+  <span>services/cerebras.js</span>
+  <span class="scope">Primary Inference Driver · 279 lines</span>
+</div>
+<pre class="code-file"><code class="language-javascript">/* ═══════════════════════════════════════════════════════════════════
    CocoAI — Cerebras AI Service
    Streaming chat completions via Cerebras (OpenAI-compatible API)
    ═══════════════════════════════════════════════════════════════════ */
@@ -1824,11 +2399,18 @@ module.exports = {
 <!-- SECTION E -->
 <div class="page-break"></div>
 <h1 class="chapter-title">
-  <span>Section E: Neural Fallback Driver</span>
-  <span class="ch-num">CODE 05</span>
+  <span>Section E: Groq Neural Fallback Driver</span>
+  <span class="ch-num">SEC E</span>
 </h1>
-<h2><span class="file-badge">services/groq.js</span> Groq Neural Fallback Driver</h2>
-<pre><code>/* ═══════════════════════════════════════════════════════════════════
+<p>
+<code>services/groq.js</code> provides seamless, zero-latency backup inference when the primary Cerebras provider exhausts rate limits or encounters transient network hiccups.
+</p>
+
+<div class="code-file-badge">
+  <span>services/groq.js</span>
+  <span class="scope">Secondary Inference Driver · 259 lines</span>
+</div>
+<pre class="code-file"><code class="language-javascript">/* ═══════════════════════════════════════════════════════════════════
    CocoAI — Groq AI Service (Fallback Engine)
    Streaming chat completions via Groq (OpenAI-compatible API)
    Used as automatic fallback when Cerebras is unavailable/rate-limited
@@ -2091,11 +2673,18 @@ module.exports = {
 <!-- SECTION F -->
 <div class="page-break"></div>
 <h1 class="chapter-title">
-  <span>Section F: Multimodal Vision Solver</span>
-  <span class="ch-num">CODE 06</span>
+  <span>Section F: Gemini Multimodal Vision Solver</span>
+  <span class="ch-num">SEC F</span>
 </h1>
-<h2><span class="file-badge">services/gemini.js</span> Google Gemini Multimodal Solver</h2>
-<pre><code>/* ═══════════════════════════════════════════════════════════════════
+<p>
+<code>services/gemini.js</code> parses desktop screenshots using Google Gemini 3.8 Flash, solving complex algorithmic diagrams, LeetCode canvases, and architecture flowcharts in under 350ms.
+</p>
+
+<div class="code-file-badge">
+  <span>services/gemini.js</span>
+  <span class="scope">Vision Solver Driver · 191 lines</span>
+</div>
+<pre class="code-file"><code class="language-javascript">/* ═══════════════════════════════════════════════════════════════════
    CocoAI — Gemini Vision Service
    Multimodal content generation via Google Gemini API (REST)
    With retry logic, exponential backoff, and model fallback
@@ -2290,11 +2879,18 @@ window.GeminiService = GeminiService;
 <!-- SECTION G -->
 <div class="page-break"></div>
 <h1 class="chapter-title">
-  <span>Section G: Secondary Vision Backup</span>
-  <span class="ch-num">CODE 07</span>
+  <span>Section G: NVIDIA NIM Vision Fallback</span>
+  <span class="ch-num">SEC G</span>
 </h1>
-<h2><span class="file-badge">services/nvidia.js</span> NVIDIA NIM Secondary Vision Driver</h2>
-<pre><code>/* ═══════════════════════════════════════════════════════════════════
+<p>
+<code>services/nvidia.js</code> handles secondary multimodal vision failover using NVIDIA NIM (MiniMax-M3), ensuring vision prompts never fail even during cloud outages.
+</p>
+
+<div class="code-file-badge">
+  <span>services/nvidia.js</span>
+  <span class="scope">Secondary Vision Fallback · 227 lines</span>
+</div>
+<pre class="code-file"><code class="language-javascript">/* ═══════════════════════════════════════════════════════════════════
    CocoAI — NVIDIA NIM Vision Service
    Multimodal image analysis via NVIDIA Integrate API (OpenAI-compatible)
    Primary model:  minimaxai/minimax-m3 (High-speed MoE, best accuracy)
@@ -2525,11 +3121,18 @@ window.NvidiaService = NvidiaService;
 <!-- SECTION H -->
 <div class="page-break"></div>
 <h1 class="chapter-title">
-  <span>Section H: Acoustic Loopback Engine</span>
-  <span class="ch-num">CODE 08</span>
+  <span>Section H: Deepgram WASAPI Loopback Engine</span>
+  <span class="ch-num">SEC H</span>
 </h1>
-<h2><span class="file-badge">services/deepgram.js</span> WASAPI Loopback Audio Driver</h2>
-<pre><code>/* ═══════════════════════════════════════════════════════════════════
+<p>
+<code>services/deepgram.js</code> captures raw system audio via WASAPI loopback, calculates acoustic RMS energy levels, filters speaker noise, and streams live PCM audio to Deepgram Nova-3.
+</p>
+
+<div class="code-file-badge">
+  <span>services/deepgram.js</span>
+  <span class="scope">Audio Loopback & STT Engine · 768 lines</span>
+</div>
+<pre class="code-file"><code class="language-javascript">/* ═══════════════════════════════════════════════════════════════════
    CocoAI — Deepgram Live Audio Transcription Service  v2.2
    Real-time speech-to-text using browser MediaRecorder + Deepgram WS
 
@@ -3301,11 +3904,18 @@ if (typeof module !== &#039;undefined&#039; &amp;&amp; module.exports) {
 <!-- SECTION I -->
 <div class="page-break"></div>
 <h1 class="chapter-title">
-  <span>Section I: 1-Click CI/CD Engine</span>
-  <span class="ch-num">CODE 09</span>
+  <span>Section I: 1-Click Release Pipeline</span>
+  <span class="ch-num">SEC I</span>
 </h1>
-<h2><span class="file-badge">Publish_Release.bat</span> Windows Execution Wrapper</h2>
-<pre><code>@echo off
+<p>
+The release automation scripts eliminate human error during deployments, performing version bumps, git tagging, NSIS compilation, and GitHub Releases distribution in a single step.
+</p>
+
+<div class="code-file-badge">
+  <span>Publish_Release.bat</span>
+  <span class="scope">Windows Batch Launcher · 10 lines</span>
+</div>
+<pre class="code-file"><code class="language-batch">@echo off
 cd /d &quot;%~dp0&quot;
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;%~dp0publish_release.ps1&quot;
 if %ERRORLEVEL% NEQ 0 (
@@ -3316,8 +3926,11 @@ if %ERRORLEVEL% NEQ 0 (
 pause
 </code></pre>
 
-<h2><span class="file-badge">publish_release.ps1</span> Global Release Automation Script</h2>
-<pre><code># ═══════════════════════════════════════════════════════════════════
+<div class="code-file-badge">
+  <span>publish_release.ps1</span>
+  <span class="scope">PowerShell Release Automation Engine · 168 lines</span>
+</div>
+<pre class="code-file"><code class="language-powershell"># ═══════════════════════════════════════════════════════════════════
 # Coco AI — 1-Click Global Auto-Release Publisher (PowerShell v3.0)
 # ═══════════════════════════════════════════════════════════════════
 $ErrorActionPreference = &#039;Stop&#039;
@@ -3489,11 +4102,18 @@ Write-Host &quot;&quot;
 <!-- SECTION J -->
 <div class="page-break"></div>
 <h1 class="chapter-title">
-  <span>Section J: Database & RLS Schema</span>
-  <span class="ch-num">CODE 10</span>
+  <span>Section J: Supabase Database Schema & RLS</span>
+  <span class="ch-num">SEC J</span>
 </h1>
-<h2><span class="file-badge">supabase/migrations/001_user_profiles.sql</span> Supabase Schema</h2>
-<pre><code>-- ============================================================
+<p>
+<code>001_user_profiles.sql</code> sets up the complete Supabase PostgreSQL database architecture: user profiles, subscription plans, usage quotas, and strict row-level security (RLS) policies.
+</p>
+
+<div class="code-file-badge">
+  <span>website/Landing Page/supabase/migrations/001_user_profiles.sql</span>
+  <span class="scope">PostgreSQL Database Schema & Policies · 163 lines</span>
+</div>
+<pre class="code-file"><code class="language-sql">-- ============================================================
 -- CocoAI — Database Schema v1.0
 -- Run this ONCE in Supabase SQL Editor (supabase.com → SQL Editor → New Query)
 -- ============================================================
@@ -3545,7 +4165,7 @@ create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
 security definer set search_path = &#039;&#039;
-as $$
+as $
 declare
   dev_emails text[] := array[
     current_setting(&#039;app.developer_email_1&#039;, true),
@@ -3577,7 +4197,7 @@ begin
   );
   return new;
 end;
-$$;
+$;
 
 -- Drop old trigger if it exists, then create fresh
 drop trigger if exists on_auth_user_created on auth.users;
@@ -3621,7 +4241,7 @@ create or replace function public.upgrade_subscription(
 returns void
 language plpgsql
 security definer
-as $$
+as $
 declare
   new_tokens bigint;
   new_audio double precision;
@@ -3650,7 +4270,7 @@ begin
     updated_at = now()
   where id = p_user_id;
 end;
-$$;
+$;
 
 -- ============================================================
 -- DONE! Your database is ready for CocoAI subscriptions.
