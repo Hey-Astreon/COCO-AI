@@ -740,97 +740,314 @@ A common mistake in Electron development is mixing UI code with node-level execu
 
 <h2>Complete Repository Directory Hierarchy</h2>
 <p>
-To build Coco AI with zero architectural confusion, every file in the repository must live in its exact intended domain. Below is the full directory tree mapping every file to its physical location:
+To build Coco AI with zero architectural confusion, every file in the repository must live in its exact intended domain. Below is the comprehensive directory tree mapping every file, manifest, script, and database migration to its physical storage location:
 </p>
 
 <div class="ascii-box">
 coco ai/
-├── .agents/                               # AI custom skills & workspace intelligence
+├── .agents/                               # AI custom skills & persistent memory
 │   └── skills/
 │       └── coco-ai-expert/
-│           └── SKILL.md                   # Permanent memory & architectural blueprint for AI agents
-├── assets/                                # Application branding & desktop icons
-│   ├── icon.ico                           # Multi-resolution Windows application icon (16px to 256px)
+│           └── SKILL.md                   # Permanent architectural blueprint & model catalogs
+├── assets/                                # Application branding & multi-DPI desktop icons
+│   ├── coco_logo.ico                      # Multi-resolution Windows icon (16x16 to 256x256)
 │   └── icon.png                           # Transparent brand icon for taskbars, docks & HUD header
 ├── services/                              # Isolated service drivers & external API connectors
-│   ├── cerebras.js                        # Primary text model streaming client via Cerebras LPU
-│   ├── deepgram.js                        # Deepgram Nova-3 WASAPI loopback audio capture engine
-│   ├── gemini.js                          # Multimodal screen vision solver (gemini-3.8-flash chain)
-│   ├── groq.js                            # Low-latency neural fallback streaming engine
-│   ├── nvidia.js                          # Secondary vision fallback client (minimax-m3 via NIM)
-│   └── pdf.min.js                         # Local client-side PDF.js bundle for zero-leak parsing
-├── website/                               # Cloud SaaS landing page & Supabase platform
+│   ├── cerebras.js                        # Primary text streaming client via Cerebras LPU (Node.js)
+│   ├── groq.js                            # Low-latency neural fallback streaming engine (Node.js)
+│   ├── gemini.js                          # Multimodal screen vision solver (gemini-3.8-flash) (Renderer)
+│   ├── nvidia.js                          # Secondary vision fallback client (minimax-m3 via NIM) (Renderer)
+│   ├── deepgram.js                        # Deepgram Nova-3 WASAPI loopback audio capture engine (Renderer)
+│   └── pdf.min.js                         # Local client-side PDF.js bundle for zero-leak parsing (Renderer)
+├── website/                               # Cloud SaaS landing page & Supabase web platform
 │   └── Landing Page/
-│       ├── src/                           # Modern React 19 + Vite frontend application
+│       ├── src/                           # Modern React 19 + Vite frontend application source
+│       │   ├── components/                # Modular UI components (Hero, Navbar, Pricing, Terminal)
+│       │   ├── lib/                       # Supabase client instances, auth helpers, utility functions
+│       │   ├── App.tsx                    # Main web layout, router integration, and pricing modals
+│       │   └── main.tsx                   # React root mount with vite:preloadError auto-recovery
 │       ├── supabase/                      # Database migrations & PostgreSQL schemas
 │       │   └── migrations/
 │       │       └── 001_user_profiles.sql  # User quotas, tier columns, and RLS security policies
-│       ├── package.json                   # Web dependencies & build commands
-│       └── vite.config.ts                 # Vite bundler & chunk preloading configuration
+│       ├── package.json                   # Web platform dependencies (React, Vite, Tailwind CSS v4)
+│       └── vite.config.ts                 # Vite bundler & dynamic chunk preloading configuration
+├── .env                                   # Secret environment variables (API keys - NEVER commit to git)
+├── .gitignore                             # Git ignore rules (filters node_modules, dist, .env)
 ├── AGENTS.md                              # Founder-enforced immutable engineering invariants
-├── Publish_Release.bat                    # 1-click batch launcher for production releases
 ├── app.js                                 # Renderer HUD controller & real-time UI logic
 ├── electron-builder.yml                   # NSIS Windows installer & auto-updater manifest
 ├── index.html                             # HUD DOM hierarchy & cosmic glassmorphism layout
 ├── main.js                                # Electron main process & Win32 hardware stealth
 ├── package.json                           # Desktop app dependencies, scripts & metadata
 ├── preload.js                             # Context-isolated security bridge (IPC whitelist)
+├── Publish_Release.bat                    # 1-click batch launcher for production releases
 ├── publish_release.ps1                    # Automated version bumping, git push & GitHub release
 └── style.css                              # Cosmic dark theme tokens & micro-animations
 </div>
 
-<h2>What Files Should Be Kept Inside What Folder & Why</h2>
-
-<h3>1. The Root Directory (<code>/</code>)</h3>
+<h2>Step-by-Step Scaffolding Blueprint: Building from Day 1</h2>
 <p>
-The root directory is reserved strictly for the Electron desktop application's lifecycle, the HUD presentation layer, and root development manifests:
+If you are initializing Coco AI on a completely empty computer with zero files, this is the exact chronological sequence to construct the folder scaffolding:
+</p>
+
+<ol>
+  <li>
+    <strong>Initialize the Root Workspace:</strong>
+    Create the root project directory and navigate into it:
+    <pre><code>mkdir "coco-ai"
+cd "coco-ai"
+npm init -y</code></pre>
+    This creates the base <code>package.json</code> file at the root.
+  </li>
+  <li>
+    <strong>Create the Specialized Subdirectories:</strong>
+    Run the following terminal commands to scaffold each isolated module:
+    <pre><code>mkdir "services"
+mkdir "assets"
+mkdir -p "website/Landing Page"
+mkdir -p ".agents/skills/coco-ai-expert"</code></pre>
+  </li>
+  <li>
+    <strong>Populate the Core Application Files:</strong>
+    Create the root execution files:
+    <pre><code>touch main.js preload.js index.html style.css app.js .env electron-builder.yml</code></pre>
+  </li>
+</ol>
+
+<h2>Folder-by-Folder Architectural Blueprint &amp; Naming Rules</h2>
+<p>
+Each folder in Coco AI has a strict naming convention, a specific lifecycle purpose, and rigorous storage rules. Understanding why each file lives where it does is essential to mastering this codebase:
+</p>
+
+<h3>1. The Root Directory (<code>/</code>) — The Electron Orchestration Layer</h3>
+<p>
+The root folder is the primary workspace for the Electron desktop client. Files stored here belong directly to the desktop application's lifecycle, the UI presentation layer, or root packaging scripts:
 </p>
 <ul>
-  <li><code>main.js</code>: The operating system brain. Executes directly in Node.js. Controls window lifecycle, native display protection (<code>SetWindowDisplayAffinity</code>), global shortcut registration (<code>Ctrl+Shift+P</code>, <code>Ctrl+Shift+Q</code>, <code>Ctrl+Shift+S</code>), and deep-link protocol listening (<code>cocoai://auth</code>).</li>
-  <li><code>preload.js</code>: The security barrier. Exposes only a tightly audited set of IPC methods to the renderer window via <code>contextBridge.exposeInMainWorld</code>, preventing malicious scripts or injection attacks from accessing the user's filesystem.</li>
-  <li><code>index.html</code> & <code>style.css</code>: The user interface layer. Encapsulates the Cosmic Glassmorphism design system, containing CSS backdrop filters, smooth opacity transitions, and responsive HUD panels.</li>
-  <li><code>app.js</code>: The client-side application logic. Manages question queueing, dynamic prompt assembly, streaming markdown parsing, audio waveform meters, and user preferences.</li>
-  <li><code>package.json</code> & <code>electron-builder.yml</code>: Project manifests. Specify exact dependency versions, build targets (NSIS x64 Windows installer), and the public GitHub release repository URL for silent auto-updates.</li>
-  <li><code>Publish_Release.bat</code> & <code>publish_release.ps1</code>: 1-click publishing scripts. Automate the entire release lifecycle (git tags, changelogs, build compilations, and GitHub asset uploads).</li>
+  <li>
+    <strong><code>main.js</code> (Node.js Main Process):</strong>
+    Must reside at the root because it is registered as the application's entrypoint in <code>package.json</code> (<code>"main": "main.js"</code>). It controls the window lifecycle, hardware display protection (<code>SetWindowDisplayAffinity</code>), global hotkeys, and native screen capture.
+  </li>
+  <li>
+    <strong><code>preload.js</code> (The Context-Isolated Security Bridge):</strong>
+    Must be stored at root alongside <code>main.js</code>. In <code>main.js</code>, Electron references it via:
+    <pre><code>webPreferences: {
+  preload: path.join(__dirname, 'preload.js'),
+  contextIsolation: true,
+  nodeIntegration: false
+}</code></pre>
+    Keeping <code>preload.js</code> at the root ensures that <code>path.join(__dirname, 'preload.js')</code> resolves seamlessly in both local development and inside the packaged ASAR archive.
+  </li>
+  <li>
+    <strong><code>index.html</code> &amp; <code>style.css</code> (HUD Presentation Layer):</strong>
+    The visual shell. <code>main.js</code> loads <code>index.html</code> via <code>mainWindow.loadFile('index.html')</code>. <code>index.html</code> links to <code>style.css</code> via standard HTML relative linkage (<code>&lt;link rel="stylesheet" href="style.css"&gt;</code>).
+  </li>
+  <li>
+    <strong><code>app.js</code> (Renderer State Controller):</strong>
+    The brain of the frontend HUD. Imported at the bottom of <code>index.html</code> (<code>&lt;script src="app.js"&gt;&lt;/script&gt;</code>). It drives question queueing, markdown rendering, audio waveform meters, and communicates with <code>preload.js</code> through <code>window.electronAPI</code>.
+  </li>
+  <li>
+    <strong><code>package.json</code> &amp; <code>electron-builder.yml</code> (Build Manifests):</strong>
+    Define desktop runtime dependencies (<code>electron</code>, <code>dotenv</code>, <code>electron-updater</code>) and packaging instructions. <code>electron-builder.yml</code> specifies the NSIS installer target, custom icon paths, and the GitHub release repository for silent updates.
+  </li>
+  <li>
+    <strong><code>Publish_Release.bat</code> &amp; <code>publish_release.ps1</code> (Automated Release Pipeline):</strong>
+    Kept in the root directory so the engineer can trigger a worldwide deployment simply by double-clicking <code>Publish_Release.bat</code> in Windows File Explorer or running it from the root terminal.
+  </li>
+  <li>
+    <strong><code>.env</code> (Environment Configuration):</strong>
+    Must be stored in the root directory so that <code>require('dotenv').config({ path: path.join(__dirname, '.env') })</code> in <code>main.js</code> locates your API keys instantly. <em>Critical Rule: <code>.env</code> must be listed in <code>.gitignore</code> and NEVER committed to public version control.</em>
+  </li>
 </ul>
 
-<h3>2. The Services Directory (<code>/services/</code>)</h3>
+<h3>2. The Services Directory (<code>/services/</code>) — The Isolated Micro-Drivers</h3>
 <p>
-The <code>services/</code> directory isolates all external integrations, AI inference drivers, and heavy computing modules away from the presentation layer:
+<strong>Folder Naming Convention:</strong> Named exactly <code>services</code> (lowercase, plural). This folder houses isolated driver modules that interface with external APIs, audio hardware, or heavy offline libraries:
 </p>
 <ul>
-  <li><strong>AI Inferencing Drivers:</strong> <code>cerebras.js</code> (primary text model on LPU hardware), <code>groq.js</code> (failover text model), <code>gemini.js</code> (multimodal vision solver), and <code>nvidia.js</code> (secondary vision fallback). Storing these in separate files allows independent retry logic, error handling, and model swaps without touching UI code.</li>
-  <li><strong>Acoustic Loopback Engine:</strong> <code>deepgram.js</code> captures audio from the default Windows playback device using WASAPI loopback, converts PCM buffers, and streams them over WebSockets to Deepgram Nova-3.</li>
-  <li><strong>Client-Side PDF Engine:</strong> <code>pdf.min.js</code> enables offline in-browser resume extraction so no sensitive user files are ever transmitted to cloud servers.</li>
+  <li>
+    <strong>The Separation of Execution Scopes:</strong>
+    Notice that the files inside <code>services/</code> operate across two distinct runtimes:
+    <ul>
+      <li>
+        <em>Node.js Main Process Drivers (<code>cerebras.js</code>, <code>groq.js</code>):</em>
+        These require Node's native <code>https</code> module and raw socket control to achieve sub-200ms latency without browser preflight overhead. They are required directly by <code>main.js</code> via:
+        <pre><code>const cerebras = require('./services/cerebras');
+const groq = require('./services/groq');</code></pre>
+      </li>
+      <li>
+        <em>Chromium Renderer Drivers (<code>gemini.js</code>, <code>nvidia.js</code>, <code>deepgram.js</code>, <code>pdf.min.js</code>):</em>
+        These run inside the browser window context. They utilize browser Web APIs (Web Audio API for WASAPI loopback, Web Workers for PDF.js, and browser <code>fetch()</code> for vision). They are loaded into <code>index.html</code> via:
+        <pre><code>&lt;script src="services/pdf.min.js"&gt;&lt;/script&gt;
+&lt;script src="services/deepgram.js"&gt;&lt;/script&gt;
+&lt;script src="services/gemini.js"&gt;&lt;/script&gt;
+&lt;script src="services/nvidia.js"&gt;&lt;/script&gt;</code></pre>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <strong>Why They Must Be in <code>services/</code>:</strong>
+    Keeping all third-party AI and audio logic inside <code>services/</code> ensures modularity. If Cerebras updates its model catalog, or Deepgram releases Nova-4, you only update a single file inside <code>services/</code> without touching window stealth, IPC bridges, or UI styles.
+  </li>
 </ul>
 
-<h3>3. The Assets Directory (<code>/assets/</code>)</h3>
+<h3>3. The Assets Directory (<code>/assets/</code>) — Visual Identity &amp; Binaries</h3>
 <p>
-Stores all visual identity resources:
+<strong>Folder Naming Convention:</strong> Named <code>assets</code>. Contains graphic assets, brand logos, and operating system icon binaries:
 </p>
 <ul>
-  <li><code>icon.ico</code>: Contains multi-size bitmap frames (16x16, 32x32, 48x48, 64x64, 128x128, 256x256) for Windows taskbar, desktop shortcuts, and installer dialogs.</li>
-  <li><code>icon.png</code>: High-resolution transparent PNG used within the HUD header and website branding.</li>
+  <li>
+    <strong><code>coco_logo.ico</code> (Windows Application Icon):</strong>
+    A compiled Windows icon resource containing multiple embedded resolution frames (16x16, 32x32, 48x48, 64x64, 128x128, and 256x256 pixels). It is referenced by <code>main.js</code>:
+    <pre><code>icon: path.join(__dirname, 'assets', 'coco_logo.ico')</code></pre>
+    and by <code>electron-builder.yml</code> during installer compilation.
+  </li>
+  <li>
+    <strong><code>icon.png</code> (Transparent Brand Logo):</strong>
+    A 512x512 transparent PNG used inside the desktop HUD header (<code>&lt;img src="assets/icon.png"&gt;</code>) and on the public marketing landing page.
+  </li>
 </ul>
 
-<h3>4. The Cloud SaaS Web Hub (<code>/website/Landing Page/</code>)</h3>
+<h3>4. The Cloud Web Hub (<code>/website/Landing Page/</code>) — The Dual-Project Rule</h3>
 <p>
-Maintains clean boundary separation between the local desktop software and the public-facing cloud web platform:
+<strong>Folder Naming Convention:</strong> <code>website/Landing Page/</code>. This folder contains the entire web presence, marketing website, user dashboard, and Supabase database migrations:
+</p>
+<div class="callout">
+  <div class="callout-title">⚡ The Architectural Reason for Dual-Project Isolation</div>
+  Why isn't the website merged into the root folder? Because the desktop client and the web application have fundamentally incompatible runtime environments:
+  <ul>
+    <li>The desktop app runs on <strong>Electron + Node.js (CommonJS)</strong> with native Win32 bindings.</li>
+    <li>The web platform runs on <strong>React 19 + Vite + TypeScript (ESM)</strong> deployed to edge servers (Vercel/Netlify).</li>
+  </ul>
+  By keeping the website inside <code>website/Landing Page/</code> with its own independent <code>package.json</code>, web dependencies (like Vite, React, TanStack Router) never inflate the desktop binary, and desktop packaging tools (<code>electron-builder</code>) ignore the web folder completely via the exclusion rule:
+  <pre><code>files:
+  - "**/*"
+  - "!website/**"
+  - "!dist/**"</code></pre>
+</div>
+
+<h3>5. The Agent Customizations Directory (<code>/.agents/</code>) — AI Memory</h3>
+<p>
+<strong>Folder Naming Convention:</strong> <code>.agents/</code> (prefixed with a dot so it remains discrete):
 </p>
 <ul>
-  <li><code>src/</code>: Modern React 19 application built with Vite and Tailwind CSS v4, containing feature showcases, interactive plan selectors, and user dashboards.</li>
-  <li><code>supabase/migrations/001_user_profiles.sql</code>: The database foundation defining user credits, subscription tiers, and row-level security (RLS).</li>
+  <li>
+    <strong><code>skills/coco-ai-expert/SKILL.md</code>:</strong>
+    Contains the persistent system memory, architectural invariants, active AI models catalog, and recovery runbooks for AI pair-programming agents (like Antigravity). If you ever open this repository on a fresh machine or new AI session, the agent reads this file to instantly regain full architectural mastery.
+  </li>
+  <li>
+    <strong><code>AGENTS.md</code> (in root):</strong>
+    The immutable engineering constitution enforcing rules: public repository visibility for silent auto-updates, perpetual hardware stealth protection, and founder whitelist access.
+  </li>
 </ul>
 
-<h3>5. The Agent Customizations Directory (<code>/.agents/</code>)</h3>
+<h2>Cross-File Relative Storage &amp; Reference Map</h2>
 <p>
-Maintains persistent engineering intelligence for AI pair programming:
+To see how every file connects across folders, consult this definitive reference table:
 </p>
-<ul>
-  <li><code>skills/coco-ai-expert/SKILL.md</code>: The master architectural blueprint, model catalogs, pricing tiers, and recovery runbooks.</li>
-  <li><code>AGENTS.md</code> (in root): Permanent rules ensuring hardware stealth, founder whitelist access, and public repository invariants.</li>
-</ul>
 
+<table>
+  <thead>
+    <tr>
+      <th>Calling File</th>
+      <th>Target File</th>
+      <th>Relative Storage Path</th>
+      <th>Syntax Used in Code</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>package.json</code></td>
+      <td><code>main.js</code></td>
+      <td><code>./main.js</code></td>
+      <td><code>"main": "main.js"</code></td>
+    </tr>
+    <tr>
+      <td><code>main.js</code></td>
+      <td><code>preload.js</code></td>
+      <td><code>./preload.js</code></td>
+      <td><code>path.join(__dirname, 'preload.js')</code></td>
+    </tr>
+    <tr>
+      <td><code>main.js</code></td>
+      <td><code>index.html</code></td>
+      <td><code>./index.html</code></td>
+      <td><code>mainWindow.loadFile('index.html')</code></td>
+    </tr>
+    <tr>
+      <td><code>main.js</code></td>
+      <td><code>assets/coco_logo.ico</code></td>
+      <td><code>./assets/coco_logo.ico</code></td>
+      <td><code>path.join(__dirname, 'assets', 'coco_logo.ico')</code></td>
+    </tr>
+    <tr>
+      <td><code>main.js</code></td>
+      <td><code>services/cerebras.js</code></td>
+      <td><code>./services/cerebras.js</code></td>
+      <td><code>require('./services/cerebras')</code></td>
+    </tr>
+    <tr>
+      <td><code>main.js</code></td>
+      <td><code>services/groq.js</code></td>
+      <td><code>./services/groq.js</code></td>
+      <td><code>require('./services/groq')</code></td>
+    </tr>
+    <tr>
+      <td><code>main.js</code></td>
+      <td><code>.env</code></td>
+      <td><code>./.env</code></td>
+      <td><code>require('dotenv').config({ path: path.join(__dirname, '.env') })</code></td>
+    </tr>
+    <tr>
+      <td><code>index.html</code></td>
+      <td><code>style.css</code></td>
+      <td><code>./style.css</code></td>
+      <td><code>&lt;link rel="stylesheet" href="style.css"&gt;</code></td>
+    </tr>
+    <tr>
+      <td><code>index.html</code></td>
+      <td><code>services/pdf.min.js</code></td>
+      <td><code>./services/pdf.min.js</code></td>
+      <td><code>&lt;script src="services/pdf.min.js"&gt;&lt;/script&gt;</code></td>
+    </tr>
+    <tr>
+      <td><code>index.html</code></td>
+      <td><code>services/deepgram.js</code></td>
+      <td><code>./services/deepgram.js</code></td>
+      <td><code>&lt;script src="services/deepgram.js"&gt;&lt;/script&gt;</code></td>
+    </tr>
+    <tr>
+      <td><code>index.html</code></td>
+      <td><code>services/gemini.js</code></td>
+      <td><code>./services/gemini.js</code></td>
+      <td><code>&lt;script src="services/gemini.js"&gt;&lt;/script&gt;</code></td>
+    </tr>
+    <tr>
+      <td><code>index.html</code></td>
+      <td><code>services/nvidia.js</code></td>
+      <td><code>./services/nvidia.js</code></td>
+      <td><code>&lt;script src="services/nvidia.js"&gt;&lt;/script&gt;</code></td>
+    </tr>
+    <tr>
+      <td><code>index.html</code></td>
+      <td><code>app.js</code></td>
+      <td><code>./app.js</code></td>
+      <td><code>&lt;script src="app.js"&gt;&lt;/script&gt;</code></td>
+    </tr>
+    <tr>
+      <td><code>Publish_Release.bat</code></td>
+      <td><code>publish_release.ps1</code></td>
+      <td><code>./publish_release.ps1</code></td>
+      <td><code>powershell -ExecutionPolicy Bypass -File "%~dp0publish_release.ps1"</code></td>
+    </tr>
+    <tr>
+      <td><code>electron-builder.yml</code></td>
+      <td><code>assets/coco_logo.ico</code></td>
+      <td><code>./assets/coco_logo.ico</code></td>
+      <td>Automatic default lookup in <code>build/icon.ico</code> or <code>assets/</code></td>
+    </tr>
+  </tbody>
+</table>
 
 <!-- ═══════════════════════════════════════════════════════════════
      CHAPTER 3
