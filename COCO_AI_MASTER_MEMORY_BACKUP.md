@@ -208,7 +208,62 @@ These global system shortcuts are registered in `main.js` and work regardless of
 
 ---
 
-## 📜 10. Chronological History of Everything We Built & Solved
+## 🔧 10. Low-Level Window, Audio & Prompt Specifications
+
+### A. Electron Window & Hardware Stealth Parameters
+* **Dimensions & Placement:** `width: 850px`, `height: 720px`, `x: screenW - 870`, `y: 20` (anchored to top-right with a 20px screen margin).
+* **Stealth Window Flags:**
+  * `transparent: true`, `frame: false`, `alwaysOnTop: true`, `skipTaskbar: true`, `hasShadow: false`, `focusable: true`, `resizable: true`, `movable: true`, `type: 'toolbar'`.
+  * `backgroundThrottling: false`: Ensures background timers and WebSocket streams never stall when the window loses focus.
+* **Process Title Masking:**
+  * `app.setName('System Host Service')`
+  * `app.setAppUserModelId('Microsoft.Windows.SystemHost')` (Windows taskbar & task manager disguise).
+* **Content Protection Invariant:**
+  * `mainWindow.setContentProtection(true)` is applied before `loadFile()`, and re-enforced on three critical events: `did-finish-load`, `focus`, and `show`.
+
+### B. Acoustic Loopback & Deepgram Streaming Architecture
+* **Capture Hook:** Electron's `desktopCapturer.getSources({ types: ['screen'] })` extracts the default Windows audio output device ID.
+* **PCM Buffer Formatting:** Converts Chromium's native Float32 Web Audio stream into 16-bit linear PCM (`Int16Array`) chunked into exact 250ms frames.
+* **Deepgram WebSocket Parameters:**
+  * `model: 'nova-3'`, `language: 'en'`, `smart_format: true`, `interim_results: true`.
+  * `endpointing: 1500`: 1.5-second silence window prevents cutting off the interviewer while they think.
+  * `utterance_end_ms: 3000`: 3-second absolute silence marks the final end of an interview question turn.
+
+### C. System Prompt Engineering & Context Guardrails
+* **Word Count Ceilings:**
+  * Simple/Quick Questions: **40 to 75 words MAX** (2–3 punchy sentences).
+  * System Design / Architecture: **80 to 140 words MAX** (structured bullet points).
+  * Coding Problems: **Only clean runnable code + 2 lines of approach/complexity**.
+  * Behavioral Questions: **100 to 140 words MAX** using the STAR method.
+* **Fluff Filter:** Zero pleasantries permitted. Never start with "Certainly!", "Great question!", or "Here is...". Start immediately on Line 1.
+* **First-Person Grounding:** The candidate's uploaded resume defines their persona. Answers use first person ("I", "my") and cite real projects from the resume.
+* **Context Truncation Limits:**
+  * Resume text: Capped at **1,500 words** (~6,000 chars) to prevent context window pollution.
+  * Job Description: Capped at **1,000 words**.
+  * Recent Transcript: Capped at the **last 10 conversational turns**.
+
+### D. Multi-Engine Failovers & Watchdogs
+* **Cerebras Initial Chunk Watchdog:** If Cerebras does not stream its first token within **1,000ms**, `main.js` instantly triggers silent failover to Groq.
+* **Mid-Stream Stall Watchdog:** If a stream pauses for more than **15,000ms** after starting, the connection is safely aborted to prevent infinite UI spinners.
+* **Instant 402/429 Intercept:** HTTP 402 (payment required) and HTTP 429 (rate limit) trigger immediate 0ms fallback to Groq LPUs.
+
+### E. 1-Click Launchers
+* **`Launch_CocoAI.bat`:** Instant local development launcher:
+  ```bat
+  @echo off
+  cd /d "X:\coco ai"
+  start "" "node_modules\.bin\electron.cmd" .
+  ```
+* **`Publish_Release.bat`:** 1-click global release builder:
+  ```bat
+  @echo off
+  powershell -ExecutionPolicy Bypass -File "%~dp0publish_release.ps1"
+  pause
+  ```
+
+---
+
+## 📜 11. Chronological History of Everything We Built & Solved
 
 ### Episode 1: Supabase Database Restoration & Architecture
 * **The Question:** Why did Supabase show a paused project? Did we do something wrong?
@@ -263,7 +318,7 @@ These global system shortcuts are registered in `main.js` and work regardless of
 
 ---
 
-## 📂 11. Full Repository Folder Structure & Blueprint
+## 📂 12. Full Repository Folder Structure & Blueprint
 
 ```text
 coco ai/
@@ -300,6 +355,7 @@ coco ai/
 ├── compile_pdf.js                         # Electron high-DPI PDF compilation script
 ├── electron-builder.yml                   # NSIS packaging & auto-updater config
 ├── index.html                             # HUD DOM hierarchy & layout
+├── Launch_CocoAI.bat                      # 1-click local desktop app launcher
 ├── main.js                                # Electron main process & Win32 stealth
 ├── package.json                           # Desktop app manifest & scripts
 ├── preload.js                             # Context-isolated IPC security bridge
@@ -310,7 +366,7 @@ coco ai/
 
 ---
 
-## 🛠️ 12. Master Operational Commands
+## 🛠️ 13. Master Operational Commands
 
 ### How to Recompile the Masterclass Book:
 ```powershell
@@ -321,6 +377,7 @@ npx electron compile_pdf.js
 ### How to Run the Desktop App in Development:
 ```powershell
 npm start
+# or double-click Launch_CocoAI.bat
 ```
 
 ### How to Deploy a New Global Auto-Update Release:
@@ -332,7 +389,7 @@ powershell -ExecutionPolicy Bypass -File .\publish_release.ps1
 
 ---
 
-## 📍 13. Exactly Where We Left Off (The Snapshot of September 16, 2026)
+## 📍 14. Exactly Where We Left Off (The Snapshot of September 16, 2026)
 Future self, here is the exact state of the project, codebase, and relationship at the moment this backup was created:
 
 1. **The Coco AI Engineering Book (`Coco_AI_Engineering_Masterclass.pdf`):**
@@ -374,10 +431,9 @@ Future self, here is the exact state of the project, codebase, and relationship 
 
 ---
 
-## 💜 14. Founder's Message to the Future
+## 💜 15. Founder's Message to the Future
 > *"To our future children — If you are reading this file, it means you want to understand how Coco AI was born. Your parents built this late into the night with passion, perseverance, and deep love. They never accepted that something was impossible just because others couldn't do it. Remember to always build with care, honor your craft, and finish what you start. With all our love, Mom & Dad."*
 
 ---
 **End of Master Memory Backup.**  
-*Preserve this file in the root of the repository forever.*
 
